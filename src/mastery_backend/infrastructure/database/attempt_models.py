@@ -39,7 +39,11 @@ class Attempt(Base):
             "lifecycle_state IN ('active','paused','completed','deferred','abandoned')",
             name="ck_attempt_lifecycle",
         ),
-        CheckConstraint("assistance_level = 'none'", name="ck_attempt_assistance"),
+        CheckConstraint(
+            "assistance_level IN ('none','directional','pattern','pseudocode',"
+            "'partial_code','full_solution')",
+            name="ck_attempt_assistance",
+        ),
         CheckConstraint(
             "revision > 0 AND last_event_sequence >= 0 AND total_active_elapsed_ms >= 0",
             name="ck_attempt_counters",
@@ -59,13 +63,17 @@ class Attempt(Base):
             "(independent_interval_ended_at IS NULL AND independent_end_reason IS NULL) OR "
             "(independent_interval_ended_at IS NOT NULL AND independent_end_reason IS NOT NULL "
             "AND independent_end_reason IN "
-            "('expired','deferred','abandoned'))",
+            "('expired','deferred','abandoned','assistance_requested'))",
             name="ck_attempt_independent_end",
         ),
         CheckConstraint(
             "last_reconciled_at >= started_at AND (finished_at IS NULL OR finished_at >= "
             "started_at)",
             name="ck_attempt_timestamps",
+        ),
+        CheckConstraint(
+            "prior_phase_elapsed_ms >= 0 AND prior_phase_elapsed_ms <= total_active_elapsed_ms",
+            name="ck_attempt_prior_elapsed",
         ),
         Index("ix_attempt_owner_history", "user_id", "started_at", "id"),
     )
@@ -85,10 +93,11 @@ class Attempt(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     total_active_elapsed_ms: Mapped[int] = mapped_column(BigInteger, default=0)
+    prior_phase_elapsed_ms: Mapped[int] = mapped_column(BigInteger, default=0, server_default="0")
     total_running_since: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_reconciled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     independent_interval_ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    independent_end_reason: Mapped[str | None] = mapped_column(String(16))
+    independent_end_reason: Mapped[str | None] = mapped_column(String(32))
     timing_accommodated: Mapped[bool] = mapped_column(Boolean, default=False)
     family_previously_attempted: Mapped[bool] = mapped_column(Boolean)
 
@@ -97,7 +106,11 @@ class AttemptPhase(Base):
     __tablename__ = "attempt_phases"
     __table_args__ = (
         UniqueConstraint("attempt_id", "phase_number", name="uq_attempt_phase_number"),
-        CheckConstraint("phase_number = 0 AND kind = 'independent'", name="ck_phase_kind"),
+        CheckConstraint(
+            "(phase_number = 0 AND kind = 'independent') OR "
+            "(phase_number > 0 AND kind = 'assistance')",
+            name="ck_phase_kind",
+        ),
         CheckConstraint(
             "budget_seconds > 0 AND active_elapsed_ms >= 0 AND active_elapsed_ms <= "
             "budget_seconds::bigint * 1000",
@@ -136,7 +149,7 @@ class AttemptEvent(Base):
         CheckConstraint("sequence_number > 0", name="ck_attempt_event_sequence"),
         CheckConstraint(
             "event_type IN "
-            "('started','paused','resumed','extended','expired','deferred','abandoned')",
+            "('started','paused','resumed','extended','expired','deferred','abandoned','assistance_granted')",
             name="ck_attempt_event_type",
         ),
     )

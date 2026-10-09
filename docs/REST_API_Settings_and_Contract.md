@@ -495,3 +495,92 @@ See [generated B3 OpenAPI](openapi.b3-attempt-timers.json) and
 publication remain unavailable. Test-only verified fixtures do not enable a
 production bypass. Hint delivery, code drafts/submissions, execution,
 recommendations and mastery are subsequent increments.
+
+## Released B4 progressive assistance (10 October 2026)
+
+This is the requested assistance increment, rather than the submission/evaluator
+milestone called B4 in the original backlog. It extends the B3 timer slice; code
+drafts/submissions, correctness, recommendations and mastery remain unreleased.
+[The assistance decision](decisions/0006_progressive_assistance.md) resolves the
+state/timing gaps before implementation. All routes require the database learner
+role and owned attempt; another owner, including an administrator, receives 404.
+
+| Route relative to /api/v1 | Input and response |
+|---|---|
+| POST /attempts/{attempt_id}/assistance/next | expected_revision, trigger=learner_request/budget_expired; AssistanceResponse |
+| POST /attempts/{attempt_id}/assistance/solution | expected_revision, confirmation=true (strict boolean); AssistanceResponse |
+| GET /attempts/{attempt_id}/assistance | AssistanceHistory: attempt_id, up to five granted stages in published order |
+
+POST requires Idempotency-Key (1–128 printable ASCII characters). The same key,
+operation, attempt and body return the original response indefinitely with
+Idempotency-Replayed: true, including its original timer/server_now. Changed input
+at that key returns 409 IDEMPOTENCY_CONFLICT. Authorization/ownership are checked
+before replay. A successful response lost in transit can be retried even after
+abandon/defer; no new content is authorized by that retry. Reload attempt detail
+for current time. Distinct concurrent commands using one revision have one success
+and one 409 STALE_REVISION; a refreshed revision cannot bypass waiting intervals.
+Rejected commands roll back expiry reconciliation and all grant/phase/event changes.
+
+AssistanceResponse contains grant and attempt. Grant contains id, step_id,
+position, kind, content, granted_at, reason, and solution (null for ordinary hints;
+reference_code/explanation/expected_complexity only for the confirmed escape).
+Attempt is the existing timer snapshot, with assistance_level extended to
+none/directional/pattern/pseudocode/partial_code/full_solution and current
+phase_number. These names represent direction -> pattern -> pseudocode -> logical
+code steps. Published versions may omit kinds; follow their ordered assets without
+inventing them. No next response includes previous/future stage text, reference
+solution or tests. History includes only previously granted content. Generic public
+question endpoints and owned attempt detail/list/question still exclude all
+assistance text, solutions, private tests and rubrics. Error details/logs never
+include assets. A grant records authorization/disclosure, never a claimed read.
+
+The first non-solution stage may be requested early with learner_request. A
+budget_expired trigger always requires actual expiry. After the first grant, both
+triggers require the current active-time interval to expire: equality is eligible.
+A grant starts a fresh waiting phase using that published step's next_budget_seconds;
+previous overdue time cannot satisfy it. Pause freezes waiting time, resume restarts
+it, and browser closure/offline time continues while active. Extension preserves all
+grants and independent-interval closure and is only allowed before phase closure/
+expiry, within the pinned 1–1800 per-command and 3600 total-budget bounds. Longer
+published wait phases (up to 86400) cannot extend beyond those total-budget bounds.
+Defer/abandon deny new grants. Reads never deliver help or write each countdown tick.
+
+New attempts pin immutable pilot-assistance-1, retaining initial timer bounds and
+adding 60–86400-second assistance intervals. Existing pilot-timer-1 attempts retain
+that immutable timer-only policy and return 503 POLICY_UNAVAILABLE for new assistance;
+no migration silently changes their pins. An early first grant permanently ends
+the independent interval with assistance_requested. Already recorded expired/
+deferred/abandoned closure is preserved. Later waiting-phase expiry does not
+replace the independent timestamp/reason. Total overdue duration subtracts elapsed
+work in all phases, rather than only the latest phase.
+
+Ordinary next returns 409 ASSISTANCE_EXHAUSTED when the terminal full_solution asset
+is next. The confirmed solution escape works immediately from active/paused at
+any stage, bypassing the wait and exposing only the terminal asset and pinned
+solution. It closes the current phase and freezes its unused remaining duration;
+total active solving may continue, and lifecycle does not change. Subsequent
+new-key help requests return ASSISTANCE_EXHAUSTED. No correctness or unaided credit
+is awarded. This escape prevents enforced waits trapping a learner indefinitely.
+
+409 codes include ASSISTANCE_NOT_READY, ASSISTANCE_EXHAUSTED, STALE_REVISION,
+INVALID_ATTEMPT_STATE, IDEMPOTENCY_CONFLICT and ATTEMPT_CONFLICT. Extending a closed
+solution phase returns PHASE_CLOSED; expired phases retain PHASE_EXPIRED. Missing
+or invalid pinned assets return 503 ASSISTANCE_UNAVAILABLE; unsupported/invalid
+pinned policy returns POLICY_UNAVAILABLE. Unknown fields, invalid trigger, noninteger
+revision and missing/false/nonboolean confirmation return 422. Missing identity is
+401, revoked/missing stored learner role is 403, and server-clock failures are 503.
+
+Archived questions prohibit new starts but existing owners retain assistance from
+their exact pinned version. New published versions/policies never alter existing
+attempts. Grants/events/policies are append-only; PostgreSQL rejects grant edits/
+deletes, mismatched pinned assets, backward assistance levels and erased timing
+history. Downgrade refuses any stored grants or attempts referencing the new policy;
+a B3-only database can be downgraded without deleting historical data.
+
+Public config advertises progressive_assistance along with attempt_lifecycle and
+server_timers; release_stage is B4-progressive-assistance. Evaluation remains
+not_integrated; learning_policy remains null because mastery is not implemented.
+See [B4 OpenAPI](openapi.b4-progressive-assistance.json) and
+[B4 verification](B4_Verification.md) for actual checks and limits. Production
+publication still requires the future trusted verifier; test fixtures verify
+transition behavior only. Hosted authentication remains disabled.

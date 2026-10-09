@@ -4,7 +4,10 @@ from alembic import context
 from pydantic import ValidationError
 from sqlalchemy import Connection
 
-from mastery_backend.infrastructure.database import attempt_models  # noqa: F401
+from mastery_backend.infrastructure.database import (
+    assistance_models,  # noqa: F401
+    attempt_models,  # noqa: F401
+)
 from mastery_backend.infrastructure.database.content_models import Base
 from mastery_backend.infrastructure.database.session import create_database_engine
 from mastery_backend.settings import Settings

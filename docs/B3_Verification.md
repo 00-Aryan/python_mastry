@@ -93,3 +93,6 @@ Remote CI, Docker, fresh Windows/WSL setup, hosted authentication and large-scal
 performance were not run. Local Linux/PostgreSQL regressions, static checks,
 migrations and package checks passed. The increment uses the configured Git author;
 no author identity is created or changed.
+
+The subsequent [B4 assistance verification](B4_Verification.md) records the released
+grant/waiting-phase extension; this document remains the historical B3 result.

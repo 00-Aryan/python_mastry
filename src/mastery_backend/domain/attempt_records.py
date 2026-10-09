@@ -28,13 +28,17 @@ class AttemptSnapshot(ContentValue):
     policy_version: str
     mode: Literal["practice", "assessment"]
     lifecycle_state: Lifecycle
-    assistance_level: Literal["none"]
+    assistance_level: Literal[
+        "none", "directional", "pattern", "pseudocode", "partial_code", "full_solution"
+    ]
     assistance_eligible: bool
     revision: int
     started_at: datetime
     finished_at: datetime | None
     independent_interval_ended_at: datetime | None
-    independent_end_reason: Literal["expired", "deferred", "abandoned"] | None
+    independent_end_reason: (
+        Literal["expired", "deferred", "abandoned", "assistance_requested"] | None
+    )
     timing_accommodated: bool
     family_previously_attempted: bool
     total_active_elapsed_ms: int

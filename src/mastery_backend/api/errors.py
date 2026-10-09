@@ -79,6 +79,7 @@ async def content_error_handler(request: Request, exception: Exception) -> JSONR
         "INVALID_MODE": 422,
         "CLOCK_UNAVAILABLE": 503,
         "POLICY_UNAVAILABLE": 503,
+        "ASSISTANCE_UNAVAILABLE": 503,
         "GRAPH_READ_LIMIT": 422,
         "INVALID_PATTERN": 422,
         "INVALID_FAMILY": 422,

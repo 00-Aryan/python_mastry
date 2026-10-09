@@ -4,7 +4,8 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select, tuple_
+from pydantic import ValidationError
+from sqlalchemy import func, select, tuple_
 from sqlalchemy.orm import Session
 
 from mastery_backend.domain.attempt_records import AttemptListQuery
@@ -44,10 +45,12 @@ class AttemptRepository:
 
     def phase(self, attempt_id: UUID) -> AttemptPhase:
         return self.session.scalars(
-            select(AttemptPhase).where(
+            select(AttemptPhase)
+            .where(
                 AttemptPhase.attempt_id == attempt_id,
-                AttemptPhase.phase_number == 0,
             )
+            .order_by(AttemptPhase.phase_number.desc())
+            .limit(1)
         ).one()
 
     def policy(self, policy_id: UUID | None = None) -> tuple[LearningPolicyVersion, TimerPolicy]:
@@ -60,7 +63,13 @@ class AttemptRepository:
         policy = self.session.scalar(query)
         if policy is None:
             raise ContentError("POLICY_UNAVAILABLE", "Pinned timer policy is unavailable.")
-        return policy, TimerPolicy.model_validate(policy.configuration_json)
+        try:
+            configuration = TimerPolicy.model_validate(policy.configuration_json)
+        except ValidationError:
+            raise ContentError(
+                "POLICY_UNAVAILABLE", "Pinned policy configuration is invalid."
+            ) from None
+        return policy, configuration
 
     def start_context(self, version_id: UUID, mode: str) -> UUID:
         # Lock the parent before rechecking availability, matching question archival.
@@ -144,12 +153,21 @@ class AttemptRepository:
         return rows
 
     def phases(self, attempts: list[Attempt]) -> dict[UUID, AttemptPhase]:
+        latest_phases = (
+            select(
+                AttemptPhase.attempt_id, func.max(AttemptPhase.phase_number).label("phase_number")
+            )
+            .where(AttemptPhase.attempt_id.in_([attempt.id for attempt in attempts]))
+            .group_by(AttemptPhase.attempt_id)
+            .subquery()
+        )
         return {
             phase.attempt_id: phase
             for phase in self.session.scalars(
-                select(AttemptPhase).where(
-                    AttemptPhase.attempt_id.in_([attempt.id for attempt in attempts]),
-                    AttemptPhase.phase_number == 0,
+                select(AttemptPhase).join(
+                    latest_phases,
+                    (AttemptPhase.attempt_id == latest_phases.c.attempt_id)
+                    & (AttemptPhase.phase_number == latest_phases.c.phase_number),
                 )
             )
         }

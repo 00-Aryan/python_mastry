@@ -1,4 +1,4 @@
-"""Pure timer projection, duration bounds and persistent independent expiry."""
+"""Pure phase timer projection, pinned duration bounds and persistent expiry."""
 
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -10,7 +10,12 @@ from mastery_backend.domain.content import ContentError, ContentValue
 
 Lifecycle = Literal["active", "paused", "completed", "deferred", "abandoned"]
 AttemptCommand = Literal["pause", "resume", "extend", "defer", "abandon"]
-PILOT_TIMER_POLICY_CODE = "pilot-timer-1"
+PILOT_TIMER_POLICY_CODE = "pilot-assistance-1"
+
+
+class AssistancePolicy(ContentValue):
+    minimum_wait_seconds: int = Field(gt=0)
+    maximum_wait_seconds: int = Field(gt=0)
 
 
 class TimerPolicy(ContentValue):
@@ -18,6 +23,8 @@ class TimerPolicy(ContentValue):
     maximum_budget_seconds: int = Field(gt=0)
     maximum_extension_seconds: int = Field(gt=0)
     allowed_modes: list[Literal["practice", "assessment"]]
+
+    assistance: AssistancePolicy | None = None
 
     def validate_budget(self, seconds: int) -> None:
         if not self.minimum_budget_seconds <= seconds <= self.maximum_budget_seconds:
@@ -38,6 +45,7 @@ class TimerState:
     total_running_since: datetime | None
     expired_at: datetime | None
     last_reconciled_at: datetime
+    prior_phase_elapsed_ms: int = 0
 
 
 @dataclass(frozen=True)
@@ -86,7 +94,7 @@ def project_timer(state: TimerState, now: datetime) -> TimerProjection:
         phase_elapsed,
         total_elapsed,
         budget_ms - phase_elapsed,
-        max(0, total_elapsed - phase_elapsed),
+        max(0, total_elapsed - phase_elapsed - state.prior_phase_elapsed_ms),
         expired_at,
     )
 
@@ -102,7 +110,7 @@ def validate_transition(
         if command == "extend":
             if expired_at is not None:
                 raise ContentError(
-                    "PHASE_EXPIRED", "The independent interval expired; extension cannot reopen it."
+                    "PHASE_EXPIRED", "The interval expired; extension cannot reopen it."
                 )
             return lifecycle
         return "deferred" if command == "defer" else "abandoned"

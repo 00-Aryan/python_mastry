@@ -1,8 +1,8 @@
 # Python Mastery Backend
 
-This is the local **B3 attempt-lifecycle and server-timer increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
+This is the local **B4 progressive-assistance increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
 
-Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers and the documented CLI-seeded local development identity are implemented. Deployed authentication, hint delivery, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
+Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers, progressive assistance and the documented CLI-seeded local development identity are implemented. Deployed authentication, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
 
 ## Quick start in WSL and VS Code
 
@@ -34,7 +34,7 @@ Set DATABASE_URL in `.env` to that database. Both `postgresql://` and
 settings for pool sizes and timeouts. Run migrations from the repository root;
 migration files live in the source checkout. Startup never creates tables or
 runs migrations. The baseline establishes Alembic history; revision 0002 adds local identity,
-normalized question storage, constraints and published-content guards. Revision 0003 adds skill revisions and prerequisite edges while retaining existing skills and mappings. Revision 0004 adds pinned timer policy, attempts, phases and event history.
+normalized question storage, constraints and published-content guards. Revision 0003 adds skill revisions and prerequisite edges while retaining existing skills and mappings. Revision 0004 adds pinned timer policy, attempts, phases and event history. Revision 0005 adds immutable assistance grants and waiting phases without changing existing attempt pins.
 
 For live reload, use the explicit Uvicorn command:
 
@@ -48,9 +48,9 @@ The direct Uvicorn command uses its CLI host/port options; it does not read API_
 
 | Endpoint | Response |
 |---|---|
-| GET /health/live | status alive; release_stage B3-attempt-timers; database not_checked |
+| GET /health/live | status alive; release_stage B4-progressive-assistance; database not_checked |
 | GET /health/ready | database connected; evaluation not_integrated; safe 503 on DB failure |
-| GET /api/v1/config/public | Application version; attempt_lifecycle/server_timers capabilities; practice/assessment modes |
+| GET /api/v1/config/public | Application version; attempt_lifecycle/server_timers/progressive_assistance capabilities; practice/assessment modes |
 | GET /api/v1/questions; /api/v1/questions/{question_id}; /api/v1/question-versions/{version_id} | Available published public content only; cursor pagination on the catalog |
 | POST /api/v1/admin/questions | Question identity and first draft; admin role and Idempotency-Key required |
 | POST /api/v1/admin/questions/{question_id}/versions | New draft with server-assigned version number |
@@ -64,6 +64,7 @@ The direct Uvicorn command uses its CLI host/port options; it does not read API_
 | POST/GET /api/v1/attempts; GET /api/v1/attempts/{attempt_id} | Start and read owned attempts with server timing snapshots |
 | GET /api/v1/attempts/{attempt_id}/question | Exact pinned public version, including owned historical archived content |
 | POST /api/v1/attempts/{attempt_id}/pause, /resume, /extend, /defer, /abandon | Revision-checked, idempotent lifecycle/timer commands |
+| POST /api/v1/attempts/{attempt_id}/assistance/next, /solution; GET /api/v1/attempts/{attempt_id}/assistance | Owned staged grants, confirmed full-solution escape and grant history |
 | GET /docs and /redoc | Development API documentation |
 | GET /openapi.json | Actual schema generated from implemented endpoints |
 
@@ -161,7 +162,7 @@ validates the publication transition; it does not validate any future verifier.
 
 Read the [question storage decision](docs/decisions/0003_question_storage.md) for
 content types, enum/position choices and the exact acceptance checks. The generated
-[OpenAPI schema](docs/openapi.b3-attempt-timers.json) describes released routes.
+[OpenAPI schema](docs/openapi.b4-progressive-assistance.json) describes released routes.
 
 ## Diagnose a failure
 
@@ -173,7 +174,7 @@ A browser CORS error usually means a mismatched origin. Host errors require a ma
 
 ## Next increment
 
-Question storage is implemented. Production publication remains unavailable until a trusted reference verifier is implemented; the test-only injected verifier proves transition logic, not the correctness of a future verifier. Skill CRUD and the prerequisite DAG are implemented. Attempt lifecycle and server timers are implemented. Later increments add hint delivery, code drafting/submissions, recommendations, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.
+Question storage is implemented. Production publication remains unavailable until a trusted reference verifier is implemented; the test-only injected verifier proves transition logic, not the correctness of a future verifier. Skill CRUD and the prerequisite DAG are implemented. Attempt lifecycle and server timers are implemented. Progressive assistance is implemented. Later increments add code drafting/submissions, recommendations, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.
 
 ## Skill graph administration
 
@@ -231,5 +232,32 @@ GET /api/v1/attempts/{id}/question. Archived questions cannot start new attempts
 private tests, hints and solutions remain excluded. Public attempt lists are bounded
 and owner-only. Read [the timer/state decision](docs/decisions/0005_attempt_timers.md)
 and [B3 verification](docs/B3_Verification.md) for rules, responsibilities, actual
-checks and unresolved limits. No code, hint delivery or learning calculation is
-implemented by this slice.
+checks and unresolved limits. B4 adds the assistance commands below; code and learning
+calculations remain unreleased.
+
+
+## Progressive assistance
+
+Use POST /api/v1/attempts/{id}/assistance/next with expected_revision,
+trigger=learner_request or budget_expired and Idempotency-Key. The first hint may
+be requested early; later hints wait for the current active-time interval to
+expire. Pause stops that interval, resume restarts it, and extensions preserve
+irreversible grants. Responses expose only that stage, with its grant timestamp,
+reason and current attempt snapshot. GET /attempts/{id}/assistance recovers granted
+content only. Generic public and attempt detail/list/question responses stay private.
+
+Confirm the full-solution escape using /assistance/solution with
+expected_revision and confirmation=true. It is immediately available on active/
+paused attempts and does not mark an answer correct or end the session. Ordinary
+next never exposes the final solution without this confirmation. Defer/abandon
+prohibit new grants. Identical key/body retries recover the original response
+indefinitely, including after a lost response or terminal transition; GET attempt
+again for current timing. Distinct competing commands use revision conflicts.
+
+New attempts pin pilot-assistance-1. B3 attempts retain pilot-timer-1 and return
+503 POLICY_UNAVAILABLE for new help; no existing policy is retroactively changed.
+Missing assets return safe 503 and leave the grant transaction unchanged. Read
+[assistance rules](docs/decisions/0006_progressive_assistance.md) and
+[B4 verification](docs/B4_Verification.md) for relationships, request flow,
+acceptance results and unverified limits. Production publication remains unavailable
+until a trusted verifier exists; test-only verifier fixtures do not enable it.

@@ -14,7 +14,7 @@ def test_health_is_explicit_about_release(client: TestClient, path: str, status:
     assert response.status_code == 200
     assert response.json() == {
         "status": status,
-        "release_stage": "B3-attempt-timers",
+        "release_stage": "B4-progressive-assistance",
         "database": "connected" if path == "/health/ready" else "not_checked",
         "evaluation": "not_integrated",
     }
@@ -23,7 +23,11 @@ def test_health_is_explicit_about_release(client: TestClient, path: str, status:
 
 def test_public_config_has_no_secrets_or_fake_capabilities(client: TestClient) -> None:
     response = client.get("/api/v1/config/public")
-    assert response.json()["capabilities"] == ["attempt_lifecycle", "server_timers"]
+    assert response.json()["capabilities"] == [
+        "attempt_lifecycle",
+        "server_timers",
+        "progressive_assistance",
+    ]
     assert response.json()["attempt_modes"] == ["practice", "assessment"]
     assert "database_url" not in response.text
     assert "test_password" not in response.text
@@ -59,6 +63,9 @@ def test_docs_and_openapi_only_describe_released_routes(client: TestClient) -> N
     assert client.get("/docs").status_code == 200
     schema = client.get("/openapi.json").json()
     assert set(schema["paths"]) == {
+        "/api/v1/attempts/{attempt_id}/assistance",
+        "/api/v1/attempts/{attempt_id}/assistance/next",
+        "/api/v1/attempts/{attempt_id}/assistance/solution",
         "/api/v1/attempts",
         "/api/v1/attempts/{attempt_id}",
         "/api/v1/attempts/{attempt_id}/question",

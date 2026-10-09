@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import Depends, Header, Request
 from sqlalchemy.orm import Session, sessionmaker
 
+from mastery_backend.application.assistance_service import AssistanceService
 from mastery_backend.application.attempt_service import AttemptService
 from mastery_backend.application.catalog_service import CatalogService
 from mastery_backend.application.clock import Clock, SystemClock
@@ -99,3 +100,10 @@ def attempt_service(
     clock: Annotated[Clock, Depends(server_clock)],
 ) -> AttemptService:
     return AttemptService(factory, clock)
+
+
+def assistance_service(
+    factory: Annotated[sessionmaker[Session], Depends(session_factory)],
+    clock: Annotated[Clock, Depends(server_clock)],
+) -> AssistanceService:
+    return AssistanceService(factory, clock)

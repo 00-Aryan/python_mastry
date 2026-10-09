@@ -108,7 +108,7 @@ def test_exact_expiry_reads_write_once_and_solving_continues(
     client = attempt_client
     attempt = start(client, published_question)
     assert attempt["timer"]["phase_number"] == 0 and attempt["timer"]["remaining_ms"] == 60000
-    assert attempt["policy_version"] == "pilot-timer-1"
+    assert attempt["policy_version"] == "pilot-assistance-1"
     attempt_clock.advance(59999)
     before = get(client, attempt)
     assert before["revision"] == 1 and before["timer"]["remaining_ms"] == 1
@@ -690,14 +690,13 @@ def test_migration_upgrade_from_b2_existing_data(database_connection: Connection
     database_connection.commit()
     command.upgrade(config, "head")
     assert database_connection.scalar(text("SELECT graph_revision FROM curricula")) == 7
-    assert (
-        database_connection.scalar(text("SELECT version_code FROM learning_policy_versions"))
-        == "pilot-timer-1"
-    )
+    assert set(
+        database_connection.scalars(text("SELECT version_code FROM learning_policy_versions"))
+    ) == {"pilot-timer-1", "pilot-assistance-1"}
     assert compare_metadata(MigrationContext.configure(database_connection), Base.metadata) == []
     database_connection.commit()
     command.upgrade(config, "head")
-    assert database_connection.scalar(text("SELECT count(*) FROM learning_policy_versions")) == 1
+    assert database_connection.scalar(text("SELECT count(*) FROM learning_policy_versions")) == 2
     database_connection.commit()
     command.downgrade(config, "0003_skill_graph")
     assert database_connection.scalar(text("SELECT graph_revision FROM curricula")) == 7
@@ -837,8 +836,8 @@ def test_question_mode_policy_pinning_and_missing_inputs(
     extended = mutate(client, attempt, "extend", additional_budget_seconds=1200)
     assert extended.status_code == 200 and extended.json()["timer"]["budget_seconds"] == 3600
     assert extended.json()["policy_version_id"] == attempt["policy_version_id"]
-    assert extended.json()["policy_version"] == "pilot-timer-1"
-    for path in ["assistance/next", "submissions", "draft"]:
+    assert extended.json()["policy_version"] == "pilot-assistance-1"
+    for path in ["submissions", "draft"]:
         assert client.post(f"/api/v1/attempts/{attempt['id']}/{path}", json={}).status_code == 404
 
 

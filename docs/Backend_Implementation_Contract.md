@@ -392,3 +392,34 @@ Remaining deployment choices: hosting, authentication provider, secure runner te
 - Microsoft WSL environment guidance: https://learn.microsoft.com/en-us/windows/wsl/setup/environment
 
 These references ground tool behavior. Schema, timing, eligibility and delivery choices above are product-specific proposals, not claims made by those documentation authors.
+
+## Released assistance storage refinement (user-requested B4)
+
+The incremental release numbering now calls progressive assistance B4. The original
+submission/evaluator backlog entry remains future work. The authoritative implemented
+rules are [decision 0006](decisions/0006_progressive_assistance.md) and the
+[B4 API slice](REST_API_Settings_and_Contract.md#released-b4-progressive-assistance-10-october-2026).
+
+Reuse immutable question_assistance_steps/question_solutions and attempt policy/version
+pins. assistance_grants replaces the planned assistance_deliveries name: each fact
+records attempt_id/step_id, granted_at, reason, command_id, operation/key/request hash
+and an immutable original response for indefinite retry recovery. Unique attempt/step
+and attempt/operation/key prevent duplicate grants. PostgreSQL guards enforce immutable
+grants, pinned assets and monotonic assistance projections. This fact says content was
+granted, not that a learner read it; no read timestamp or mastery observation is added.
+
+New attempts pin pilot-assistance-1; timer-only B3 attempts keep their old policy and
+deny new assistance safely. Subsequent assistance phases are numbered above zero;
+prior_phase_elapsed_ms preserves accumulated work in closed phases for correct total
+versus overdue projections. First early help closes the independent interval permanently.
+Pause/resume/extend cannot erase exposure; defer/abandon prohibit new grants. Explicit
+confirmed full-solution escape closes the current interval without ending the session.
+All waiting intervals use the existing injected server clock and persisted phase anchors,
+with no background sleeps or per-tick writes. Transaction/ownership/revision/idempotency
+boundaries match B3. API/services/domain/repositories retain separate responsibilities.
+
+Public catalog/attempt projections never load assistance bodies. Dedicated owned
+commands/history return only granted assets. Stored grant receipts duplicate the response
+intentionally for exact recovery; authoritative content remains the pinned published
+asset. History is separate from any future scoring or evidence calculations. No code
+submission, execution, automatic correctness, recommendation or mastery path is released.

@@ -66,6 +66,7 @@ class AttemptService:
             attempt.total_running_since,
             phase.expired_at,
             attempt.last_reconciled_at,
+            attempt.prior_phase_elapsed_ms,
         )
 
     def reconcile_expiry(
@@ -86,8 +87,9 @@ class AttemptService:
         attempt.total_active_elapsed_ms = projection.total_elapsed_ms
         attempt.total_running_since = now if attempt.lifecycle_state == "active" else None
         attempt.last_reconciled_at = now
-        attempt.independent_interval_ended_at = projection.expired_at
-        attempt.independent_end_reason = "expired"
+        if attempt.independent_interval_ended_at is None:
+            attempt.independent_interval_ended_at = projection.expired_at
+            attempt.independent_end_reason = "expired"
         attempt.revision += 1
         repository.append_event(
             attempt,
@@ -118,7 +120,8 @@ class AttemptService:
                 "lifecycle_state": attempt.lifecycle_state,
                 "assistance_level": attempt.assistance_level,
                 "assistance_eligible": phase.expired_at is not None
-                and attempt.lifecycle_state in {"active", "paused"},
+                and attempt.lifecycle_state in {"active", "paused"}
+                and attempt.assistance_level != "full_solution",
                 "revision": attempt.revision,
                 "started_at": attempt.started_at,
                 "finished_at": attempt.finished_at,
@@ -279,6 +282,10 @@ class AttemptService:
                 policy_record, policy = repository.policy(attempt.policy_version_id)
                 projection = project_timer(self.timer_state(attempt, phase), now)
                 if command == "extend":
+                    if phase.closed_at is not None:
+                        raise ContentError(
+                            "PHASE_CLOSED", "The phase is closed; extension cannot reopen it."
+                        )
                     if additional_seconds is None:
                         raise ContentError("INVALID_BUDGET", "Supply additional budget seconds.")
                     policy.validate_extension(phase.budget_seconds, additional_seconds)
