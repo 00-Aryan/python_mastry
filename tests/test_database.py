@@ -4,7 +4,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, TimeoutError
 
 from mastery_backend.api import routes
 from mastery_backend.infrastructure.database.session import (
@@ -79,3 +79,27 @@ def test_lifespan_disposes_engine(settings: Settings, monkeypatch: pytest.Monkey
         assert client.get("/health/live").status_code == 200
         dispose.assert_not_called()
     dispose.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        OperationalError("PRIVATE_TEST_INPUT", {}, Exception("PRIVATE_SOLUTION")),
+        TimeoutError("PRIVATE_SOLUTION"),
+    ],
+)
+def test_database_faults_return_safe_api_errors(
+    app: FastAPI,
+    client: TestClient,
+    failure: Exception,
+) -> None:
+    @app.get("/test-database-fault")
+    def fail_connection() -> None:
+        raise failure
+
+    response = client.get("/test-database-fault", headers={"X-Request-ID": "safe-db-fault"})
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "DATABASE_UNAVAILABLE"
+    assert response.json()["error"]["request_id"] == "safe-db-fault"
+    assert "PRIVATE_TEST_INPUT" not in response.text
+    assert "PRIVATE_SOLUTION" not in response.text

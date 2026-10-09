@@ -6,7 +6,12 @@ env/
 !.env.example
 .aws/
 credentials/
+credentials.json
+credentials.toml
+client_secret*.json
+service-account*.json
 secrets/
+.netrc
 *.pem
 *.key
 *.p12
@@ -17,6 +22,11 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .coverage
+.coverage.*
+coverage.xml
+.cache/
+.tox/
+.nox/
 htmlcov/
 dist/
 build/
@@ -30,3 +40,4 @@ build/
 pgdata/
 postgres-data/
 .pgpass
+.pg_service.conf

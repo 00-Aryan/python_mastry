@@ -5,16 +5,24 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from sqlalchemy.exc import OperationalError, TimeoutError
 from starlette.exceptions import HTTPException
 
-from mastery_backend.api.errors import http_error_handler, validation_error_handler
+from mastery_backend.api.errors import (
+    content_error_handler,
+    database_error_handler,
+    http_error_handler,
+    validation_error_handler,
+)
 from mastery_backend.api.middleware import (
     ApiCORSMiddleware,
     HostGuardMiddleware,
     RequestContextMiddleware,
     RequestGuardMiddleware,
 )
+from mastery_backend.api.routers.questions import admin_router, catalog_router
 from mastery_backend.api.routes import config_router, health_router
+from mastery_backend.domain.content import ContentError
 from mastery_backend.infrastructure.database.session import (
     create_database_engine,
     create_session_factory,
@@ -50,8 +58,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = configuration
     app.add_exception_handler(HTTPException, http_error_handler)
     app.add_exception_handler(RequestValidationError, validation_error_handler)
+    app.add_exception_handler(ContentError, content_error_handler)
+    app.add_exception_handler(OperationalError, database_error_handler)
+    app.add_exception_handler(TimeoutError, database_error_handler)
     app.include_router(health_router)
     app.include_router(config_router)
+    app.include_router(admin_router)
+    app.include_router(catalog_router)
     # Last added is outermost: tracing covers CORS and guard failures too.
     app.add_middleware(RequestGuardMiddleware, settings=configuration)
     app.add_middleware(

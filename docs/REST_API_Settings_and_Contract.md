@@ -2,6 +2,12 @@
 
 Version 1.0 · 9 October 2026 · Companion to Backend Implementation Contract and AGENTS.md
 
+Implementation status: B0 and the B1 database/question-storage increments are
+implemented locally. [Question storage decisions](decisions/0003_question_storage.md)
+record concrete input formats, lifecycle/authorization choices and the user's
+publication boundary: no publication until trusted executable verification exists.
+The remaining sections retain the broader planning scope.
+
 ## 1 What an API means in this project
 
 The API is the agreement between the user interface and the backend. The interface sends an HTTP request to start an attempt, save code, request help or submit a solution. The backend checks permissions and rules, updates the database and returns a documented response.

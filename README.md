@@ -1,8 +1,8 @@
 # Python Mastery Backend
 
-This is the local **B1 database foundation**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
+This is the local **B1 database and question-storage increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
 
-Questions, authentication, countdowns, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
+Question storage and the documented CLI-seeded local development identity are implemented. Deployed authentication, countdowns, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
 
 ## Quick start in WSL and VS Code
 
@@ -33,8 +33,8 @@ Set DATABASE_URL in `.env` to that database. Both `postgresql://` and
 `postgresql+psycopg://` use psycopg 3. URL query options are rejected; use DB_*
 settings for pool sizes and timeouts. Run migrations from the repository root;
 migration files live in the source checkout. Startup never creates tables or
-runs migrations. The first revision establishes Alembic history only; identity
-and content tables are future B1 increments.
+runs migrations. The baseline establishes Alembic history; revision 0002 adds local identity,
+normalized question storage, constraints and published-content guards.
 
 For live reload, use the explicit Uvicorn command:
 
@@ -51,6 +51,12 @@ The direct Uvicorn command uses its CLI host/port options; it does not read API_
 | GET /health/live | status alive; release_stage B1-foundation; database not_checked |
 | GET /health/ready | database connected; evaluation not_integrated; safe 503 on DB failure |
 | GET /api/v1/config/public | Application version and empty learning capabilities/modes |
+| GET /api/v1/questions; /api/v1/questions/{question_id}; /api/v1/question-versions/{version_id} | Available published public content only; cursor pagination on the catalog |
+| POST /api/v1/admin/questions | Question identity and first draft; admin role and Idempotency-Key required |
+| POST /api/v1/admin/questions/{question_id}/versions | New draft with server-assigned version number |
+| GET/PATCH/DELETE /api/v1/admin/question-versions/{version_id} | Admin preview, revision-checked draft edit/delete |
+| POST /api/v1/admin/question-versions/{version_id}/publish | Validates completeness; 503 until trusted reference verification exists |
+| POST /api/v1/admin/questions/{question_id}/archive | Explicit revision-checked archival; preserves published history |
 | GET /docs and /redoc | Development API documentation |
 | GET /openapi.json | Actual schema generated from implemented endpoints |
 
@@ -65,7 +71,7 @@ uv sync --locked
 uv run pytest --cov=mastery_backend --cov-report=term-missing
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy src
+uv run mypy src migrations
 uv build
 ```
 
@@ -82,8 +88,9 @@ uv run pytest --cov=mastery_backend --cov-report=term-missing
 
 Integration tests create and remove only randomly named schemas in that DB.
 TEST_DATABASE_URL is read from the shell, not `.env`. Test credentials need schema
-creation rights. Use a disposable test database. Concurrency, application
-constraints and evaluation tests follow with their implemented use cases.
+creation rights. Use a disposable test database. Question-storage tests also exercise concurrent edits, publication races,
+published parent/child guards, authorization and private-content response boundaries.
+Evaluation tests will accompany a future trusted execution implementation.
 
 ## File responsibilities
 
@@ -102,7 +109,52 @@ constraints and evaluation tests follow with their implemented use cases.
 | docs/ | Planning contracts, increment decisions, verification records and generated schemas |
 | AGENTS.md | Project-wide contributor and coding-agent instructions |
 
-Database infrastructure is implemented; application services, ORM entities and learning rules follow with their use cases. See [B1 database decisions](docs/decisions/0002_b1_database_foundation.md) for request flow, transaction ownership and acceptance tests.
+See [B1 database decisions](docs/decisions/0002_b1_database_foundation.md) and [question storage decisions](docs/decisions/0003_question_storage.md) for file responsibilities, data relationships, request flow, transaction ownership and acceptance tests.
+
+## Local content administration
+
+After migrating, explicitly seed a local identity. This UUID is an example for
+local setup; roles are database grants and cannot be supplied through HTTP headers:
+
+```bash
+uv run mastery-content seed-identity --user-id 00000000-0000-0000-0000-000000000001 --display-name 'Local developer' --role learner --role content_admin
+```
+
+Set `DEVELOPMENT_USER_ID=00000000-0000-0000-0000-000000000001` in ignored `.env`,
+then seed your reference metadata (an editable example is included):
+
+```bash
+uv run mastery-content seed-references docs/reference_catalog.example.json
+uv run mastery-backend
+```
+
+Missing identity configuration denies admin requests with 401. Missing database
+admin grants return 403. The configured identity requires loopback bind/host/origin
+settings and local request peers. This is single-operator local mode; production
+and deployed sessions remain disabled. Keep API_HOST at 127.0.0.1.
+
+Create an incomplete draft using the family seeded above:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/admin/questions -H 'Content-Type: application/json' -H 'Idempotency-Key: create-return-01' -d '{"code":"PY-RETURN-01","family_id":"00000000-0000-0000-0000-000000000031","draft":{"title":"Return a value","statement":"Return the supplied value."}}'
+```
+
+Use the returned version ID for admin preview and PATCH. Edits supply the current
+`expected_revision`; supplied arrays replace their collections. DELETE supplies
+`?expected_revision=N`. Archive supplies the separate `question_revision` through
+an `expected_revision` body and requires Idempotency-Key. All state-changing POSTs
+require this key; successful identical replay returns its original result.
+
+Publication requires complete validated assets and a trusted executable reference
+verification receipt. Complete drafts currently receive `503 VERIFICATION_UNAVAILABLE`
+and stay drafts. Incomplete drafts receive a validation conflict. **There is no
+production/test-verifier switch or publication bypass in the CLI.** Public catalog
+reads remain empty until verified published content exists. The test-only verifier
+validates the publication transition; it does not validate any future verifier.
+
+Read the [question storage decision](docs/decisions/0003_question_storage.md) for
+content types, enum/position choices and the exact acceptance checks. The generated
+[OpenAPI schema](docs/openapi.b1-question-storage.json) describes released routes.
 
 ## Diagnose a failure
 
@@ -114,4 +166,4 @@ A browser CORS error usually means a mismatched origin. Host errors require a ma
 
 ## Next increment
 
-The next B1 increment adds identities/roles, question drafts, publication and their constraints and storage tests. Later increments add the skill DAG, attempts/timers, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.
+Question storage is implemented. Production publication remains unavailable until a trusted reference verifier is implemented; the test-only injected verifier proves transition logic, not the correctness of a future verifier. Later increments add the skill DAG, attempts/timers, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.

@@ -58,7 +58,19 @@ def test_untrusted_host_is_rejected(client: TestClient) -> None:
 def test_docs_and_openapi_only_describe_released_routes(client: TestClient) -> None:
     assert client.get("/docs").status_code == 200
     schema = client.get("/openapi.json").json()
-    assert set(schema["paths"]) == {"/health/live", "/health/ready", "/api/v1/config/public"}
+    assert set(schema["paths"]) == {
+        "/health/live",
+        "/health/ready",
+        "/api/v1/config/public",
+        "/api/v1/questions",
+        "/api/v1/questions/{question_id}",
+        "/api/v1/question-versions/{version_id}",
+        "/api/v1/admin/questions",
+        "/api/v1/admin/questions/{question_id}/versions",
+        "/api/v1/admin/question-versions/{version_id}",
+        "/api/v1/admin/question-versions/{version_id}/publish",
+        "/api/v1/admin/questions/{question_id}/archive",
+    }
     ids = [
         operation["operationId"] for item in schema["paths"].values() for operation in item.values()
     ]
@@ -214,3 +226,21 @@ def test_safe_internal_error_is_visible_to_permitted_browser(settings: Settings)
         assert allowed.headers["access-control-allow-origin"] == "http://localhost:5173"
         denied = client.get("/fail", headers={"Origin": "http://evil.example"})
         assert "access-control-allow-origin" not in denied.headers
+
+
+def test_writes_without_development_identity_are_denied(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/admin/questions",
+        json={
+            "code": "DRAFT",
+            "family_id": "00000000-0000-0000-0000-000000000031",
+            "draft": {"title": "Draft", "statement": "Statement"},
+        },
+        headers={
+            "Idempotency-Key": "unauthorized",
+            "X-User-ID": "00000000-0000-0000-0000-000000000001",
+            "X-Role": "content_admin",
+        },
+    )
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "UNAUTHENTICATED"

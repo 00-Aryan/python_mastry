@@ -1,0 +1,6 @@
+{
+  "curricula": [{"id": "00000000-0000-0000-0000-000000000010", "code": "PYTHON", "title": "Python"}],
+  "skills": [{"id": "00000000-0000-0000-0000-000000000011", "curriculum_id": "00000000-0000-0000-0000-000000000010", "code": "PY-RETURN", "title": "Return values", "competency": "Return the required value from a function."}],
+  "patterns": [{"id": "00000000-0000-0000-0000-000000000021", "code": "RETURN", "title": "Return an input"}],
+  "question_families": [{"id": "00000000-0000-0000-0000-000000000031", "code": "IDENTITY", "novelty_definition": "Tasks whose essential solution is returning the supplied value."}]
+}

@@ -2,6 +2,12 @@
 
 Version 1.0 · 9 October 2026 · Prepared for Aryan Kumar
 
+Implementation status: B0 and the B1 database/question-storage increments are
+implemented locally. [Question storage decisions](decisions/0003_question_storage.md)
+record concrete input formats, lifecycle/authorization choices and the user's
+publication boundary: no publication until trusted executable verification exists.
+The remaining sections retain the broader planning scope.
+
 ## 1 Purpose and implementation boundary
 
 We will implement one complete learning branch using a backend whose rules, data and failures can be inspected. This contract supplements the Python Mastery Platform Master Blueprint. It turns the product direction into proposed engineering decisions. It does not claim that application code, dependency installation or a working server has already been created or tested.

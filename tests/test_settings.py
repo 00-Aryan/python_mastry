@@ -78,3 +78,19 @@ def test_environment_parsing(monkeypatch: pytest.MonkeyPatch) -> None:
     result = Settings(_env_file=None)
     assert result.allowed_origins == ["http://localhost:5173"]
     assert result.api_port == 8123
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"app_env": "production"},
+        {"api_host": "0.0.0.0"},
+        {"allowed_hosts": ["public.example"]},
+        {"allowed_origins": ["https://public.example"]},
+    ],
+)
+def test_local_identity_rejects_production_and_public_networks(
+    overrides: dict[str, object],
+) -> None:
+    with pytest.raises(ValidationError):
+        make_settings(development_user_id="00000000-0000-0000-0000-000000000001", **overrides)

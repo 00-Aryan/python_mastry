@@ -40,13 +40,13 @@ def test_test_database_guard_reads_application_dotenv(
 def test_migration_upgrade_replay_and_downgrade(database_connection: Connection) -> None:
     config = Config(str(Path(__file__).resolve().parents[2] / "alembic.ini"))
     config.attributes["connection"] = database_connection
-    command.upgrade(config, "head")
+    command.upgrade(config, "0001_database_baseline")
     assert inspect(database_connection).get_table_names() == ["alembic_version"]
     assert database_connection.scalar(text("SELECT version_num FROM alembic_version")) == (
         "0001_database_baseline"
     )
     database_connection.commit()
-    command.upgrade(config, "head")
+    command.upgrade(config, "0001_database_baseline")
     assert database_connection.scalar(text("SELECT count(*) FROM alembic_version")) == 1
     database_connection.commit()
     with pytest.raises(IntegrityError), database_connection.begin():
@@ -56,7 +56,7 @@ def test_migration_upgrade_replay_and_downgrade(database_connection: Connection)
     command.downgrade(config, "base")
     assert database_connection.scalar(text("SELECT count(*) FROM alembic_version")) == 0
     database_connection.commit()
-    command.upgrade(config, "head")
+    command.upgrade(config, "0001_database_baseline")
     assert database_connection.scalar(text("SELECT count(*) FROM alembic_version")) == 1
     database_connection.commit()
 

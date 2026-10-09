@@ -2,6 +2,7 @@
 
 from typing import Literal
 from urllib.parse import urlsplit
+from uuid import UUID
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -18,6 +19,7 @@ class Settings(BaseSettings):
     db_connect_timeout_seconds: int = Field(default=5, ge=1, le=60)
     db_statement_timeout_ms: int = Field(default=5000, ge=1, le=60000)
     auth_mode: Literal["development_identity", "session"] = "development_identity"
+    development_user_id: UUID | None = None
     api_host: str = "127.0.0.1"
     api_port: int = Field(default=8000, ge=1, le=65535)
     allowed_origins: list[str] = Field(default_factory=list)
@@ -75,6 +77,16 @@ class Settings(BaseSettings):
             raise ValueError("B0 is local-only; deployed authentication is not implemented")
         if self.auth_mode != "development_identity":
             raise ValueError("Session authentication is not implemented in B0")
+        if self.development_user_id is not None:
+            if self.api_host not in {"localhost", "127.0.0.1", "::1"}:
+                raise ValueError("Development identity requires a loopback API_HOST")
+            if any(host not in {"localhost", "127.0.0.1"} for host in self.allowed_hosts):
+                raise ValueError("Development identity requires loopback ALLOWED_HOSTS")
+            if any(
+                urlsplit(origin).hostname not in {"localhost", "127.0.0.1", "::1"}
+                for origin in self.allowed_origins
+            ):
+                raise ValueError("Development identity requires loopback ALLOWED_ORIGINS")
         return self
 
     @property
