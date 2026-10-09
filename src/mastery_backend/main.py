@@ -20,6 +20,7 @@ from mastery_backend.api.middleware import (
     RequestContextMiddleware,
     RequestGuardMiddleware,
 )
+from mastery_backend.api.routers.attempts import router as attempt_router
 from mastery_backend.api.routers.questions import admin_router, catalog_router
 from mastery_backend.api.routers.skills import admin_router as skill_admin_router
 from mastery_backend.api.routers.skills import router as skill_router
@@ -69,6 +70,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(catalog_router)
     app.include_router(skill_admin_router)
     app.include_router(skill_router)
+    app.include_router(attempt_router)
     # Last added is outermost: tracing covers CORS and guard failures too.
     app.add_middleware(RequestGuardMiddleware, settings=configuration)
     app.add_middleware(

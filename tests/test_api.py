@@ -14,7 +14,7 @@ def test_health_is_explicit_about_release(client: TestClient, path: str, status:
     assert response.status_code == 200
     assert response.json() == {
         "status": status,
-        "release_stage": "B1-foundation",
+        "release_stage": "B3-attempt-timers",
         "database": "connected" if path == "/health/ready" else "not_checked",
         "evaluation": "not_integrated",
     }
@@ -23,8 +23,8 @@ def test_health_is_explicit_about_release(client: TestClient, path: str, status:
 
 def test_public_config_has_no_secrets_or_fake_capabilities(client: TestClient) -> None:
     response = client.get("/api/v1/config/public")
-    assert response.json()["capabilities"] == []
-    assert response.json()["attempt_modes"] == []
+    assert response.json()["capabilities"] == ["attempt_lifecycle", "server_timers"]
+    assert response.json()["attempt_modes"] == ["practice", "assessment"]
     assert "database_url" not in response.text
     assert "test_password" not in response.text
 
@@ -43,7 +43,7 @@ def test_invalid_request_id_is_replaced(client: TestClient, request_id: str) -> 
 
 
 def test_not_found_and_wrong_method_use_error_envelope(client: TestClient) -> None:
-    for response in [client.get("/api/v1/attempts"), client.post("/health/live")]:
+    for response in [client.get("/api/v1/recommendations"), client.post("/health/live")]:
         error = response.json()["error"]
         assert error["request_id"] == response.headers["X-Request-ID"]
         assert error["code"] in {"NOT_FOUND", "METHOD_NOT_ALLOWED"}
@@ -59,6 +59,14 @@ def test_docs_and_openapi_only_describe_released_routes(client: TestClient) -> N
     assert client.get("/docs").status_code == 200
     schema = client.get("/openapi.json").json()
     assert set(schema["paths"]) == {
+        "/api/v1/attempts",
+        "/api/v1/attempts/{attempt_id}",
+        "/api/v1/attempts/{attempt_id}/question",
+        "/api/v1/attempts/{attempt_id}/pause",
+        "/api/v1/attempts/{attempt_id}/resume",
+        "/api/v1/attempts/{attempt_id}/extend",
+        "/api/v1/attempts/{attempt_id}/defer",
+        "/api/v1/attempts/{attempt_id}/abandon",
         "/health/live",
         "/health/ready",
         "/api/v1/config/public",

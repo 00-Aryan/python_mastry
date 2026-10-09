@@ -1,8 +1,8 @@
 # Python Mastery Backend
 
-This is the local **B1 question storage and B2 skill-graph increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
+This is the local **B3 attempt-lifecycle and server-timer increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
 
-Question storage, skill CRUD/prerequisite DAG storage and the documented CLI-seeded local development identity are implemented. Deployed authentication, countdowns, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
+Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers and the documented CLI-seeded local development identity are implemented. Deployed authentication, hint delivery, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
 
 ## Quick start in WSL and VS Code
 
@@ -34,7 +34,7 @@ Set DATABASE_URL in `.env` to that database. Both `postgresql://` and
 settings for pool sizes and timeouts. Run migrations from the repository root;
 migration files live in the source checkout. Startup never creates tables or
 runs migrations. The baseline establishes Alembic history; revision 0002 adds local identity,
-normalized question storage, constraints and published-content guards. Revision 0003 adds skill revisions and prerequisite edges while retaining existing skills and mappings.
+normalized question storage, constraints and published-content guards. Revision 0003 adds skill revisions and prerequisite edges while retaining existing skills and mappings. Revision 0004 adds pinned timer policy, attempts, phases and event history.
 
 For live reload, use the explicit Uvicorn command:
 
@@ -48,9 +48,9 @@ The direct Uvicorn command uses its CLI host/port options; it does not read API_
 
 | Endpoint | Response |
 |---|---|
-| GET /health/live | status alive; release_stage B1-foundation; database not_checked |
+| GET /health/live | status alive; release_stage B3-attempt-timers; database not_checked |
 | GET /health/ready | database connected; evaluation not_integrated; safe 503 on DB failure |
-| GET /api/v1/config/public | Application version and empty learning capabilities/modes |
+| GET /api/v1/config/public | Application version; attempt_lifecycle/server_timers capabilities; practice/assessment modes |
 | GET /api/v1/questions; /api/v1/questions/{question_id}; /api/v1/question-versions/{version_id} | Available published public content only; cursor pagination on the catalog |
 | POST /api/v1/admin/questions | Question identity and first draft; admin role and Idempotency-Key required |
 | POST /api/v1/admin/questions/{question_id}/versions | New draft with server-assigned version number |
@@ -61,6 +61,9 @@ The direct Uvicorn command uses its CLI host/port options; it does not read API_
 | POST /api/v1/admin/skills; PATCH /api/v1/admin/skills/{skill_id} | Admin skill creation and revision-checked metadata edits |
 | POST /api/v1/admin/skills/{skill_id}/archive | Validated archival preserving history |
 | POST/PUT /api/v1/admin/skills/{dependent_id}/prerequisites; DELETE /api/v1/admin/skills/{dependent_id}/prerequisites/{prerequisite_id} | Serialized, revision-checked DAG edge changes |
+| POST/GET /api/v1/attempts; GET /api/v1/attempts/{attempt_id} | Start and read owned attempts with server timing snapshots |
+| GET /api/v1/attempts/{attempt_id}/question | Exact pinned public version, including owned historical archived content |
+| POST /api/v1/attempts/{attempt_id}/pause, /resume, /extend, /defer, /abandon | Revision-checked, idempotent lifecycle/timer commands |
 | GET /docs and /redoc | Development API documentation |
 | GET /openapi.json | Actual schema generated from implemented endpoints |
 
@@ -158,7 +161,7 @@ validates the publication transition; it does not validate any future verifier.
 
 Read the [question storage decision](docs/decisions/0003_question_storage.md) for
 content types, enum/position choices and the exact acceptance checks. The generated
-[OpenAPI schema](docs/openapi.b2-skill-graph.json) describes released routes.
+[OpenAPI schema](docs/openapi.b3-attempt-timers.json) describes released routes.
 
 ## Diagnose a failure
 
@@ -170,7 +173,7 @@ A browser CORS error usually means a mismatched origin. Host errors require a ma
 
 ## Next increment
 
-Question storage is implemented. Production publication remains unavailable until a trusted reference verifier is implemented; the test-only injected verifier proves transition logic, not the correctness of a future verifier. Skill CRUD and the prerequisite DAG are implemented. Later increments add recommendations, attempts/timers, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.
+Question storage is implemented. Production publication remains unavailable until a trusted reference verifier is implemented; the test-only injected verifier proves transition logic, not the correctness of a future verifier. Skill CRUD and the prerequisite DAG are implemented. Attempt lifecycle and server timers are implemented. Later increments add hint delivery, code drafting/submissions, recommendations, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.
 
 ## Skill graph administration
 
@@ -194,3 +197,39 @@ select a smaller neighborhood. Catalog pages use filter-bound cursors, up to 100
 items. Read [the skill graph decision](docs/decisions/0004_skill_graph.md) for
 request flow, relationships, archival/revision choices and acceptance tests, and
 [the verification record](docs/B2_Verification.md) for actual checks and limits.
+
+## Attempt lifecycle and timers
+
+Use a seeded identity with the database learner role. Production publication still
+requires a trusted verifier, so local attempt starts need already verified published
+content; no seed or CLI command bypasses publication. Tests supply controlled
+published fixtures with a test-only verifier.
+
+POST /api/v1/attempts takes question_version_id, mode (practice/assessment) and
+independent_budget_seconds (60–3600), plus Idempotency-Key. Ownership comes from the
+configured database identity. The response returns the immutable question/policy
+pins, revision, lifecycle and a timer with server_now/remaining_ms. Animate the
+countdown locally with a frontend monotonic clock; reload/reconnect via GET. Never
+send elapsed time or a desired result/status.
+
+Pause/resume/extend/defer/abandon supply expected_revision and Idempotency-Key.
+Pause excludes time only after the server accepts it; closing/offlining a browser
+keeps the active timer running. Extension is limited to 1–1800 seconds per command,
+with 3600 total, and is rejected at/after expiry. Defer ends unresolved; abandon
+stops voluntarily. Neither marks an answer wrong or successful. Assessment pauses
+and extensions permanently record timing accommodation.
+
+At expiry, the independent phase ends and assistance becomes eligible. No hint is
+delivered and the learning session stays active. Total active/overdue solving time
+continues until pause/end. Reads project timestamps rather than writing every tick;
+first-observed expiry is recorded once. Expiry/closure cannot be erased to regain
+an independent interval. Retry with the same key/payload for its original result;
+GET afterward for current server time. Invalid/stale transitions return 409.
+
+An existing owned attempt keeps its pinned public question after archival through
+GET /api/v1/attempts/{id}/question. Archived questions cannot start new attempts;
+private tests, hints and solutions remain excluded. Public attempt lists are bounded
+and owner-only. Read [the timer/state decision](docs/decisions/0005_attempt_timers.md)
+and [B3 verification](docs/B3_Verification.md) for rules, responsibilities, actual
+checks and unresolved limits. No code, hint delivery or learning calculation is
+implemented by this slice.

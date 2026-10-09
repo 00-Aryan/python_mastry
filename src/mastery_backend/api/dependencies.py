@@ -5,7 +5,9 @@ from typing import Annotated
 from fastapi import Depends, Header, Request
 from sqlalchemy.orm import Session, sessionmaker
 
+from mastery_backend.application.attempt_service import AttemptService
 from mastery_backend.application.catalog_service import CatalogService
+from mastery_backend.application.clock import Clock, SystemClock
 from mastery_backend.application.content_service import ContentService
 from mastery_backend.application.identity_service import read_development_principal
 from mastery_backend.application.publication_verification import (
@@ -14,7 +16,7 @@ from mastery_backend.application.publication_verification import (
 )
 from mastery_backend.application.skill_service import SkillService
 from mastery_backend.domain.content import ContentError
-from mastery_backend.domain.identity import Principal, require_content_admin
+from mastery_backend.domain.identity import Principal, require_content_admin, require_learner
 
 
 def session_factory(request: Request) -> sessionmaker[Session]:
@@ -81,3 +83,19 @@ def skill_service(
     factory: Annotated[sessionmaker[Session], Depends(session_factory)],
 ) -> SkillService:
     return SkillService(factory)
+
+
+def learner(principal: Annotated[Principal, Depends(current_principal)]) -> Principal:
+    require_learner(principal)
+    return principal
+
+
+def server_clock() -> Clock:
+    return SystemClock()
+
+
+def attempt_service(
+    factory: Annotated[sessionmaker[Session], Depends(session_factory)],
+    clock: Annotated[Clock, Depends(server_clock)],
+) -> AttemptService:
+    return AttemptService(factory, clock)

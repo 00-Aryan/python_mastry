@@ -15,7 +15,7 @@ from mastery_backend.infrastructure.observability.logging import logger
 
 class HealthResponse(BaseModel):
     status: Literal["alive", "ready"]
-    release_stage: Literal["B1-foundation"] = "B1-foundation"
+    release_stage: Literal["B3-attempt-timers"] = "B3-attempt-timers"
     database: Literal["not_checked", "connected"] = "not_checked"
     evaluation: Literal["not_integrated"] = "not_integrated"
 
@@ -23,9 +23,9 @@ class HealthResponse(BaseModel):
 class PublicConfigResponse(BaseModel):
     api_version: Literal["v1"] = "v1"
     application_version: str = __version__
-    release_stage: Literal["B1-foundation"] = "B1-foundation"
-    capabilities: list[str] = []
-    attempt_modes: list[str] = []
+    release_stage: Literal["B3-attempt-timers"] = "B3-attempt-timers"
+    capabilities: list[str] = ["attempt_lifecycle", "server_timers"]
+    attempt_modes: list[str] = ["practice", "assessment"]
     learning_policy: None = None
 
 

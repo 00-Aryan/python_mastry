@@ -15,3 +15,8 @@ class Principal:
 def require_content_admin(principal: Principal) -> None:
     if "content_admin" not in principal.roles:
         raise ContentError("FORBIDDEN", "Content administrator role required.")
+
+
+def require_learner(principal: Principal) -> None:
+    if "learner" not in principal.roles:
+        raise ContentError("FORBIDDEN", "Learner role required.")

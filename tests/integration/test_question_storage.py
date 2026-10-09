@@ -431,7 +431,7 @@ def test_migration_upgrade_from_baseline_constraints_and_replay(
     command.upgrade(config, "head")
     assert (
         database_connection.scalar(text("SELECT version_num FROM alembic_version"))
-        == "0003_skill_graph"
+        == "0004_attempt_timers"
     )
     database_connection.commit()
     command.downgrade(config, "0001_database_baseline")

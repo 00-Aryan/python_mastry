@@ -1,27 +1,22 @@
 """Shared admin authorization and durable command replay in one transaction."""
 
-import hashlib
-import json
 from collections.abc import Callable
-from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
+from mastery_backend.application.command_replay import (
+    CommandResult as CommandResult,
+)
+from mastery_backend.application.command_replay import (
+    record_command,
+    replay_command,
+    request_hash,
+)
 from mastery_backend.domain.content import ContentError
 from mastery_backend.domain.identity import Principal, require_content_admin
-from mastery_backend.infrastructure.database.content_models import IdempotencyRecord
 from mastery_backend.infrastructure.database.identity_repository import load_principal
-
-
-@dataclass(frozen=True)
-class CommandResult:
-    body: dict[str, Any]
-    status_code: int = 200
-    location: str | None = None
-    replayed: bool = False
 
 
 class AdminCommands:
@@ -35,18 +30,7 @@ class AdminCommands:
     def replay(
         self, session: Session, principal: Principal, operation: str, key: str, request_hash: str
     ) -> CommandResult | None:
-        record = session.get(IdempotencyRecord, (principal.user_id, operation, key))
-        if record is None:
-            return None
-        if record.expires_at <= datetime.now(UTC):
-            session.delete(record)
-            session.flush()
-            return None
-        if record.request_hash != request_hash:
-            raise ContentError(
-                "IDEMPOTENCY_CONFLICT", "Idempotency key was used with different input."
-            )
-        return CommandResult(record.response_json, record.status_code, record.location, True)
+        return replay_command(session, principal, operation, key, request_hash)
 
     def run(
         self,
@@ -65,19 +49,7 @@ class AdminCommands:
                 if replay is not None:
                     return replay
                 result = action(session)
-                session.add(
-                    IdempotencyRecord(
-                        principal_id=principal.user_id,
-                        operation=operation,
-                        key=key,
-                        request_hash=request_hash,
-                        response_json=result.body,
-                        status_code=result.status_code,
-                        location=result.location,
-                        expires_at=datetime.now(UTC) + timedelta(days=7),
-                    )
-                )
-                session.flush()
+                record_command(session, principal, operation, key, request_hash, result)
                 return result
         except IntegrityError:
             raise ContentError(
@@ -86,6 +58,4 @@ class AdminCommands:
 
     @staticmethod
     def request_hash(payload: dict[str, Any]) -> str:
-        return hashlib.sha256(
-            json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
-        ).hexdigest()
+        return request_hash(payload)

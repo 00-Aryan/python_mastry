@@ -167,3 +167,71 @@ def storage_client(
         main.create_app(settings), base_url="http://localhost", raise_server_exceptions=False
     ) as client:
         yield client
+
+
+class ControlledClock:
+    def __init__(self) -> None:
+        from datetime import UTC, datetime
+
+        self.instant = datetime(2026, 10, 9, 12, tzinfo=UTC)
+        self.calls = 0
+
+    def now(self):
+        self.calls += 1
+        return self.instant
+
+    def advance(self, milliseconds: int) -> None:
+        from datetime import timedelta
+
+        self.instant += timedelta(milliseconds=milliseconds)
+
+
+@pytest.fixture
+def attempt_clock() -> ControlledClock:
+    return ControlledClock()
+
+
+@pytest.fixture
+def attempt_client(storage_client: TestClient, attempt_clock: ControlledClock) -> TestClient:
+    from mastery_backend.api.dependencies import server_clock
+
+    storage_client.app.dependency_overrides[server_clock] = lambda: attempt_clock
+    return storage_client
+
+
+@pytest.fixture
+def published_question(
+    attempt_client: TestClient, complete_draft: dict[str, object]
+) -> dict[str, Any]:
+    import hashlib
+
+    from mastery_backend.api.dependencies import reference_verifier
+    from mastery_backend.application.publication_verification import VerificationProof
+
+    class TransitionFixtureVerifier:
+        def verify(self, immutable_snapshot: bytes, content_hash: str) -> VerificationProof:
+            assert hashlib.sha256(immutable_snapshot).hexdigest() == content_hash
+            return VerificationProof(
+                content_hash=content_hash,
+                verifier_version="test-only",
+                verification_id="attempt-fixture",
+            )
+
+    draft = attempt_client.post(
+        "/api/v1/admin/questions",
+        headers={"Idempotency-Key": "fixture"},
+        json={
+            "code": "ATTEMPT-FIXTURE",
+            "family_id": "00000000-0000-0000-0000-000000000031",
+            "draft": complete_draft,
+        },
+    )
+    assert draft.status_code == 201, draft.text
+    attempt_client.app.dependency_overrides[reference_verifier] = TransitionFixtureVerifier
+    published = attempt_client.post(
+        f"/api/v1/admin/question-versions/{draft.json()['id']}/publish",
+        headers={"Idempotency-Key": "publish-fixture"},
+        json={"expected_revision": 1},
+    )
+    assert published.status_code == 200, published.text
+    return published.json()

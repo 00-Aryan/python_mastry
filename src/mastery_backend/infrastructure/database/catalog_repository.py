@@ -16,13 +16,17 @@ class CatalogRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    def public_version(self, version_id: UUID) -> PublicQuestionVersion:
-        return self.public_versions([version_id])[0]
+    def public_version(
+        self, version_id: UUID, *, include_archived: bool = False
+    ) -> PublicQuestionVersion:
+        return self.public_versions([version_id], include_archived=include_archived)[0]
 
-    def public_versions(self, version_ids: list[UUID]) -> list[PublicQuestionVersion]:
+    def public_versions(
+        self, version_ids: list[UUID], *, include_archived: bool = False
+    ) -> list[PublicQuestionVersion]:
         if not version_ids:
             return []
-        rows = self.session.execute(
+        statement = (
             select(
                 models.QuestionVersion.id,
                 models.QuestionVersion.question_id,
@@ -39,9 +43,11 @@ class CatalogRepository:
             .where(
                 models.QuestionVersion.id.in_(version_ids),
                 models.QuestionVersion.status == "published",
-                models.Question.archived_at.is_(None),
             )
-        ).mappings()
+        )
+        if not include_archived:
+            statement = statement.where(models.Question.archived_at.is_(None))
+        rows = self.session.execute(statement).mappings()
         by_id: dict[UUID, dict[str, Any]] = {}
         for row in rows:
             fields = dict(row)

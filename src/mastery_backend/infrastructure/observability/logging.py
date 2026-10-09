@@ -19,7 +19,16 @@ class JsonLogFormatter(logging.Formatter):
             "event": record.getMessage(),
             "request_id": request_id_context.get(),
         }
-        for field in ("operation", "status_code", "duration_ms"):
+        for field in (
+            "operation",
+            "status_code",
+            "duration_ms",
+            "attempt_id",
+            "revision",
+            "policy_version",
+            "state_before",
+            "state_after",
+        ):
             if hasattr(record, field):
                 payload[field] = getattr(record, field)
         if record.exc_info and record.exc_info[0]:

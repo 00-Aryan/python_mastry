@@ -85,3 +85,9 @@ Remote CI, Docker setup and a fresh Windows/WSL setup were not run and remain
 unverified. Local Linux regression, real PostgreSQL migrations/integration, static
 checks and package checks passed. The commit uses the already configured Git
 identity; no author identity was invented or changed.
+
+## Subsequent B3 slice
+
+Owned attempts and server timers are verified separately in [B3 verification](B3_Verification.md).
+The B2 checks above remain historical. Trusted-verifier/deployed-authentication
+limitations still apply.

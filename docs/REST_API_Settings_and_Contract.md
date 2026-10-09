@@ -427,3 +427,71 @@ See [current generated OpenAPI](openapi.b2-skill-graph.json) and
 [actual verification](B2_Verification.md). Previous OpenAPI files remain historical
 release snapshots. No recommendations, mastery, timers, submissions or execution
 are implemented; trusted production publication remains unavailable.
+
+## Released B3 attempt lifecycle/timer slice (9 October 2026)
+
+The [attempt-timer decision](decisions/0005_attempt_timers.md), written before coding,
+defines the transition table, accounting, pinning, retry and archival rules. The
+broader B3 draft/hint inventory above remains planned; only these paths are released:
+
+| Route relative to /api/v1 | Input and result |
+|---|---|
+| POST /attempts | question_version_id, mode=practice/assessment, independent_budget_seconds; 201 + Location |
+| GET /attempts | Owner-only descending (started_at, UUID) cursor pages; mode/lifecycle_state/limit/cursor filters |
+| GET /attempts/{attempt_id} | Current owned AttemptSnapshot; first observed expiry reconciled once |
+| GET /attempts/{attempt_id}/question | Pinned public question projection, including archived content for that owner only |
+| POST /attempts/{attempt_id}/pause | expected_revision; active -> paused |
+| POST /attempts/{attempt_id}/resume | expected_revision; paused -> active, preserving any expired phase |
+| POST /attempts/{attempt_id}/extend | expected_revision, additional_budget_seconds, optional reason; unexpired active/paused only |
+| POST /attempts/{attempt_id}/defer | expected_revision, optional reason; end unresolved as terminal deferred |
+| POST /attempts/{attempt_id}/abandon | expected_revision, optional reason; terminal abandoned |
+
+Every command requires Idempotency-Key. Stored learner role and ownership are
+rechecked before replay; replay returns the original body/server_now, so GET again
+for a current countdown. Another user's attempt returns 404 even to content admins.
+Unknown fields/filters are 422. Budgets/revisions reject booleans, strings and
+fractional values. An immutable pinned pilot-timer-1 policy permits selected
+budgets 60–3600 seconds, extensions 1–1800 each and total budget at most 3600.
+Question-supported modes are enforced; transfer/review context is not released.
+
+AttemptSnapshot contains id, question_version_id, policy_version_id/policy_version,
+mode, lifecycle_state, assistance_level (none), assistance_eligible, revision,
+started_at/finished_at, independent_interval_ended_at/independent_end_reason,
+timing_accommodated, family_previously_attempted, total_active_elapsed_ms and
+overdue_active_elapsed_ms. Its timer contains phase_number (0), phase_started_at,
+budget_seconds, active_elapsed_ms, remaining_ms, server_now, running_since and
+expired_at. All durations are integer milliseconds except budget integer seconds;
+all timestamps are aware UTC at millisecond precision. No outcome or credit field
+is manufactured. Public/private content boundaries remain explicit.
+
+The exact expiry boundary is remaining_ms=0. The independent phase freezes at its
+budget and historical expired_at, while total active time continues unless paused
+or ended. Expiry makes assistance eligible without delivery, wrong-answer marking,
+completion or a mastery observation. Returning offline first reconciles the stored
+anchors. Browser closure never pauses; offline pause takes effect on server receipt.
+At/after expiry extension returns 409 PHASE_EXPIRED, never reopening the interval.
+Assessment pause/extension permanently records timing accommodation. Read countdowns
+are projections, with no per-tick writes; first-observed expiry adds one event and
+revision. Valid commands can record expiry plus their transition in one transaction.
+Invalid commands roll back their writes, including reconciliation. A stale request
+returns 409 STALE_REVISION; new-key repetition of an invalid state returns 409
+INVALID_ATTEMPT_STATE. Backward/invalid server clock returns safe 503 CLOCK_UNAVAILABLE.
+
+New attempts cannot pin a draft or archived question. Archival preserves existing
+owned attempts and their exact public version; it does not switch them to a later
+version or forbid continuing/ending. GET /attempts/{id}/question is the owned
+historical route; generic question endpoints still hide archived questions.
+Policy/version/owner/history are database-protected facts. Completed is reserved
+for future evaluated completion; /defer and /abandon are not claims of correctness.
+
+List bounds are 20/default and 100/max (or lower MAX_PAGE_SIZE). Cursors expire in
+one day and bind to owner/mode/lifecycle filters. Lists use one solving-clock sample
+and batched phase/policy reads. The public config now advertises attempt_lifecycle
+and server_timers with practice/assessment; release_stage is B3-attempt-timers.
+Evaluation remains not_integrated and learning_policy remains null.
+
+See [generated B3 OpenAPI](openapi.b3-attempt-timers.json) and
+[B3 verification](B3_Verification.md). Production authentication and trusted
+publication remain unavailable. Test-only verified fixtures do not enable a
+production bypass. Hint delivery, code drafts/submissions, execution,
+recommendations and mastery are subsequent increments.
