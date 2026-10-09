@@ -386,3 +386,44 @@ FastAPI validated settings: https://fastapi.tiangolo.com/advanced/settings/
 These sources explain HTTP and framework behavior. Specific limits, paths and payloads above are our proposed product decisions. They are not vendor recommendations.
 
 Use the master blueprint for learning goals, the backend contract for architecture and data rules, this document for HTTP/settings details, and AGENTS.md for contributor behavior. Resolve conflicts explicitly in a decision record; implementation and its tests must not quietly invent a different contract.
+
+## Released skill graph increment (9 October 2026)
+
+The [skill graph decision](decisions/0004_skill_graph.md) specifies the implemented
+B1 skill CRUD and B2 prerequisite storage subset. All routes use /api/v1:
+
+| Route | Implemented contract |
+|---|---|
+| GET /skills | Stable (code, UUID) cursor pages; curriculum_id, include_archived, limit (20/default, 100/max), cursor |
+| GET /skills/{skill_id} | Explicit skill identity, metadata, revision and archived_at; preserves archived detail |
+| GET /skills/graph | Required curriculum_id; optional center_skill_id, direction=both/prerequisites/dependents, depth=1..5; max_nodes=100 (max 100), max_edges=200 (max 500) |
+| POST /admin/skills | curriculum_id, code, title, competency; 201 and Location; stored admin and Idempotency-Key |
+| PATCH /admin/skills/{skill_id} | expected_revision and title and/or competency; stable code/curriculum; 200 |
+| POST /admin/skills/{skill_id}/archive | expected_revision, expected_graph_revision; Idempotency-Key; 200 |
+| POST /admin/skills/{dependent_id}/prerequisites | prerequisite_skill_id, expected_graph_revision; Idempotency-Key; 201 with canonical edge Location |
+| PUT /admin/skills/{dependent_id}/prerequisites | prerequisite_skill_ids (unique, max 100), expected_graph_revision; atomic full incoming-set replacement; 200 |
+| DELETE /admin/skills/{dependent_id}/prerequisites/{prerequisite_id} | expected_graph_revision query; 204; reload graph for committed revision |
+
+Edges always point prerequisite -> dependent. Graph reads return curriculum_id,
+graph_revision, nodes and edges. Neighborhoods are induced subgraphs of nodes
+reachable within the chosen direction/depth. Bounds are checked without silent
+truncation: 422 GRAPH_READ_LIMIT requests a narrower neighborhood or larger bounds.
+Unknown fields/filters are 422. A graph snapshot uses a short shared curriculum
+lock; graph mutations use its exclusive row lock and validate in that transaction.
+Add/remove/replacement require the current graph revision. Conflicts use 409
+STALE_REVISION, GRAPH_CYCLE (skill-code path), SELF_PREREQUISITE, DUPLICATE_EDGE,
+SKILL_ARCHIVED or SKILL_IN_USE. Missing dependent/curriculum is 404; invalid,
+archived or cross-curriculum prerequisite is 422 INVALID_SKILL.
+
+Remove incident edges before archival. Resolve mappings on available questions by
+editing drafts or archiving their questions. Mappings on archived questions are
+retained, including immutable published assets. Archived skills cannot accept
+edits/edges and are omitted from active graph/default catalogs. All mutations use
+the existing database-resolved admin policy; missing identity configuration denies
+writes and local identity remains disabled in production. Prerequisites guide
+future recommendations and never introduce learner access restrictions.
+
+See [current generated OpenAPI](openapi.b2-skill-graph.json) and
+[actual verification](B2_Verification.md). Previous OpenAPI files remain historical
+release snapshots. No recommendations, mastery, timers, submissions or execution
+are implemented; trusted production publication remains unavailable.

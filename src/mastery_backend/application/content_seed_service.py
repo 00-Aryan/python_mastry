@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
 from mastery_backend.domain.content import ContentError
-from mastery_backend.domain.content_seed import ReferenceCatalogSeed
+from mastery_backend.domain.content_seed import ReferenceCatalogSeed, SkillSeed
 from mastery_backend.domain.identity import require_content_admin
 from mastery_backend.infrastructure.database import content_models as models
 from mastery_backend.infrastructure.database.identity_repository import load_principal
@@ -49,11 +49,24 @@ def seed_reference_catalog(
                 (models.QuestionFamily, catalog.question_families),
             )
             for model, values in groups:
+                # Shared curriculum locks also cover bootstrap insertions. Sorting avoids
+                # opposing lock order when two administrators seed several curricula.
+                curricula = {}
+                if model is models.Skill:
+                    for curriculum_id in sorted({value.curriculum_id for value in catalog.skills}):
+                        curricula[curriculum_id] = session.get(
+                            models.Curriculum, curriculum_id, with_for_update=True
+                        )
                 for value in values:
+                    curriculum = None
+                    if isinstance(value, SkillSeed):
+                        curriculum = curricula[value.curriculum_id]
                     existing = session.get(model, value.id)
                     attributes = value.model_dump()
                     if existing is None:
                         session.add(model(**attributes))
+                        if curriculum is not None:
+                            curriculum.graph_revision += 1
                     elif any(
                         getattr(existing, name) != content for name, content in attributes.items()
                     ):

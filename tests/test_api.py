@@ -70,6 +70,14 @@ def test_docs_and_openapi_only_describe_released_routes(client: TestClient) -> N
         "/api/v1/admin/question-versions/{version_id}",
         "/api/v1/admin/question-versions/{version_id}/publish",
         "/api/v1/admin/questions/{question_id}/archive",
+        "/api/v1/skills",
+        "/api/v1/skills/graph",
+        "/api/v1/skills/{skill_id}",
+        "/api/v1/admin/skills",
+        "/api/v1/admin/skills/{skill_id}",
+        "/api/v1/admin/skills/{skill_id}/archive",
+        "/api/v1/admin/skills/{dependent_id}/prerequisites",
+        "/api/v1/admin/skills/{dependent_id}/prerequisites/{prerequisite_id}",
     }
     ids = [
         operation["operationId"] for item in schema["paths"].values() for operation in item.values()

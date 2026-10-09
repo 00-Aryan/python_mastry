@@ -75,6 +75,7 @@ async def content_error_handler(request: Request, exception: Exception) -> JSONR
         "FORBIDDEN": 403,
         "NOT_FOUND": 404,
         "INVALID_SKILL": 422,
+        "GRAPH_READ_LIMIT": 422,
         "INVALID_PATTERN": 422,
         "INVALID_FAMILY": 422,
         "INVALID_LINK": 422,

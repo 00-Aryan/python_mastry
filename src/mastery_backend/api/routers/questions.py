@@ -1,11 +1,12 @@
 """Thin HTTP translation; content services own use cases and transactions."""
 
-from typing import Annotated, Any
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 from starlette.responses import JSONResponse
 
+from mastery_backend.api.admin_responses import command_response, content_errors
 from mastery_backend.api.dependencies import (
     catalog_service,
     content_administrator,
@@ -15,7 +16,7 @@ from mastery_backend.api.dependencies import (
 from mastery_backend.api.errors import ErrorEnvelope
 from mastery_backend.api.schemas.questions import CreateQuestion, ExpectedRevision, PatchDraft
 from mastery_backend.application.catalog_service import CatalogService
-from mastery_backend.application.content_service import CommandResult, ContentService
+from mastery_backend.application.content_service import ContentService
 from mastery_backend.domain.content import ContentError, DraftContent
 from mastery_backend.domain.content_records import (
     AdminQuestionVersion,
@@ -31,16 +32,6 @@ Content = Annotated[ContentService, Depends(content_service)]
 Catalog = Annotated[CatalogService, Depends(catalog_service)]
 Key = Annotated[str, Depends(idempotency_key)]
 
-content_errors: dict[int | str, dict[str, Any]] = {
-    400: {
-        "model": ErrorEnvelope,
-        "description": "Malformed JSON or invalid/expired catalog cursor",
-    },
-    404: {"model": ErrorEnvelope, "description": "Resource missing or unavailable to this reader"},
-    422: {"model": ErrorEnvelope, "description": "Invalid input or content reference"},
-    503: {"model": ErrorEnvelope, "description": "Database unavailable"},
-    500: {"model": ErrorEnvelope, "description": "Unexpected fault; safe details only"},
-}
 admin_router = APIRouter(
     prefix="/api/v1/admin",
     tags=["content administration"],
@@ -58,15 +49,6 @@ admin_router = APIRouter(
     },
 )
 catalog_router = APIRouter(prefix="/api/v1", tags=["questions"], responses=content_errors)
-
-
-def command_response(result: CommandResult) -> JSONResponse:
-    headers = {}
-    if result.location:
-        headers["Location"] = result.location
-    if result.replayed:
-        headers["Idempotency-Replayed"] = "true"
-    return JSONResponse(result.body, status_code=result.status_code, headers=headers)
 
 
 @admin_router.post(

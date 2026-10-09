@@ -111,3 +111,10 @@ Full content import tooling, deployed login/CSRF, trusted execution, backup/rest
 and hosted use are subsequent work. No DAG traversal, timer, submission, execution
 or Bayesian behavior was added. No remote CI run or Docker/WSL setup run was
 performed; those environments remain unverified.
+
+## Subsequent skill graph increment
+
+The later skill CRUD/prerequisite DAG implementation and its actual results are
+recorded separately in [B2 verification](B2_Verification.md). The B1 results above
+remain the historical question-storage verification. Its production-verifier and
+deployed-authentication limitations still apply.

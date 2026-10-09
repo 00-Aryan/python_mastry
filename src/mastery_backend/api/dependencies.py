@@ -12,6 +12,7 @@ from mastery_backend.application.publication_verification import (
     ReferenceVerifier,
     UnavailableReferenceVerifier,
 )
+from mastery_backend.application.skill_service import SkillService
 from mastery_backend.domain.content import ContentError
 from mastery_backend.domain.identity import Principal, require_content_admin
 
@@ -74,3 +75,9 @@ def idempotency_key(
     if any(ord(character) < 32 or ord(character) > 126 for character in value):
         raise ContentError("INVALID_IDEMPOTENCY_KEY", "Use 1–128 printable ASCII characters.")
     return value
+
+
+def skill_service(
+    factory: Annotated[sessionmaker[Session], Depends(session_factory)],
+) -> SkillService:
+    return SkillService(factory)

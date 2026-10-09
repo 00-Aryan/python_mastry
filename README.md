@@ -1,8 +1,8 @@
 # Python Mastery Backend
 
-This is the local **B1 database and question-storage increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
+This is the local **B1 question storage and B2 skill-graph increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
 
-Question storage and the documented CLI-seeded local development identity are implemented. Deployed authentication, countdowns, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
+Question storage, skill CRUD/prerequisite DAG storage and the documented CLI-seeded local development identity are implemented. Deployed authentication, countdowns, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
 
 ## Quick start in WSL and VS Code
 
@@ -34,7 +34,7 @@ Set DATABASE_URL in `.env` to that database. Both `postgresql://` and
 settings for pool sizes and timeouts. Run migrations from the repository root;
 migration files live in the source checkout. Startup never creates tables or
 runs migrations. The baseline establishes Alembic history; revision 0002 adds local identity,
-normalized question storage, constraints and published-content guards.
+normalized question storage, constraints and published-content guards. Revision 0003 adds skill revisions and prerequisite edges while retaining existing skills and mappings.
 
 For live reload, use the explicit Uvicorn command:
 
@@ -57,6 +57,10 @@ The direct Uvicorn command uses its CLI host/port options; it does not read API_
 | GET/PATCH/DELETE /api/v1/admin/question-versions/{version_id} | Admin preview, revision-checked draft edit/delete |
 | POST /api/v1/admin/question-versions/{version_id}/publish | Validates completeness; 503 until trusted reference verification exists |
 | POST /api/v1/admin/questions/{question_id}/archive | Explicit revision-checked archival; preserves published history |
+| GET /api/v1/skills; /api/v1/skills/{skill_id}; /api/v1/skills/graph | Bounded skill catalogs and graph/neighborhood snapshots |
+| POST /api/v1/admin/skills; PATCH /api/v1/admin/skills/{skill_id} | Admin skill creation and revision-checked metadata edits |
+| POST /api/v1/admin/skills/{skill_id}/archive | Validated archival preserving history |
+| POST/PUT /api/v1/admin/skills/{dependent_id}/prerequisites; DELETE /api/v1/admin/skills/{dependent_id}/prerequisites/{prerequisite_id} | Serialized, revision-checked DAG edge changes |
 | GET /docs and /redoc | Development API documentation |
 | GET /openapi.json | Actual schema generated from implemented endpoints |
 
@@ -154,7 +158,7 @@ validates the publication transition; it does not validate any future verifier.
 
 Read the [question storage decision](docs/decisions/0003_question_storage.md) for
 content types, enum/position choices and the exact acceptance checks. The generated
-[OpenAPI schema](docs/openapi.b1-question-storage.json) describes released routes.
+[OpenAPI schema](docs/openapi.b2-skill-graph.json) describes released routes.
 
 ## Diagnose a failure
 
@@ -162,8 +166,31 @@ Read X-Request-ID from the response, then find the matching structured log. Logs
 
 If startup fails, check the named setting, JSON formatting for list variables and the selected WSL interpreter. The launcher reports only invalid configuration fields. An occupied port requires stopping the existing process or selecting a different API_PORT; it is not a settings validation failure.
 
-A browser CORS error usually means a mismatched origin. Host errors require a matching ALLOWED_HOSTS entry. A 413 means the actual or declared body exceeds MAX_REQUEST_BODY_BYTES. MAX_CODE_BYTES and MAX_PAGE_SIZE are validated future boundary settings; no code-save or paginated endpoints exist to apply them yet.
+A browser CORS error usually means a mismatched origin. Host errors require a matching ALLOWED_HOSTS entry. A 413 means the actual or declared body exceeds MAX_REQUEST_BODY_BYTES. MAX_PAGE_SIZE also caps catalog pages. MAX_CODE_BYTES remains a future code-save boundary.
 
 ## Next increment
 
-Question storage is implemented. Production publication remains unavailable until a trusted reference verifier is implemented; the test-only injected verifier proves transition logic, not the correctness of a future verifier. Later increments add the skill DAG, attempts/timers, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.
+Question storage is implemented. Production publication remains unavailable until a trusted reference verifier is implemented; the test-only injected verifier proves transition logic, not the correctness of a future verifier. Skill CRUD and the prerequisite DAG are implemented. Later increments add recommendations, attempts/timers, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.
+
+## Skill graph administration
+
+Use the same seeded content_admin identity. Create a skill with curriculum_id,
+code, title and competency. PATCH accepts title/competency plus expected_revision;
+identity fields remain stable. GET /api/v1/skills/graph?curriculum_id=UUID returns
+nodes, prerequisite -> dependent edges and graph_revision. Supply that revision
+when adding, removing or replacing prerequisites. PUT replaces all prerequisites
+of one dependent and validates the resulting DAG atomically. POST commands require
+Idempotency-Key; DELETE returns 204 and the graph must be reloaded.
+
+All graph mutations lock their curriculum in PostgreSQL. Archive requires removing
+incident edges and resolving mappings on available questions first. Historical
+mappings on archived questions remain intact. Archived skill detail remains
+readable, while default catalogs and active graphs omit it. Prerequisites are
+recommendation guidance and do not restrict access to published questions.
+
+Graph reads support center_skill_id, direction and depth (1–5), with max_nodes
+up to 100 and max_edges up to 500. Oversized results return GRAPH_READ_LIMIT;
+select a smaller neighborhood. Catalog pages use filter-bound cursors, up to 100
+items. Read [the skill graph decision](docs/decisions/0004_skill_graph.md) for
+request flow, relationships, archival/revision choices and acceptance tests, and
+[the verification record](docs/B2_Verification.md) for actual checks and limits.

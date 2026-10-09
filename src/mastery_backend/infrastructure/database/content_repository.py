@@ -46,9 +46,10 @@ class ContentRepository:
         if skill_ids:
             found = set(
                 self.session.scalars(
-                    select(models.Skill.id).where(
-                        models.Skill.id.in_(skill_ids), models.Skill.archived_at.is_(None)
-                    )
+                    select(models.Skill.id)
+                    .where(models.Skill.id.in_(skill_ids), models.Skill.archived_at.is_(None))
+                    .order_by(models.Skill.id)
+                    .with_for_update()
                 )
             )
             if found != skill_ids:

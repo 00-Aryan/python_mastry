@@ -10,6 +10,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
     Index,
     Integer,
     String,
@@ -48,6 +49,8 @@ class UserRole(Base):
 
 class Curriculum(Base):
     __tablename__ = "curricula"
+    __table_args__ = (CheckConstraint("graph_revision >= 0", name="ck_curriculum_graph_revision"),)
+    graph_revision: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     code: Mapped[str] = mapped_column(String(64), unique=True)
     title: Mapped[str] = mapped_column(String(200))
@@ -56,6 +59,7 @@ class Curriculum(Base):
 class Skill(Base):
     __tablename__ = "skills"
     __table_args__ = (
+        CheckConstraint("revision > 0", name="ck_skill_revision"),
         UniqueConstraint("curriculum_id", "code", name="uq_skill_curriculum_code"),
         UniqueConstraint("id", "curriculum_id", name="uq_skill_id_curriculum"),
     )
@@ -64,7 +68,34 @@ class Skill(Base):
     code: Mapped[str] = mapped_column(String(64))
     title: Mapped[str] = mapped_column(String(200))
     competency: Mapped[str] = mapped_column(Text)
+    revision: Mapped[int] = mapped_column(Integer, server_default=text("1"))
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class SkillPrerequisite(Base):
+    __tablename__ = "skill_prerequisites"
+    __table_args__ = (
+        CheckConstraint(
+            "prerequisite_skill_id <> dependent_skill_id", name="ck_prerequisite_distinct"
+        ),
+        ForeignKeyConstraint(
+            ["prerequisite_skill_id", "curriculum_id"],
+            ["skills.id", "skills.curriculum_id"],
+            ondelete="RESTRICT",
+            name="fk_prerequisite_curriculum",
+        ),
+        ForeignKeyConstraint(
+            ["dependent_skill_id", "curriculum_id"],
+            ["skills.id", "skills.curriculum_id"],
+            ondelete="RESTRICT",
+            name="fk_dependent_curriculum",
+        ),
+        Index("ix_prerequisite_outgoing", "curriculum_id", "prerequisite_skill_id"),
+        Index("ix_prerequisite_incoming", "curriculum_id", "dependent_skill_id"),
+    )
+    prerequisite_skill_id: Mapped[UUID] = mapped_column(primary_key=True)
+    dependent_skill_id: Mapped[UUID] = mapped_column(primary_key=True)
+    curriculum_id: Mapped[UUID] = mapped_column(nullable=False)
 
 
 class Pattern(Base):
