@@ -584,3 +584,94 @@ See [B4 OpenAPI](openapi.b4-progressive-assistance.json) and
 [B4 verification](B4_Verification.md) for actual checks and limits. Production
 publication still requires the future trusted verifier; test fixtures verify
 transition behavior only. Hosted authentication remains disabled.
+
+## Released B5 immutable source receipts (10 October 2026)
+
+The user-requested B5 is receipt storage, not the execution or scoring milestones
+in the original backlog. [Decision 0007](decisions/0007_immutable_submissions.md)
+records intake, lifecycle, ordering and privacy rules before implementation.
+
+| Route relative to /api/v1 | Input/result |
+|---|---|
+| POST /attempts/{attempt_id}/submissions | source_code, purpose=public_run/assessment, expected_revision; 201 SubmissionDetail + Location |
+| GET /submissions/{submission_id} | Exact immutable owned SubmissionDetail |
+| GET /attempts/{attempt_id}/submissions | Bounded metadata page; limit, cursor, optional purpose |
+
+Stored learner authorization and ownership are required on every operation/replay.
+Another owner, including a content administrator, receives 404. Missing/disabled
+identity returns 401; missing/revoked stored learner role returns 403. Unknown
+input fields, nonstring source, invalid purpose and nonpositive/noninteger revision
+return safe 422. Clients cannot supply pins, timestamps, assistance state, evaluation
+status or evidence. Existing single-operator local identity/deployment guards apply.
+
+Source must be nonblank UTF-8 Python text without U+0000 or lone surrogate code
+points. Preserve exact bytes, whitespace and line endings. Syntax errors and
+incorrect implementations are received unchanged; intake never parses, compiles,
+imports, executes or grades code. Both purposes reject blank source: these are
+receipts, not editable drafts. MAX_CODE_BYTES defaults to 65536 and counts encoded
+UTF-8 bytes, not characters; exceeding it returns 413 CODE_TOO_LARGE. Existing
+MAX_REQUEST_BODY_BYTES defaults to 262144 and limits the entire encoded JSON body,
+including escaped characters and fields. Unsupported text returns 422 INVALID_SOURCE.
+No rejected source is echoed in errors or logs.
+
+New intake requires active/paused lifecycle and current expected_revision. Expired
+or fully assisted active/paused attempts can submit; defer/abandon/completed deny
+new intake with 409 INVALID_ATTEMPT_STATE. Source acceptance leaves lifecycle and
+countdown behavior unchanged, records an event and advances revision. No pending
+job is created, so the future pending-assessment assistance lock does not apply.
+Both purposes are intent labels permitted in current practice/assessment modes.
+
+SubmissionDetail includes id, attempt_id, question_version_id, policy_version_id,
+purpose, status=received, evaluation=not_requested, code_hash (SHA-256 of exact UTF-8
+source), source_bytes, accepted_at, accepted_event_sequence, attempt_revision,
+source_code and evidence. Evidence contains the acceptance-time AttemptSnapshot,
+phase_id and assistance_grant_ids already granted by that point. The snapshot
+includes mode/lifecycle, assistance level, independent closure, accommodation,
+familiar-family context, total/overdue time and the current phase timer. Pins refer
+to immutable published content/policy. No outcome, executed result, independent
+success, computed eligibility or mastery claim is returned. No private tests,
+assistance bodies, reference solutions or authoring rubrics are loaded/disclosed.
+Source itself is the learner's authorized submitted text, not a question asset.
+
+User -> attempt row locks serialize intake with assistance, expiry, pause/resume,
+extend and end. Within intake, check revision against stored state, reconcile any
+expiry first, materialize clocks, append submission_received, advance revision and
+store source/evidence in one transaction. Equal acceptance timestamps are ordered
+by accepted_event_sequence. Competing distinct commands at one revision have one
+success and one STALE_REVISION conflict. A refreshed receipt after assistance
+captures the grant; an earlier receipt retains its pre-assistance facts forever.
+Expiry alone still does not disclose help or count as wrong/correct. Failed intake
+rolls back source, event, revision and timer reconciliation. Backward solving clock
+returns safe 503 CLOCK_UNAVAILABLE without mutation.
+
+POST requires Idempotency-Key (existing printable ASCII 1–128 rule). A unique
+attempt/key and canonical request hash persist indefinitely. Identical key/body
+returns the original submission and 201/Location, with Idempotency-Replayed: true,
+without another event, clock sample or identity. Changed source/purpose/revision
+at that key returns 409 IDEMPOTENCY_CONFLICT. Replay rechecks current authorization
+and ownership before returning source, including after terminal transition/archival.
+Lowering MAX_CODE_BYTES later does not reject a successful replay; the HTTP body
+guard still applies before intake. Distinct keys permit identical source as distinct
+submissions; future scoring must not treat those as independent observations.
+
+List defaults to 20 and is capped by min(100, MAX_PAGE_SIZE). It returns
+SubmissionSummary items (all detail metadata, without source_code/evidence) and
+next_cursor. SQL also excludes source/evidence columns, avoiding large source loads
+for a metadata page. Order is descending acceptance event sequence within the
+attempt. First page fixes a high-water mark; cursor pages exclude later inserts,
+bind to owner/attempt/purpose and expire after one day. Malformed/expired/wrong-context
+cursors return 400 INVALID_CURSOR; invalid bounds/filters return 422. Detail/list
+read persisted receipt facts without sampling or reconciling the solving clock.
+
+PostgreSQL protects source/evidence from UPDATE/DELETE, verifies byte count/SHA-256,
+restricts referenced attempt/version/policy/phase/event deletion and validates
+pinned ownership/context at insert. Unique request/event constraints prevent duplicate
+receipt facts. Storage conflicts return 409 SUBMISSION_CONFLICT with safe details.
+Migration downgrade refuses stored submission history rather than erasing it.
+Archive still prevents new attempts while existing owners retain intake/history.
+
+Public config adds submission_receipts; stage is B5-immutable-submissions. Evaluation
+health remains not_integrated and learning_policy remains null. No runner/job endpoint,
+grading, recommendation or mastery path is released. See [B5 OpenAPI](openapi.b5-immutable-submissions.json)
+and [B5 verification](B5_Verification.md). Trusted publication and deployed authentication
+remain unavailable; test-only published fixtures do not enable production bypasses.

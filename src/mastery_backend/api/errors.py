@@ -76,6 +76,8 @@ async def content_error_handler(request: Request, exception: Exception) -> JSONR
         "NOT_FOUND": 404,
         "INVALID_SKILL": 422,
         "INVALID_BUDGET": 422,
+        "INVALID_SOURCE": 422,
+        "CODE_TOO_LARGE": 413,
         "INVALID_MODE": 422,
         "CLOCK_UNAVAILABLE": 503,
         "POLICY_UNAVAILABLE": 503,

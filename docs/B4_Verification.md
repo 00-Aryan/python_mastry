@@ -97,3 +97,6 @@ uses project dependencies rather than a fresh online dependency install.
 
 The configured Git author is reused; no identity is invented or changed. Generated
 database files, environments, caches and dist output remain ignored.
+
+The subsequent [B5 receipt verification](B5_Verification.md) records immutable source
+storage; this document remains the historical B4 assistance result.

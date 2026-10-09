@@ -16,6 +16,7 @@ from mastery_backend.application.publication_verification import (
     UnavailableReferenceVerifier,
 )
 from mastery_backend.application.skill_service import SkillService
+from mastery_backend.application.submission_service import SubmissionService
 from mastery_backend.domain.content import ContentError
 from mastery_backend.domain.identity import Principal, require_content_admin, require_learner
 
@@ -107,3 +108,11 @@ def assistance_service(
     clock: Annotated[Clock, Depends(server_clock)],
 ) -> AssistanceService:
     return AssistanceService(factory, clock)
+
+
+def submission_service(
+    request: Request,
+    factory: Annotated[sessionmaker[Session], Depends(session_factory)],
+    clock: Annotated[Clock, Depends(server_clock)],
+) -> SubmissionService:
+    return SubmissionService(factory, clock, request.app.state.settings.max_code_bytes)

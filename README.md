@@ -1,8 +1,8 @@
 # Python Mastery Backend
 
-This is the local **B4 progressive-assistance increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
+This is the local **B5 immutable-submission increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
 
-Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers, progressive assistance and the documented CLI-seeded local development identity are implemented. Deployed authentication, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
+Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers, progressive assistance, immutable source receipts and the documented CLI-seeded local development identity are implemented. Deployed authentication, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
 
 ## Quick start in WSL and VS Code
 
@@ -34,7 +34,7 @@ Set DATABASE_URL in `.env` to that database. Both `postgresql://` and
 settings for pool sizes and timeouts. Run migrations from the repository root;
 migration files live in the source checkout. Startup never creates tables or
 runs migrations. The baseline establishes Alembic history; revision 0002 adds local identity,
-normalized question storage, constraints and published-content guards. Revision 0003 adds skill revisions and prerequisite edges while retaining existing skills and mappings. Revision 0004 adds pinned timer policy, attempts, phases and event history. Revision 0005 adds immutable assistance grants and waiting phases without changing existing attempt pins.
+normalized question storage, constraints and published-content guards. Revision 0003 adds skill revisions and prerequisite edges while retaining existing skills and mappings. Revision 0004 adds pinned timer policy, attempts, phases and event history. Revision 0005 adds immutable assistance grants and waiting phases without changing existing attempt pins. Revision 0006 adds immutable submissions and acceptance events.
 
 For live reload, use the explicit Uvicorn command:
 
@@ -48,9 +48,9 @@ The direct Uvicorn command uses its CLI host/port options; it does not read API_
 
 | Endpoint | Response |
 |---|---|
-| GET /health/live | status alive; release_stage B4-progressive-assistance; database not_checked |
+| GET /health/live | status alive; release_stage B5-immutable-submissions; database not_checked |
 | GET /health/ready | database connected; evaluation not_integrated; safe 503 on DB failure |
-| GET /api/v1/config/public | Application version; attempt_lifecycle/server_timers/progressive_assistance capabilities; practice/assessment modes |
+| GET /api/v1/config/public | Application version; attempt_lifecycle/server_timers/progressive_assistance/submission_receipts capabilities; practice/assessment modes |
 | GET /api/v1/questions; /api/v1/questions/{question_id}; /api/v1/question-versions/{version_id} | Available published public content only; cursor pagination on the catalog |
 | POST /api/v1/admin/questions | Question identity and first draft; admin role and Idempotency-Key required |
 | POST /api/v1/admin/questions/{question_id}/versions | New draft with server-assigned version number |
@@ -65,6 +65,7 @@ The direct Uvicorn command uses its CLI host/port options; it does not read API_
 | GET /api/v1/attempts/{attempt_id}/question | Exact pinned public version, including owned historical archived content |
 | POST /api/v1/attempts/{attempt_id}/pause, /resume, /extend, /defer, /abandon | Revision-checked, idempotent lifecycle/timer commands |
 | POST /api/v1/attempts/{attempt_id}/assistance/next, /solution; GET /api/v1/attempts/{attempt_id}/assistance | Owned staged grants, confirmed full-solution escape and grant history |
+| POST/GET /api/v1/attempts/{attempt_id}/submissions; GET /api/v1/submissions/{submission_id} | Owned immutable source receipt, bounded metadata history and detail; no execution |
 | GET /docs and /redoc | Development API documentation |
 | GET /openapi.json | Actual schema generated from implemented endpoints |
 
@@ -162,7 +163,7 @@ validates the publication transition; it does not validate any future verifier.
 
 Read the [question storage decision](docs/decisions/0003_question_storage.md) for
 content types, enum/position choices and the exact acceptance checks. The generated
-[OpenAPI schema](docs/openapi.b4-progressive-assistance.json) describes released routes.
+[OpenAPI schema](docs/openapi.b5-immutable-submissions.json) describes released routes.
 
 ## Diagnose a failure
 
@@ -170,11 +171,11 @@ Read X-Request-ID from the response, then find the matching structured log. Logs
 
 If startup fails, check the named setting, JSON formatting for list variables and the selected WSL interpreter. The launcher reports only invalid configuration fields. An occupied port requires stopping the existing process or selecting a different API_PORT; it is not a settings validation failure.
 
-A browser CORS error usually means a mismatched origin. Host errors require a matching ALLOWED_HOSTS entry. A 413 means the actual or declared body exceeds MAX_REQUEST_BODY_BYTES. MAX_PAGE_SIZE also caps catalog pages. MAX_CODE_BYTES remains a future code-save boundary.
+A browser CORS error usually means a mismatched origin. Host errors require a matching ALLOWED_HOSTS entry. A 413 means the actual or declared body exceeds MAX_REQUEST_BODY_BYTES. MAX_PAGE_SIZE also caps catalog pages. MAX_CODE_BYTES limits UTF-8 submission source; larger source returns 413.
 
 ## Next increment
 
-Question storage is implemented. Production publication remains unavailable until a trusted reference verifier is implemented; the test-only injected verifier proves transition logic, not the correctness of a future verifier. Skill CRUD and the prerequisite DAG are implemented. Attempt lifecycle and server timers are implemented. Progressive assistance is implemented. Later increments add code drafting/submissions, recommendations, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.
+Question storage is implemented. Production publication remains unavailable until a trusted reference verifier is implemented; the test-only injected verifier proves transition logic, not the correctness of a future verifier. Skill CRUD and the prerequisite DAG are implemented. Attempt lifecycle and server timers are implemented. Progressive assistance is implemented. Immutable source receipts are implemented. Later increments add code drafting, recommendations, isolated execution and learning evidence. Do not enable hosted use by removing the B0 startup guard without implementing its requirements.
 
 ## Skill graph administration
 
@@ -232,7 +233,7 @@ GET /api/v1/attempts/{id}/question. Archived questions cannot start new attempts
 private tests, hints and solutions remain excluded. Public attempt lists are bounded
 and owner-only. Read [the timer/state decision](docs/decisions/0005_attempt_timers.md)
 and [B3 verification](docs/B3_Verification.md) for rules, responsibilities, actual
-checks and unresolved limits. B4 adds the assistance commands below; code and learning
+checks and unresolved limits. B4 adds the assistance commands below; code execution and learning
 calculations remain unreleased.
 
 
@@ -261,3 +262,27 @@ Missing assets return safe 503 and leave the grant transaction unchanged. Read
 [B4 verification](docs/B4_Verification.md) for relationships, request flow,
 acceptance results and unverified limits. Production publication remains unavailable
 until a trusted verifier exists; test-only verifier fixtures do not enable it.
+
+
+## Immutable source submissions
+
+POST /api/v1/attempts/{id}/submissions takes source_code, purpose=public_run or
+assessment, expected_revision and Idempotency-Key. Only active/paused owners can
+submit. Responses say received/not_requested: source has been stored, never parsed,
+executed or graded. Invalid Python syntax is accepted unchanged. Nonblank valid
+UTF-8 text without NUL is required; MAX_CODE_BYTES defaults to 65536 encoded bytes,
+while the whole JSON request must fit MAX_REQUEST_BODY_BYTES (262144 by default).
+
+Each receipt pins question/policy versions and preserves its acceptance-time timer,
+assistance grants, accommodation and family context. Later assistance cannot change
+it. Concurrent submission/help/timer commands share attempt locks and revisions.
+Identical retries return the same immutable receipt indefinitely; changed payload
+at the same key returns 409. Distinct keys create distinct submissions, including
+repeated source. No receipt starts a pending assessment job or blocks help.
+
+GET /api/v1/submissions/{id} returns owned source/detail. GET
+/api/v1/attempts/{id}/submissions returns bounded metadata pages without source or
+full evidence. Reads never alter receipt clocks. No response loads hidden tests,
+hints or solutions; logs omit learner source. See [submission rules](docs/decisions/0007_immutable_submissions.md)
+and [B5 verification](docs/B5_Verification.md) for ordering, constraints and actual
+checks. Execution, grading, recommendations and mastery remain future increments.

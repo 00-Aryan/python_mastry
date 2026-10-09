@@ -423,3 +423,33 @@ commands/history return only granted assets. Stored grant receipts duplicate the
 intentionally for exact recovery; authoritative content remains the pinned published
 asset. History is separate from any future scoring or evidence calculations. No code
 submission, execution, automatic correctness, recommendation or mastery path is released.
+
+## Released immutable receipt refinement (user-requested B5)
+
+[Decision 0007](decisions/0007_immutable_submissions.md) and the
+[B5 API slice](REST_API_Settings_and_Contract.md#released-b5-immutable-source-receipts-10-october-2026)
+refine the original submission backlog into a receipt-only increment. submissions
+stores exact source/hash/bytes, attempt/question/policy/phase pins, acceptance time,
+acceptance event sequence/revision, immutable evidence_json and an attempt-scoped
+request key/hash. Unique request/event constraints, restrictive FKs, byte/hash checks
+and PostgreSQL insert/history guards accompany application validation.
+
+Every intake locks the database user then owned attempt, reconciles exact expiry,
+materializes timer anchors and captures timer/assistance/context evidence with its
+submission_received event in one transaction. This uses the same total ordering as
+help/timer transitions; later grants cannot rewrite earlier snapshots. Assistance
+IDs are recorded without loading hint or solution text. The original response can
+be reconstructed indefinitely for retry without a duplicate general command receipt.
+Acceptance-time evidence is input for future rules, not an eligibility outcome.
+
+No evaluation_jobs, evaluations or checkpoints are created. received/not_requested
+accurately describe receipt rather than pending execution. Consequently the future
+pending-assessment help lock is not activated; active/paused learners may continue
+submitting or requesting help. Both purpose values remain intent only. Invalid
+Python syntax is stored rather than classified by the API. All execution must await
+a verified isolated runner, and no receipt can award correctness or mastery.
+
+Owned detail includes submitted source; bounded attempt lists select metadata only.
+Archived pinned content remains available to its existing owner. Source/evidence and
+retry facts are immutable, and downgrade refuses stored receipts. Payload limits,
+strict authorization and safe logging remain the infrastructure/API boundaries.

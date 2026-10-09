@@ -837,7 +837,7 @@ def test_question_mode_policy_pinning_and_missing_inputs(
     assert extended.status_code == 200 and extended.json()["timer"]["budget_seconds"] == 3600
     assert extended.json()["policy_version_id"] == attempt["policy_version_id"]
     assert extended.json()["policy_version"] == "pilot-assistance-1"
-    for path in ["submissions", "draft"]:
+    for path in ["draft"]:
         assert client.post(f"/api/v1/attempts/{attempt['id']}/{path}", json={}).status_code == 404
 
 

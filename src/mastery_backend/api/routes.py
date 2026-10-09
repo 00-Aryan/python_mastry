@@ -15,7 +15,7 @@ from mastery_backend.infrastructure.observability.logging import logger
 
 class HealthResponse(BaseModel):
     status: Literal["alive", "ready"]
-    release_stage: Literal["B4-progressive-assistance"] = "B4-progressive-assistance"
+    release_stage: Literal["B5-immutable-submissions"] = "B5-immutable-submissions"
     database: Literal["not_checked", "connected"] = "not_checked"
     evaluation: Literal["not_integrated"] = "not_integrated"
 
@@ -23,8 +23,13 @@ class HealthResponse(BaseModel):
 class PublicConfigResponse(BaseModel):
     api_version: Literal["v1"] = "v1"
     application_version: str = __version__
-    release_stage: Literal["B4-progressive-assistance"] = "B4-progressive-assistance"
-    capabilities: list[str] = ["attempt_lifecycle", "server_timers", "progressive_assistance"]
+    release_stage: Literal["B5-immutable-submissions"] = "B5-immutable-submissions"
+    capabilities: list[str] = [
+        "attempt_lifecycle",
+        "server_timers",
+        "progressive_assistance",
+        "submission_receipts",
+    ]
     attempt_modes: list[str] = ["practice", "assessment"]
     learning_policy: None = None
 

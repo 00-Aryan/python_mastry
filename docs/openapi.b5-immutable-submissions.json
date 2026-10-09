@@ -1,0 +1,6749 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Python Mastery Backend",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health/live": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Read Liveness",
+        "operationId": "read_liveness",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Read Readiness",
+        "description": "Probe PostgreSQL in a worker thread; liveness remains independent.",
+        "operationId": "read_readiness",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/public": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Read Public Configuration",
+        "operationId": "read_public_configuration",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/questions": {
+      "post": {
+        "tags": [
+          "content administration"
+        ],
+        "summary": "Create Question",
+        "operationId": "create_question",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuestion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminQuestionVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Local identity missing or unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored admin role or local request guard denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, lifecycle, publication or idempotency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/questions/{question_id}/versions": {
+      "post": {
+        "tags": [
+          "content administration"
+        ],
+        "summary": "Create Question Version",
+        "operationId": "create_question_version",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Question Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftContent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminQuestionVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Local identity missing or unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored admin role or local request guard denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, lifecycle, publication or idempotency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/question-versions/{version_id}": {
+      "get": {
+        "tags": [
+          "content administration"
+        ],
+        "summary": "Read Admin Question Version",
+        "operationId": "read_admin_question_version",
+        "parameters": [
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Version Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminQuestionVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Local identity missing or unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored admin role or local request guard denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, lifecycle, publication or idempotency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "content administration"
+        ],
+        "summary": "Edit Question Draft",
+        "operationId": "edit_question_draft",
+        "parameters": [
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Version Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchDraft"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminQuestionVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Local identity missing or unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored admin role or local request guard denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, lifecycle, publication or idempotency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "content administration"
+        ],
+        "summary": "Delete Question Draft",
+        "operationId": "delete_question_draft",
+        "parameters": [
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Version Id"
+            }
+          },
+          {
+            "name": "expected_revision",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "title": "Expected Revision"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Local identity missing or unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored admin role or local request guard denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, lifecycle, publication or idempotency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/question-versions/{version_id}/publish": {
+      "post": {
+        "tags": [
+          "content administration"
+        ],
+        "summary": "Publish Question Version",
+        "operationId": "publish_question_version",
+        "parameters": [
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Version Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpectedRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminQuestionVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "VERIFICATION_UNAVAILABLE until trusted reference verification exists; draft stays unchanged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Local identity missing or unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored admin role or local request guard denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, lifecycle, publication or idempotency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/questions/{question_id}/archive": {
+      "post": {
+        "tags": [
+          "content administration"
+        ],
+        "summary": "Archive Question",
+        "operationId": "archive_question",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Question Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpectedRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionLifecycle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Local identity missing or unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored admin role or local request guard denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, lifecycle, publication or idempotency conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/questions": {
+      "get": {
+        "tags": [
+          "questions"
+        ],
+        "summary": "List Questions",
+        "operationId": "list_questions",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "skill_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Skill Id"
+            }
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "easy",
+                    "medium",
+                    "hard"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Difficulty"
+            }
+          },
+          {
+            "name": "track",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Track"
+            }
+          },
+          {
+            "name": "curriculum_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Curriculum Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/questions/{question_id}": {
+      "get": {
+        "tags": [
+          "questions"
+        ],
+        "summary": "Read Question",
+        "operationId": "read_question",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicQuestionVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/question-versions/{version_id}": {
+      "get": {
+        "tags": [
+          "questions"
+        ],
+        "summary": "Read Question Version",
+        "operationId": "read_question_version",
+        "parameters": [
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Version Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicQuestionVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/skills": {
+      "post": {
+        "tags": [
+          "skill administration"
+        ],
+        "summary": "Create Skill",
+        "operationId": "create_skill",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSkill"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Configured local identity unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored content_admin role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, duplicate, cycle or archival conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/skills/{skill_id}": {
+      "patch": {
+        "tags": [
+          "skill administration"
+        ],
+        "summary": "Edit Skill",
+        "operationId": "edit_skill",
+        "parameters": [
+          {
+            "name": "skill_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Skill Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchSkill"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Configured local identity unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored content_admin role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, duplicate, cycle or archival conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/skills/{skill_id}/archive": {
+      "post": {
+        "tags": [
+          "skill administration"
+        ],
+        "summary": "Archive Skill",
+        "operationId": "archive_skill",
+        "parameters": [
+          {
+            "name": "skill_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Skill Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveSkill"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Configured local identity unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored content_admin role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, duplicate, cycle or archival conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/skills/{dependent_id}/prerequisites": {
+      "post": {
+        "tags": [
+          "skill administration"
+        ],
+        "summary": "Add Skill Prerequisite",
+        "operationId": "add_skill_prerequisite",
+        "parameters": [
+          {
+            "name": "dependent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Dependent Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPrerequisite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphMutationRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Configured local identity unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored content_admin role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, duplicate, cycle or archival conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "skill administration"
+        ],
+        "summary": "Replace Skill Prerequisites",
+        "operationId": "replace_skill_prerequisites",
+        "parameters": [
+          {
+            "name": "dependent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Dependent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplacePrerequisites"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphMutationRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Configured local identity unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored content_admin role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, duplicate, cycle or archival conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/skills/{dependent_id}/prerequisites/{prerequisite_id}": {
+      "delete": {
+        "tags": [
+          "skill administration"
+        ],
+        "summary": "Remove Skill Prerequisite",
+        "operationId": "remove_skill_prerequisite",
+        "parameters": [
+          {
+            "name": "dependent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Dependent Id"
+            }
+          },
+          {
+            "name": "prerequisite_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Prerequisite Id"
+            }
+          },
+          {
+            "name": "expected_graph_revision",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "title": "Expected Graph Revision"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Configured local identity unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored content_admin role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, duplicate, cycle or archival conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/skills/graph": {
+      "get": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "Read Skill Graph",
+        "operationId": "read_skill_graph",
+        "parameters": [
+          {
+            "name": "curriculum_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Curriculum Id"
+            }
+          },
+          {
+            "name": "center_skill_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Center Skill Id"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "prerequisites",
+                "dependents",
+                "both"
+              ],
+              "type": "string",
+              "default": "both",
+              "title": "Direction"
+            }
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 5,
+              "minimum": 1,
+              "default": 1,
+              "title": "Depth"
+            }
+          },
+          {
+            "name": "max_nodes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Max Nodes"
+            }
+          },
+          {
+            "name": "max_edges",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 200,
+              "title": "Max Edges"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/skills": {
+      "get": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "List Skills",
+        "operationId": "list_skills",
+        "parameters": [
+          {
+            "name": "curriculum_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Curriculum Id"
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Archived"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 2048
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/skills/{skill_id}": {
+      "get": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "Read Skill",
+        "operationId": "read_skill",
+        "parameters": [
+          {
+            "name": "skill_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Skill Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts": {
+      "post": {
+        "tags": [
+          "attempt lifecycle"
+        ],
+        "summary": "Start Attempt",
+        "operationId": "start_attempt",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartAttempt"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid state, expired phase or incompatible retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "attempt lifecycle"
+        ],
+        "summary": "List Attempts",
+        "operationId": "list_attempts",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 2048
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "practice",
+                    "assessment"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Mode"
+            }
+          },
+          {
+            "name": "lifecycle_state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "active",
+                    "paused",
+                    "completed",
+                    "deferred",
+                    "abandoned"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lifecycle State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid state, expired phase or incompatible retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}": {
+      "get": {
+        "tags": [
+          "attempt lifecycle"
+        ],
+        "summary": "Read Attempt",
+        "operationId": "read_attempt",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid state, expired phase or incompatible retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/question": {
+      "get": {
+        "tags": [
+          "attempt lifecycle"
+        ],
+        "summary": "Read Attempt Question",
+        "operationId": "read_attempt_question",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicQuestionVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid state, expired phase or incompatible retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/pause": {
+      "post": {
+        "tags": [
+          "attempt lifecycle"
+        ],
+        "summary": "Pause Attempt",
+        "operationId": "pause_attempt",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttemptRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid state, expired phase or incompatible retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/resume": {
+      "post": {
+        "tags": [
+          "attempt lifecycle"
+        ],
+        "summary": "Resume Attempt",
+        "operationId": "resume_attempt",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttemptRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid state, expired phase or incompatible retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/extend": {
+      "post": {
+        "tags": [
+          "attempt lifecycle"
+        ],
+        "summary": "Extend Attempt",
+        "operationId": "extend_attempt",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtendAttempt"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid state, expired phase or incompatible retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/defer": {
+      "post": {
+        "tags": [
+          "attempt lifecycle"
+        ],
+        "summary": "Defer Attempt",
+        "operationId": "defer_attempt",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndAttempt"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid state, expired phase or incompatible retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/abandon": {
+      "post": {
+        "tags": [
+          "attempt lifecycle"
+        ],
+        "summary": "Abandon Attempt",
+        "operationId": "abandon_attempt",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndAttempt"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid state, expired phase or incompatible retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/assistance/next": {
+      "post": {
+        "tags": [
+          "progressive assistance"
+        ],
+        "summary": "Grant Next Assistance",
+        "operationId": "grant_next_assistance",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NextAssistance"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Pinned policy/assets or database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, waiting interval, exhausted ladder or retry conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/assistance/solution": {
+      "post": {
+        "tags": [
+          "progressive assistance"
+        ],
+        "summary": "Grant Full Solution",
+        "operationId": "grant_full_solution",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolutionEscape"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Pinned policy/assets or database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, waiting interval, exhausted ladder or retry conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/assistance": {
+      "get": {
+        "tags": [
+          "progressive assistance"
+        ],
+        "summary": "Read Assistance History",
+        "operationId": "read_assistance_history",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistanceHistory"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Pinned policy/assets or database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, waiting interval, exhausted ladder or retry conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/submissions": {
+      "post": {
+        "tags": [
+          "submission receipts"
+        ],
+        "summary": "Accept Submission",
+        "operationId": "accept_submission",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptSubmission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid lifecycle or conflicting retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Source or HTTP body exceeds configured byte limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "submission receipts"
+        ],
+        "summary": "List Attempt Submissions",
+        "operationId": "list_attempt_submissions",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attempt Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 2048
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "public_run",
+                    "assessment"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Purpose"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid lifecycle or conflicting retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Source or HTTP body exceeds configured byte limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/{submission_id}": {
+      "get": {
+        "tags": [
+          "submission receipts"
+        ],
+        "summary": "Read Submission",
+        "operationId": "read_submission",
+        "parameters": [
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Submission Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON or invalid/expired catalog cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource missing or unavailable to this reader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input or content reference",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; safe details only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Active local identity required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stored learner role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision, invalid lifecycle or conflicting retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Source or HTTP body exceeds configured byte limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AcceptSubmission": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "source_code": {
+            "type": "string",
+            "title": "Source Code",
+            "description": "Exact UTF-8 Python source, bounded by MAX_CODE_BYTES; not executed."
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "public_run",
+              "assessment"
+            ],
+            "title": "Purpose"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "source_code",
+          "purpose"
+        ],
+        "title": "AcceptSubmission"
+      },
+      "AddPrerequisite": {
+        "properties": {
+          "prerequisite_skill_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Prerequisite Skill Id"
+          },
+          "expected_graph_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Graph Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "prerequisite_skill_id",
+          "expected_graph_revision"
+        ],
+        "title": "AddPrerequisite"
+      },
+      "AdminQuestionVersion": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "statement": {
+            "type": "string",
+            "maxLength": 65536,
+            "minLength": 1,
+            "title": "Statement"
+          },
+          "track": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Track",
+            "default": "python"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "medium",
+              "hard"
+            ],
+            "title": "Difficulty",
+            "default": "easy"
+          },
+          "assessment_role": {
+            "type": "string",
+            "enum": [
+              "practice",
+              "assessment",
+              "transfer",
+              "delayed_review"
+            ],
+            "title": "Assessment Role",
+            "default": "practice"
+          },
+          "supported_modes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "practice",
+                "assessment",
+                "transfer",
+                "delayed_review"
+              ]
+            },
+            "type": "array",
+            "maxItems": 4,
+            "title": "Supported Modes"
+          },
+          "suggested_budget_seconds": {
+            "type": "integer",
+            "maximum": 86400.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Suggested Budget Seconds",
+            "default": 600
+          },
+          "contract": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FunctionContract"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "skill_mappings": {
+            "items": {
+              "$ref": "#/components/schemas/SkillMapping"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Skill Mappings"
+          },
+          "pattern_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Pattern Ids"
+          },
+          "examples": {
+            "items": {
+              "$ref": "#/components/schemas/Example"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Examples"
+          },
+          "test_cases": {
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            },
+            "type": "array",
+            "maxItems": 500,
+            "title": "Test Cases"
+          },
+          "assistance_steps": {
+            "items": {
+              "$ref": "#/components/schemas/AssistanceStep"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Assistance Steps"
+          },
+          "solution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Solution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision_links": {
+            "items": {
+              "$ref": "#/components/schemas/RevisionLink"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Revision Links"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "version_number": {
+            "type": "integer",
+            "title": "Version Number"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "question_revision": {
+            "type": "integer",
+            "title": "Question Revision"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published"
+            ],
+            "title": "Status"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "statement",
+          "id",
+          "question_id",
+          "code",
+          "version_number",
+          "revision",
+          "question_revision",
+          "status",
+          "published_at",
+          "archived_at"
+        ],
+        "title": "AdminQuestionVersion"
+      },
+      "ArchiveSkill": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "expected_graph_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Graph Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "expected_graph_revision"
+        ],
+        "title": "ArchiveSkill"
+      },
+      "ArgumentSpecification": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "integer",
+              "number",
+              "string",
+              "boolean",
+              "array",
+              "object",
+              "null"
+            ],
+            "title": "Type"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+            "title": "Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "name"
+        ],
+        "title": "ArgumentSpecification"
+      },
+      "AssistanceHistory": {
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Attempt Id"
+          },
+          "grants": {
+            "items": {
+              "$ref": "#/components/schemas/GrantedAssistance"
+            },
+            "type": "array",
+            "title": "Grants"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attempt_id",
+          "grants"
+        ],
+        "title": "AssistanceHistory"
+      },
+      "AssistanceResponse": {
+        "properties": {
+          "grant": {
+            "$ref": "#/components/schemas/GrantedAssistance"
+          },
+          "attempt": {
+            "$ref": "#/components/schemas/AttemptSnapshot"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "grant",
+          "attempt"
+        ],
+        "title": "AssistanceResponse"
+      },
+      "AssistanceStep": {
+        "properties": {
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "directional",
+              "pattern",
+              "pseudocode",
+              "partial_code",
+              "full_solution"
+            ],
+            "title": "Kind"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 65536,
+            "minLength": 1,
+            "title": "Content"
+          },
+          "next_budget_seconds": {
+            "type": "integer",
+            "maximum": 86400.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Next Budget Seconds"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position",
+          "kind",
+          "content",
+          "next_budget_seconds"
+        ],
+        "title": "AssistanceStep"
+      },
+      "AttemptPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AttemptSnapshot"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "AttemptPage"
+      },
+      "AttemptRevision": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision"
+        ],
+        "title": "AttemptRevision"
+      },
+      "AttemptSnapshot": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "question_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Version Id"
+          },
+          "policy_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Policy Version Id"
+          },
+          "policy_version": {
+            "type": "string",
+            "title": "Policy Version"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "practice",
+              "assessment"
+            ],
+            "title": "Mode"
+          },
+          "lifecycle_state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused",
+              "completed",
+              "deferred",
+              "abandoned"
+            ],
+            "title": "Lifecycle State"
+          },
+          "assistance_level": {
+            "type": "string",
+            "enum": [
+              "none",
+              "directional",
+              "pattern",
+              "pseudocode",
+              "partial_code",
+              "full_solution"
+            ],
+            "title": "Assistance Level"
+          },
+          "assistance_eligible": {
+            "type": "boolean",
+            "title": "Assistance Eligible"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "independent_interval_ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Independent Interval Ended At"
+          },
+          "independent_end_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "expired",
+                  "deferred",
+                  "abandoned",
+                  "assistance_requested"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Independent End Reason"
+          },
+          "timing_accommodated": {
+            "type": "boolean",
+            "title": "Timing Accommodated"
+          },
+          "family_previously_attempted": {
+            "type": "boolean",
+            "title": "Family Previously Attempted"
+          },
+          "total_active_elapsed_ms": {
+            "type": "integer",
+            "title": "Total Active Elapsed Ms"
+          },
+          "overdue_active_elapsed_ms": {
+            "type": "integer",
+            "title": "Overdue Active Elapsed Ms"
+          },
+          "timer": {
+            "$ref": "#/components/schemas/AttemptTimer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "question_version_id",
+          "policy_version_id",
+          "policy_version",
+          "mode",
+          "lifecycle_state",
+          "assistance_level",
+          "assistance_eligible",
+          "revision",
+          "started_at",
+          "finished_at",
+          "independent_interval_ended_at",
+          "independent_end_reason",
+          "timing_accommodated",
+          "family_previously_attempted",
+          "total_active_elapsed_ms",
+          "overdue_active_elapsed_ms",
+          "timer"
+        ],
+        "title": "AttemptSnapshot"
+      },
+      "AttemptTimer": {
+        "properties": {
+          "phase_number": {
+            "type": "integer",
+            "title": "Phase Number"
+          },
+          "phase_started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Phase Started At"
+          },
+          "budget_seconds": {
+            "type": "integer",
+            "title": "Budget Seconds"
+          },
+          "active_elapsed_ms": {
+            "type": "integer",
+            "title": "Active Elapsed Ms"
+          },
+          "remaining_ms": {
+            "type": "integer",
+            "title": "Remaining Ms"
+          },
+          "server_now": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Server Now"
+          },
+          "running_since": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Running Since"
+          },
+          "expired_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expired At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "phase_number",
+          "phase_started_at",
+          "budget_seconds",
+          "active_elapsed_ms",
+          "remaining_ms",
+          "server_now",
+          "running_since",
+          "expired_at"
+        ],
+        "title": "AttemptTimer"
+      },
+      "CreateQuestion": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+            "title": "Code"
+          },
+          "family_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Family Id"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/DraftContent"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "family_id",
+          "draft"
+        ],
+        "title": "CreateQuestion"
+      },
+      "CreateSkill": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Title"
+          },
+          "competency": {
+            "type": "string",
+            "maxLength": 65536,
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Competency"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+            "title": "Code"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "competency",
+          "curriculum_id",
+          "code"
+        ],
+        "title": "CreateSkill"
+      },
+      "DraftContent": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "statement": {
+            "type": "string",
+            "maxLength": 65536,
+            "minLength": 1,
+            "title": "Statement"
+          },
+          "track": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Track",
+            "default": "python"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "medium",
+              "hard"
+            ],
+            "title": "Difficulty",
+            "default": "easy"
+          },
+          "assessment_role": {
+            "type": "string",
+            "enum": [
+              "practice",
+              "assessment",
+              "transfer",
+              "delayed_review"
+            ],
+            "title": "Assessment Role",
+            "default": "practice"
+          },
+          "supported_modes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "practice",
+                "assessment",
+                "transfer",
+                "delayed_review"
+              ]
+            },
+            "type": "array",
+            "maxItems": 4,
+            "title": "Supported Modes"
+          },
+          "suggested_budget_seconds": {
+            "type": "integer",
+            "maximum": 86400.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Suggested Budget Seconds",
+            "default": 600
+          },
+          "contract": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FunctionContract"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "skill_mappings": {
+            "items": {
+              "$ref": "#/components/schemas/SkillMapping"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Skill Mappings"
+          },
+          "pattern_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Pattern Ids"
+          },
+          "examples": {
+            "items": {
+              "$ref": "#/components/schemas/Example"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Examples"
+          },
+          "test_cases": {
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            },
+            "type": "array",
+            "maxItems": 500,
+            "title": "Test Cases"
+          },
+          "assistance_steps": {
+            "items": {
+              "$ref": "#/components/schemas/AssistanceStep"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Assistance Steps"
+          },
+          "solution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Solution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision_links": {
+            "items": {
+              "$ref": "#/components/schemas/RevisionLink"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Revision Links"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "statement"
+        ],
+        "title": "DraftContent"
+      },
+      "EdgeRecord": {
+        "properties": {
+          "prerequisite_skill_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Prerequisite Skill Id"
+          },
+          "dependent_skill_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Dependent Skill Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "prerequisite_skill_id",
+          "dependent_skill_id"
+        ],
+        "title": "EdgeRecord"
+      },
+      "EndAttempt": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision"
+        ],
+        "title": "EndAttempt"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "request_id",
+          "details"
+        ],
+        "title": "ErrorBody"
+      },
+      "ErrorEnvelope": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorEnvelope"
+      },
+      "Example": {
+        "properties": {
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "input": {
+            "items": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "type": "array",
+            "title": "Input"
+          },
+          "expected_output": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "explanation": {
+            "type": "string",
+            "maxLength": 65536,
+            "minLength": 1,
+            "title": "Explanation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position",
+          "input",
+          "expected_output",
+          "explanation"
+        ],
+        "title": "Example"
+      },
+      "ExpectedRevision": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision"
+        ],
+        "title": "ExpectedRevision"
+      },
+      "ExtendAttempt": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "additional_budget_seconds": {
+            "type": "integer",
+            "maximum": 86400.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Additional Budget Seconds"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "additional_budget_seconds"
+        ],
+        "title": "ExtendAttempt"
+      },
+      "FunctionContract": {
+        "properties": {
+          "function_name": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+            "title": "Function Name"
+          },
+          "arguments": {
+            "items": {
+              "$ref": "#/components/schemas/ArgumentSpecification"
+            },
+            "type": "array",
+            "maxItems": 32,
+            "title": "Arguments"
+          },
+          "output": {
+            "$ref": "#/components/schemas/TypeSpecification"
+          },
+          "constraints": {
+            "items": {
+              "type": "string",
+              "maxLength": 65536,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Constraints"
+          },
+          "invalid_input_policy": {
+            "type": "string",
+            "enum": [
+              "not_tested",
+              "raise_value_error"
+            ],
+            "title": "Invalid Input Policy"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "function_name",
+          "arguments",
+          "output",
+          "invalid_input_policy"
+        ],
+        "title": "FunctionContract"
+      },
+      "GrantedAssistance": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "step_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Step Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "directional",
+              "pattern",
+              "pseudocode",
+              "partial_code",
+              "full_solution"
+            ],
+            "title": "Kind"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "granted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Granted At"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "budget_expired",
+              "learner_request",
+              "solution_escape"
+            ],
+            "title": "Reason"
+          },
+          "solution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Solution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "step_id",
+          "position",
+          "kind",
+          "content",
+          "granted_at",
+          "reason"
+        ],
+        "title": "GrantedAssistance"
+      },
+      "GraphMutationRecord": {
+        "properties": {
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "graph_revision": {
+            "type": "integer",
+            "title": "Graph Revision"
+          },
+          "dependent_skill_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Dependent Skill Id"
+          },
+          "prerequisite_skill_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Prerequisite Skill Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "curriculum_id",
+          "graph_revision",
+          "dependent_skill_id",
+          "prerequisite_skill_ids"
+        ],
+        "title": "GraphMutationRecord"
+      },
+      "GraphRecord": {
+        "properties": {
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "graph_revision": {
+            "type": "integer",
+            "title": "Graph Revision"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/SkillRecord"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/EdgeRecord"
+            },
+            "type": "array",
+            "title": "Edges"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "curriculum_id",
+          "graph_revision",
+          "nodes",
+          "edges"
+        ],
+        "title": "GraphRecord"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "alive",
+              "ready"
+            ],
+            "title": "Status"
+          },
+          "release_stage": {
+            "type": "string",
+            "const": "B5-immutable-submissions",
+            "title": "Release Stage",
+            "default": "B5-immutable-submissions"
+          },
+          "database": {
+            "type": "string",
+            "enum": [
+              "not_checked",
+              "connected"
+            ],
+            "title": "Database",
+            "default": "not_checked"
+          },
+          "evaluation": {
+            "type": "string",
+            "const": "not_integrated",
+            "title": "Evaluation",
+            "default": "not_integrated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse"
+      },
+      "JsonValue": {},
+      "NextAssistance": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "budget_expired",
+              "learner_request"
+            ],
+            "title": "Trigger"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "trigger"
+        ],
+        "title": "NextAssistance"
+      },
+      "PatchDraft": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 65536,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statement"
+          },
+          "track": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Track"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "easy",
+                  "medium",
+                  "hard"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difficulty"
+          },
+          "assessment_role": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "practice",
+                  "assessment",
+                  "transfer",
+                  "delayed_review"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assessment Role"
+          },
+          "supported_modes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "practice",
+                    "assessment",
+                    "transfer",
+                    "delayed_review"
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supported Modes"
+          },
+          "suggested_budget_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 86400.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Budget Seconds"
+          },
+          "contract": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FunctionContract"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "skill_mappings": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SkillMapping"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skill Mappings"
+          },
+          "pattern_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pattern Ids"
+          },
+          "examples": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Example"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Examples"
+          },
+          "test_cases": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TestCase"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Cases"
+          },
+          "assistance_steps": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AssistanceStep"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assistance Steps"
+          },
+          "solution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Solution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision_links": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/RevisionLink"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision Links"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision"
+        ],
+        "title": "PatchDraft"
+      },
+      "PatchSkill": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "competency": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 65536,
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Competency"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision"
+        ],
+        "title": "PatchSkill"
+      },
+      "PublicConfigResponse": {
+        "properties": {
+          "api_version": {
+            "type": "string",
+            "const": "v1",
+            "title": "Api Version",
+            "default": "v1"
+          },
+          "application_version": {
+            "type": "string",
+            "title": "Application Version",
+            "default": "0.1.0"
+          },
+          "release_stage": {
+            "type": "string",
+            "const": "B5-immutable-submissions",
+            "title": "Release Stage",
+            "default": "B5-immutable-submissions"
+          },
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Capabilities",
+            "default": [
+              "attempt_lifecycle",
+              "server_timers",
+              "progressive_assistance",
+              "submission_receipts"
+            ]
+          },
+          "attempt_modes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Attempt Modes",
+            "default": [
+              "practice",
+              "assessment"
+            ]
+          },
+          "learning_policy": {
+            "type": "null",
+            "title": "Learning Policy"
+          }
+        },
+        "type": "object",
+        "title": "PublicConfigResponse"
+      },
+      "PublicQuestionVersion": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "version_number": {
+            "type": "integer",
+            "title": "Version Number"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "statement": {
+            "type": "string",
+            "title": "Statement"
+          },
+          "track": {
+            "type": "string",
+            "title": "Track"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "medium",
+              "hard"
+            ],
+            "title": "Difficulty"
+          },
+          "supported_modes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "practice",
+                "assessment",
+                "transfer",
+                "delayed_review"
+              ]
+            },
+            "type": "array",
+            "title": "Supported Modes"
+          },
+          "suggested_budget_seconds": {
+            "type": "integer",
+            "title": "Suggested Budget Seconds"
+          },
+          "contract": {
+            "$ref": "#/components/schemas/FunctionContract"
+          },
+          "skill_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Skill Ids"
+          },
+          "pattern_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Pattern Ids"
+          },
+          "examples": {
+            "items": {
+              "$ref": "#/components/schemas/Example"
+            },
+            "type": "array",
+            "title": "Examples"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "question_id",
+          "code",
+          "version_number",
+          "title",
+          "statement",
+          "track",
+          "difficulty",
+          "supported_modes",
+          "suggested_budget_seconds",
+          "contract",
+          "skill_ids",
+          "pattern_ids",
+          "examples"
+        ],
+        "title": "PublicQuestionVersion"
+      },
+      "QuestionLifecycle": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "revision",
+          "archived_at"
+        ],
+        "title": "QuestionLifecycle"
+      },
+      "QuestionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PublicQuestionVersion"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "QuestionPage"
+      },
+      "ReplacePrerequisites": {
+        "properties": {
+          "prerequisite_skill_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Prerequisite Skill Ids"
+          },
+          "expected_graph_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Graph Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "prerequisite_skill_ids",
+          "expected_graph_revision"
+        ],
+        "title": "ReplacePrerequisites"
+      },
+      "RevisionLink": {
+        "properties": {
+          "target_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Version Id"
+          },
+          "link_type": {
+            "type": "string",
+            "enum": [
+              "variation",
+              "transfer",
+              "review"
+            ],
+            "title": "Link Type"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "target_version_id",
+          "link_type"
+        ],
+        "title": "RevisionLink"
+      },
+      "SkillMapping": {
+        "properties": {
+          "skill_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Skill Id"
+          },
+          "attribution_role": {
+            "type": "string",
+            "enum": [
+              "primary",
+              "secondary"
+            ],
+            "title": "Attribution Role"
+          },
+          "rubric": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "type": "object",
+            "title": "Rubric"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "skill_id",
+          "attribution_role"
+        ],
+        "title": "SkillMapping"
+      },
+      "SkillPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SkillRecord"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "SkillPage"
+      },
+      "SkillRecord": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Title"
+          },
+          "competency": {
+            "type": "string",
+            "maxLength": 65536,
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Competency"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+            "title": "Code"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "competency",
+          "curriculum_id",
+          "code",
+          "id",
+          "revision",
+          "archived_at"
+        ],
+        "title": "SkillRecord"
+      },
+      "Solution": {
+        "properties": {
+          "reference_code": {
+            "type": "string",
+            "maxLength": 65536,
+            "minLength": 1,
+            "title": "Reference Code"
+          },
+          "explanation": {
+            "type": "string",
+            "maxLength": 65536,
+            "minLength": 1,
+            "title": "Explanation"
+          },
+          "expected_complexity": {
+            "type": "string",
+            "maxLength": 65536,
+            "minLength": 1,
+            "title": "Expected Complexity"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reference_code",
+          "explanation",
+          "expected_complexity"
+        ],
+        "title": "Solution"
+      },
+      "SolutionEscape": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "confirmation": {
+            "type": "boolean",
+            "title": "Confirmation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "confirmation"
+        ],
+        "title": "SolutionEscape"
+      },
+      "StartAttempt": {
+        "properties": {
+          "question_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Version Id"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "practice",
+              "assessment"
+            ],
+            "title": "Mode"
+          },
+          "independent_budget_seconds": {
+            "type": "integer",
+            "maximum": 86400.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Independent Budget Seconds"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "question_version_id",
+          "mode",
+          "independent_budget_seconds"
+        ],
+        "title": "StartAttempt"
+      },
+      "SubmissionDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "attempt_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Attempt Id"
+          },
+          "question_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Version Id"
+          },
+          "policy_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Policy Version Id"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "public_run",
+              "assessment"
+            ],
+            "title": "Purpose"
+          },
+          "status": {
+            "type": "string",
+            "const": "received",
+            "title": "Status",
+            "default": "received"
+          },
+          "evaluation": {
+            "type": "string",
+            "const": "not_requested",
+            "title": "Evaluation",
+            "default": "not_requested"
+          },
+          "code_hash": {
+            "type": "string",
+            "title": "Code Hash"
+          },
+          "source_bytes": {
+            "type": "integer",
+            "title": "Source Bytes"
+          },
+          "accepted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Accepted At"
+          },
+          "accepted_event_sequence": {
+            "type": "integer",
+            "title": "Accepted Event Sequence"
+          },
+          "attempt_revision": {
+            "type": "integer",
+            "title": "Attempt Revision"
+          },
+          "source_code": {
+            "type": "string",
+            "title": "Source Code"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/SubmissionEvidence"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "attempt_id",
+          "question_version_id",
+          "policy_version_id",
+          "purpose",
+          "code_hash",
+          "source_bytes",
+          "accepted_at",
+          "accepted_event_sequence",
+          "attempt_revision",
+          "source_code",
+          "evidence"
+        ],
+        "title": "SubmissionDetail"
+      },
+      "SubmissionEvidence": {
+        "properties": {
+          "attempt": {
+            "$ref": "#/components/schemas/AttemptSnapshot"
+          },
+          "phase_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Phase Id"
+          },
+          "assistance_grant_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Assistance Grant Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attempt",
+          "phase_id",
+          "assistance_grant_ids"
+        ],
+        "title": "SubmissionEvidence"
+      },
+      "SubmissionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "SubmissionPage"
+      },
+      "SubmissionSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "attempt_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Attempt Id"
+          },
+          "question_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Version Id"
+          },
+          "policy_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Policy Version Id"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "public_run",
+              "assessment"
+            ],
+            "title": "Purpose"
+          },
+          "status": {
+            "type": "string",
+            "const": "received",
+            "title": "Status",
+            "default": "received"
+          },
+          "evaluation": {
+            "type": "string",
+            "const": "not_requested",
+            "title": "Evaluation",
+            "default": "not_requested"
+          },
+          "code_hash": {
+            "type": "string",
+            "title": "Code Hash"
+          },
+          "source_bytes": {
+            "type": "integer",
+            "title": "Source Bytes"
+          },
+          "accepted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Accepted At"
+          },
+          "accepted_event_sequence": {
+            "type": "integer",
+            "title": "Accepted Event Sequence"
+          },
+          "attempt_revision": {
+            "type": "integer",
+            "title": "Attempt Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "attempt_id",
+          "question_version_id",
+          "policy_version_id",
+          "purpose",
+          "code_hash",
+          "source_bytes",
+          "accepted_at",
+          "accepted_event_sequence",
+          "attempt_revision"
+        ],
+        "title": "SubmissionSummary"
+      },
+      "TestCase": {
+        "properties": {
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ],
+            "title": "Visibility"
+          },
+          "input": {
+            "items": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "type": "array",
+            "title": "Input"
+          },
+          "expected_output": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "assertion_rule": {
+            "type": "string",
+            "const": "equals",
+            "title": "Assertion Rule",
+            "default": "equals"
+          },
+          "critical": {
+            "type": "boolean",
+            "title": "Critical",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position",
+          "visibility",
+          "input",
+          "expected_output"
+        ],
+        "title": "TestCase"
+      },
+      "TypeSpecification": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "integer",
+              "number",
+              "string",
+              "boolean",
+              "array",
+              "object",
+              "null"
+            ],
+            "title": "Type"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "TypeSpecification"
+      }
+    }
+  }
+}

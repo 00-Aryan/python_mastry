@@ -149,7 +149,7 @@ class AttemptEvent(Base):
         CheckConstraint("sequence_number > 0", name="ck_attempt_event_sequence"),
         CheckConstraint(
             "event_type IN "
-            "('started','paused','resumed','extended','expired','deferred','abandoned','assistance_granted')",
+            "('started','paused','resumed','extended','expired','deferred','abandoned','assistance_granted','submission_received')",
             name="ck_attempt_event_type",
         ),
     )
