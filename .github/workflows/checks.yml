@@ -1,0 +1,33 @@
+name: Backend checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: mastery
+          POSTGRES_PASSWORD: ci_only_password
+          POSTGRES_DB: mastery_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mastery -d mastery_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://mastery:ci_only_password@localhost:5432/mastery_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.23'
+      - run: uv python install 3.12
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy src
+      - run: uv run pytest --cov=mastery_backend --cov-report=term-missing
+      - run: uv build

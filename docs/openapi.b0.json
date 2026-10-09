@@ -1,0 +1,155 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Python Mastery Backend",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health/live": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Read Liveness",
+        "operationId": "read_liveness",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Read Readiness",
+        "description": "B0 readiness means the foundation, not a database or evaluator, is ready.",
+        "operationId": "read_readiness",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/public": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Read Public Configuration",
+        "operationId": "read_public_configuration",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "alive",
+              "ready"
+            ],
+            "title": "Status"
+          },
+          "release_stage": {
+            "type": "string",
+            "const": "B0",
+            "title": "Release Stage",
+            "default": "B0"
+          },
+          "database": {
+            "type": "string",
+            "const": "not_integrated",
+            "title": "Database",
+            "default": "not_integrated"
+          },
+          "evaluation": {
+            "type": "string",
+            "const": "not_integrated",
+            "title": "Evaluation",
+            "default": "not_integrated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse"
+      },
+      "PublicConfigResponse": {
+        "properties": {
+          "api_version": {
+            "type": "string",
+            "const": "v1",
+            "title": "Api Version",
+            "default": "v1"
+          },
+          "application_version": {
+            "type": "string",
+            "title": "Application Version",
+            "default": "0.1.0"
+          },
+          "release_stage": {
+            "type": "string",
+            "const": "B0",
+            "title": "Release Stage",
+            "default": "B0"
+          },
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Capabilities",
+            "default": []
+          },
+          "attempt_modes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Attempt Modes",
+            "default": []
+          },
+          "learning_policy": {
+            "type": "null",
+            "title": "Learning Policy"
+          }
+        },
+        "type": "object",
+        "title": "PublicConfigResponse"
+      }
+    }
+  }
+}
