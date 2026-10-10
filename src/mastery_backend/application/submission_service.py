@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from mastery_backend.application.attempt_service import AttemptService
 from mastery_backend.application.clock import Clock
 from mastery_backend.application.command_replay import CommandResult, request_hash
+from mastery_backend.application.evaluation_transactions import check_pending_assessment
 from mastery_backend.domain.content import ContentError, ContentValue
 from mastery_backend.domain.identity import Principal
 from mastery_backend.domain.submission_records import (
@@ -97,6 +98,8 @@ class SubmissionService:
                 )
                 phase = attempts.phase(attempt_id)
                 now = normalized_server_time(self.clock.now())
+                if purpose == "assessment":
+                    check_pending_assessment(session, attempt_id, now)
                 command_id = uuid4()
                 self.attempts.reconcile_expiry(attempts, attempt, phase, now, command_id)
                 projection = project_timer(self.attempts.timer_state(attempt, phase), now)

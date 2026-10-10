@@ -1,8 +1,8 @@
 # Python Mastery Backend
 
-This is the local **B5 immutable-submission increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
+This is the local **B6a evaluation-lifecycle increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
 
-Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers, progressive assistance, immutable source receipts and the documented CLI-seeded local development identity are implemented. Deployed authentication, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
+Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers, progressive assistance, immutable source receipts, evaluation orchestration and the documented CLI-seeded local development identity are implemented. Deployed authentication, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
 
 ## Quick start in WSL and VS Code
 
@@ -286,3 +286,30 @@ full evidence. Reads never alter receipt clocks. No response loads hidden tests,
 hints or solutions; logs omit learner source. See [submission rules](docs/decisions/0007_immutable_submissions.md)
 and [B5 verification](docs/B5_Verification.md) for ordering, constraints and actual
 checks. Execution, grading, recommendations and mastery remain future increments.
+
+## Evaluation lifecycle and runner interface
+
+B6a adds POST /api/v1/submissions/{id}/evaluations with expected_revision and
+Idempotency-Key, GET /api/v1/evaluations/{id}, and bounded
+GET /api/v1/attempts/{id}/evaluations. Default admission returns 503
+EVALUATION_UNAVAILABLE: no supported isolated runner exists. RUNNER_URL cannot enable
+execution; test adapters are defined only in tests and rejected outside APP_ENV=test.
+No source is interpreted or executed by this backend.
+
+When a supported adapter is introduced, admission atomically pins an immutable
+submission, published test bundle and evaluator policy, records a pending job and
+durable dispatch intent, and advances the attempt revision. Leased dispatch happens
+outside transactions; stale/duplicate results cannot overwrite a terminal result.
+Infrastructure failures have a separate category from incorrect/syntactically invalid
+code. Status/history reveal no hidden assets, source or raw diagnostics.
+
+Pending assessment jobs block new assistance/assessment commands. Timers continue,
+and pause/end remain available. Bounded retries and a five-minute deadline prevent
+an indefinite help lock: valid help admission also finalizes overdue jobs if the
+worker stopped. Immutable receipt evidence and exact successful retries remain intact.
+Results do not end attempts, award eligibility or change mastery.
+
+Read [evaluation rules](docs/decisions/0008_evaluation_lifecycle.md) for state/protocol,
+identity and isolation release gates, and [B6a verification](docs/B6a_Verification.md)
+for actual tests and unverified guarantees. Real runner integration, publication
+verification, recommendations and mastery remain outside this increment.

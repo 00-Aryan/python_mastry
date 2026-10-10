@@ -7,6 +7,7 @@ from sqlalchemy import Connection
 from mastery_backend.infrastructure.database import (
     assistance_models,  # noqa: F401
     attempt_models,  # noqa: F401
+    evaluation_models,  # noqa: F401
     submission_models,  # noqa: F401
 )
 from mastery_backend.infrastructure.database.content_models import Base

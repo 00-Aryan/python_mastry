@@ -453,3 +453,29 @@ Owned detail includes submitted source; bounded attempt lists select metadata on
 Archived pinned content remains available to its existing owner. Source/evidence and
 retry facts are immutable, and downgrade refuses stored receipts. Payload limits,
 strict authorization and safe logging remain the infrastructure/API boundaries.
+
+## Released evaluation orchestration refinement (user-requested B6a)
+
+[Decision 0008](decisions/0008_evaluation_lifecycle.md) and the
+[B6a API slice](REST_API_Settings_and_Contract.md#released-b6a-evaluation-lifecycle-10-october-2026)
+are authoritative for this scoped increment. B5 receipt intake stays separate from
+owned evaluation admission. Atomicity covers the job, append-only initial transition,
+durable dispatch intent and permanent request receipt, alongside the ordered attempt
+event/revision. One immutable submission has at most one job; retry generations are
+infrastructure redelivery, never extra assessment observations.
+
+Normalized test bundles reference the immutable published assets already stored.
+Jobs pin source submission, question, attempt learning policy, bundle and evaluator
+policy. Explicit state/history, leases, generations, bounded backoff/deadlines and
+current-token result application protect terminal results. The application worker
+calls the trusted adapter outside transactions. Shared transition/admission rules
+also finalize overdue pending assessments before valid help/assessment commands,
+preventing indefinite help locks if the worker stops. Status polls stay read-only.
+
+No supported production adapter, worker daemon, learner-code execution, transport
+callback, grader, publication verifier, evidence/checkpoint calculation or mastery
+path is enabled. Default requests return 503 EVALUATION_UNAVAILABLE without writes.
+Adapter implementations live only in tests; application and worker reject injection
+outside APP_ENV=test. Future real runner admission requires authenticated identity/
+results and adversarially verified execution isolation. Synthetic outcomes prove
+orchestration only, not correctness of source or future runner security.

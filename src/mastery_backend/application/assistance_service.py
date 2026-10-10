@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from mastery_backend.application.attempt_service import AttemptService
 from mastery_backend.application.clock import Clock
 from mastery_backend.application.command_replay import CommandResult, request_hash
+from mastery_backend.application.evaluation_transactions import check_pending_assessment
 from mastery_backend.domain.assistance import (
     AssistanceTrigger,
     validate_assistance_release,
@@ -64,6 +65,7 @@ class AssistanceService:
                     raise ContentError("STALE_REVISION", "Attempt changed; reload before retrying.")
                 phase = attempts.phase(attempt_id)
                 now = normalized_server_time(self.clock.now())
+                check_pending_assessment(session, attempt_id, now)
                 command_id = uuid4()
                 self.attempts.reconcile_expiry(attempts, attempt, phase, now, command_id)
                 policy_record, policy = attempts.policy(attempt.policy_version_id)

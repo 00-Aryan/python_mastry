@@ -25,6 +25,7 @@ class JsonLogFormatter(logging.Formatter):
             "duration_ms",
             "attempt_id",
             "submission_id",
+            "job_id",
             "grant_id",
             "assistance_kind",
             "reason_code",

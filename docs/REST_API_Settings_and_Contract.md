@@ -675,3 +675,84 @@ health remains not_integrated and learning_policy remains null. No runner/job en
 grading, recommendation or mastery path is released. See [B5 OpenAPI](openapi.b5-immutable-submissions.json)
 and [B5 verification](B5_Verification.md). Trusted publication and deployed authentication
 remain unavailable; test-only published fixtures do not enable production bypasses.
+
+## Released B6a evaluation lifecycle (10 October 2026)
+
+This slice supersedes the original combined submit-and-evaluate proposal. B5 immutable
+receipts remain received/not_requested forever; query the evaluation resource for
+current job state. Receipt/evidence does not imply executed, correct or independent.
+There is no supported real runner in this release. Default admission returns safe
+503 EVALUATION_UNAVAILABLE with no job, intent, revision or timer mutation. RUNNER_URL
+is still a planning setting, not an enabling switch. Adapters may be injected only
+in APP_ENV=test; the package contains no fake executor or result callback.
+
+| Method/path | Behavior |
+|---|---|
+| POST /api/v1/submissions/{submission_id}/evaluations | Owned admission, expected_revision and Idempotency-Key; atomic job/intent/history/receipt; 202 with Location when a supported binding exists |
+| GET /api/v1/evaluations/{job_id} | Owned safe status, immutable pins and at most eight ordered transitions |
+| GET /api/v1/attempts/{attempt_id}/evaluations | Owned metadata history, limit/cursor, default 20, maximum min(100, MAX_PAGE_SIZE) |
+
+Admission requires the fresh database learner role and active/paused parent attempt.
+Archived pinned content remains available to its owner. Purpose comes from the
+submission: public_run pins published public tests only; assessment pins all tests.
+The immutable bundle records normalized membership and a content hash covering tests
+and function contract. Job pins submission/question/learning-policy/bundle and the
+immutable orchestration-v1 evaluator policy. Later content/policies cannot repin it.
+No client-supplied owner, result, pins, runner identity or diagnostics is accepted.
+
+One job exists per submission. Identical submission/key/revision retries recover
+original 202/detail/Location indefinitely, before runner availability, state and
+revision checks, with Idempotency-Replayed: true. Changed revision at that key returns
+409 IDEMPOTENCY_CONFLICT. A new key for an already evaluated submission returns
+409 EVALUATION_EXISTS: poll the existing job. Infrastructure redelivery stays on that
+job rather than creating another evaluation identity. Distinct immutable submissions
+can have distinct jobs; no repeated run becomes an independent learning observation.
+
+Admission uses user -> attempt -> job lock ordering, reconciles exact timer expiry
+before evaluation_requested, advances attempt revision and atomically stores job,
+initial transition, durable dispatch intent and retry receipt. Competing admission,
+help and timer mutations at one revision yield one success and a documented conflict.
+Saved submission assistance/timer evidence stays unchanged. Assessment pending/running
+blocks new help, solution escape, new assessment receipts and new evaluation requests
+with 409 EVALUATION_PENDING. Existing grant/receipt retries remain recoverable. Public
+source receipts alone are still allowed; public-run evaluation is blocked during an
+in-flight assessment. Public-run jobs do not block help. Pause/resume/extend/defer/
+abandon remain available; they neither cancel jobs nor alter saved evidence.
+
+States are pending -> running -> passed/failed/infrastructure_error. Only retryable
+infrastructure faults permit running -> pending. Final states are immutable. No result
+completes the attempt or computes scoring/eligibility. Public categories are passed,
+incorrect, syntax_error, resource_limit, infrastructure_error, or null before result.
+Syntax errors and incorrect code are ordinary failed evaluations when a trusted runner
+reports them, never HTTP server errors; dispatch/authenticity/timeouts are infrastructure
+failures. These result transitions are tested with synthetic adapter envelopes only.
+
+Workers claim durable intent with SKIP LOCKED, commit a unique token/generation and
+30-second lease, call the adapter outside transactions, then reacquire user/attempt/job
+locks. Result protocol v1 must match every pin/hash, configured runner identity and
+current token/generation before lease/deadline expiry. Duplicate/stale/late results are
+ignored, including after terminal results. Three generations maximum, 5/10-second
+backoff and a 300-second overall deadline bound work. Deadline equality is expired.
+Recovery requeues expired leases or records infrastructure_error; worker recreation
+can redeliver after a crash. Admission of new help/assessment commands also finalizes
+overdue pending assessment jobs, so a stopped worker cannot indefinitely block help.
+Failed commands roll this lazy recovery back atomically. Status/history reads do not
+sample the solving clock or write. No background worker scheduler is enabled yet.
+
+History uses descending attempt event sequence, a first-page high-water mark and
+one-day owner/attempt-bound cursors, preserving order even at equal timestamps and
+excluding later jobs. Responses exclude source, test membership/inputs/expected values,
+hidden diagnostics, private assistance/solutions, lease tokens and internal request
+receipts. Errors/logs never interpolate adapter exceptions or learner source.
+
+The trusted adapter boundary must authenticate remote identity and result transport;
+identity strings/tokens provide correlation, not cryptographic authenticity. No HTTP
+result callback exists. Real runner registration requires mutually authenticated
+transport, authenticated envelopes/replay resistance, resource/output bounds, isolated
+unprivileged execution without credentials/network/host access, private harness secrecy,
+image/runtime version pins, cleanup and adversarial isolation tests. See
+[decision 0008](decisions/0008_evaluation_lifecycle.md) for protocol fields, guarantees,
+recovery and file responsibilities, and [B6a verification](B6a_Verification.md) for actual
+checks. Production publication, execution, grading, recommendations and mastery remain
+unavailable. Public config adds evaluation_lifecycle; release_stage is
+B6a-evaluation-lifecycle, evaluation health stays not_integrated.

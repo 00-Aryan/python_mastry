@@ -1,0 +1,264 @@
+{
+  "protocol_version": 1,
+  "request": {
+    "$defs": {
+      "RunnerTest": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "visibility": {
+            "enum": [
+              "public",
+              "private"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          },
+          "input_json": {
+            "items": {},
+            "title": "Input Json",
+            "type": "array"
+          },
+          "expected_json": {
+            "title": "Expected Json"
+          },
+          "assertion_rule": {
+            "const": "equals",
+            "title": "Assertion Rule",
+            "type": "string"
+          },
+          "critical": {
+            "title": "Critical",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "visibility",
+          "input_json",
+          "expected_json",
+          "assertion_rule",
+          "critical"
+        ],
+        "title": "RunnerTest",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "protocol_version": {
+        "const": 1,
+        "default": 1,
+        "title": "Protocol Version",
+        "type": "integer"
+      },
+      "job_id": {
+        "format": "uuid",
+        "title": "Job Id",
+        "type": "string"
+      },
+      "generation": {
+        "minimum": 1,
+        "title": "Generation",
+        "type": "integer"
+      },
+      "lease_token": {
+        "format": "uuid",
+        "title": "Lease Token",
+        "type": "string"
+      },
+      "submission_id": {
+        "format": "uuid",
+        "title": "Submission Id",
+        "type": "string"
+      },
+      "question_version_id": {
+        "format": "uuid",
+        "title": "Question Version Id",
+        "type": "string"
+      },
+      "policy_version_id": {
+        "format": "uuid",
+        "title": "Policy Version Id",
+        "type": "string"
+      },
+      "test_bundle_id": {
+        "format": "uuid",
+        "title": "Test Bundle Id",
+        "type": "string"
+      },
+      "evaluator_policy_version_id": {
+        "format": "uuid",
+        "title": "Evaluator Policy Version Id",
+        "type": "string"
+      },
+      "source_hash": {
+        "pattern": "^[a-f0-9]{64}$",
+        "title": "Source Hash",
+        "type": "string"
+      },
+      "bundle_hash": {
+        "pattern": "^[a-f0-9]{64}$",
+        "title": "Bundle Hash",
+        "type": "string"
+      },
+      "runner_identity": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Runner Identity",
+        "type": "string"
+      },
+      "request_id": {
+        "anyOf": [
+          {
+            "maxLength": 128,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Request Id"
+      },
+      "source_code": {
+        "title": "Source Code",
+        "type": "string"
+      },
+      "contract": {
+        "additionalProperties": true,
+        "title": "Contract",
+        "type": "object"
+      },
+      "tests": {
+        "items": {
+          "$ref": "#/$defs/RunnerTest"
+        },
+        "title": "Tests",
+        "type": "array"
+      },
+      "execution_deadline": {
+        "format": "date-time",
+        "title": "Execution Deadline",
+        "type": "string"
+      }
+    },
+    "required": [
+      "job_id",
+      "generation",
+      "lease_token",
+      "submission_id",
+      "question_version_id",
+      "policy_version_id",
+      "test_bundle_id",
+      "evaluator_policy_version_id",
+      "source_hash",
+      "bundle_hash",
+      "runner_identity",
+      "source_code",
+      "contract",
+      "tests",
+      "execution_deadline"
+    ],
+    "title": "RunnerRequest",
+    "type": "object"
+  },
+  "result": {
+    "additionalProperties": false,
+    "properties": {
+      "protocol_version": {
+        "const": 1,
+        "default": 1,
+        "title": "Protocol Version",
+        "type": "integer"
+      },
+      "job_id": {
+        "format": "uuid",
+        "title": "Job Id",
+        "type": "string"
+      },
+      "generation": {
+        "minimum": 1,
+        "title": "Generation",
+        "type": "integer"
+      },
+      "lease_token": {
+        "format": "uuid",
+        "title": "Lease Token",
+        "type": "string"
+      },
+      "submission_id": {
+        "format": "uuid",
+        "title": "Submission Id",
+        "type": "string"
+      },
+      "question_version_id": {
+        "format": "uuid",
+        "title": "Question Version Id",
+        "type": "string"
+      },
+      "policy_version_id": {
+        "format": "uuid",
+        "title": "Policy Version Id",
+        "type": "string"
+      },
+      "test_bundle_id": {
+        "format": "uuid",
+        "title": "Test Bundle Id",
+        "type": "string"
+      },
+      "evaluator_policy_version_id": {
+        "format": "uuid",
+        "title": "Evaluator Policy Version Id",
+        "type": "string"
+      },
+      "source_hash": {
+        "pattern": "^[a-f0-9]{64}$",
+        "title": "Source Hash",
+        "type": "string"
+      },
+      "bundle_hash": {
+        "pattern": "^[a-f0-9]{64}$",
+        "title": "Bundle Hash",
+        "type": "string"
+      },
+      "runner_identity": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Runner Identity",
+        "type": "string"
+      },
+      "outcome": {
+        "enum": [
+          "passed",
+          "incorrect",
+          "syntax_error",
+          "resource_limit",
+          "infrastructure_error"
+        ],
+        "title": "Outcome",
+        "type": "string"
+      }
+    },
+    "required": [
+      "job_id",
+      "generation",
+      "lease_token",
+      "submission_id",
+      "question_version_id",
+      "policy_version_id",
+      "test_bundle_id",
+      "evaluator_policy_version_id",
+      "source_hash",
+      "bundle_hash",
+      "runner_identity",
+      "outcome"
+    ],
+    "title": "RunnerResult",
+    "type": "object"
+  }
+}

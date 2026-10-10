@@ -10,6 +10,7 @@ from mastery_backend.application.attempt_service import AttemptService
 from mastery_backend.application.catalog_service import CatalogService
 from mastery_backend.application.clock import Clock, SystemClock
 from mastery_backend.application.content_service import ContentService
+from mastery_backend.application.evaluation_service import EvaluationService
 from mastery_backend.application.identity_service import read_development_principal
 from mastery_backend.application.publication_verification import (
     ReferenceVerifier,
@@ -19,6 +20,7 @@ from mastery_backend.application.skill_service import SkillService
 from mastery_backend.application.submission_service import SubmissionService
 from mastery_backend.domain.content import ContentError
 from mastery_backend.domain.identity import Principal, require_content_admin, require_learner
+from mastery_backend.infrastructure.runner.runner_protocol import RunnerAdapter
 
 
 def session_factory(request: Request) -> sessionmaker[Session]:
@@ -116,3 +118,16 @@ def submission_service(
     clock: Annotated[Clock, Depends(server_clock)],
 ) -> SubmissionService:
     return SubmissionService(factory, clock, request.app.state.settings.max_code_bytes)
+
+
+def runner_adapter() -> RunnerAdapter | None:
+    return None
+
+
+def evaluation_service(
+    request: Request,
+    factory: Annotated[sessionmaker[Session], Depends(session_factory)],
+    clock: Annotated[Clock, Depends(server_clock)],
+    adapter: Annotated[RunnerAdapter | None, Depends(runner_adapter)],
+) -> EvaluationService:
+    return EvaluationService(factory, clock, adapter, request.app.state.settings.app_env)

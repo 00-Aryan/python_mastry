@@ -93,3 +93,7 @@ smoke uses project dependencies, not a fresh online dependency installation.
 
 The configured Git author is reused without changing identity. Credentials, .env,
 virtual environments, caches, dist output and local database artifacts remain ignored.
+
+B6a subsequently adds separate owned evaluation admission and job history; see
+[B6a verification](B6a_Verification.md). The B5 checks above remain the historical
+receipt-only verification, not proof of runner execution or security.

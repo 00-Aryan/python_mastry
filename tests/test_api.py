@@ -14,7 +14,7 @@ def test_health_is_explicit_about_release(client: TestClient, path: str, status:
     assert response.status_code == 200
     assert response.json() == {
         "status": status,
-        "release_stage": "B5-immutable-submissions",
+        "release_stage": "B6a-evaluation-lifecycle",
         "database": "connected" if path == "/health/ready" else "not_checked",
         "evaluation": "not_integrated",
     }
@@ -28,6 +28,7 @@ def test_public_config_has_no_secrets_or_fake_capabilities(client: TestClient) -
         "server_timers",
         "progressive_assistance",
         "submission_receipts",
+        "evaluation_lifecycle",
     ]
     assert response.json()["attempt_modes"] == ["practice", "assessment"]
     assert "database_url" not in response.text
@@ -64,6 +65,9 @@ def test_docs_and_openapi_only_describe_released_routes(client: TestClient) -> N
     assert client.get("/docs").status_code == 200
     schema = client.get("/openapi.json").json()
     assert set(schema["paths"]) == {
+        "/api/v1/submissions/{submission_id}/evaluations",
+        "/api/v1/evaluations/{job_id}",
+        "/api/v1/attempts/{attempt_id}/evaluations",
         "/api/v1/attempts/{attempt_id}/submissions",
         "/api/v1/submissions/{submission_id}",
         "/api/v1/attempts/{attempt_id}/assistance",
