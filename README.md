@@ -330,3 +330,12 @@ assets/credentials enter isolation. Real verification includes adversarial submi
 and a real killed supervisor, with independent systemd timeout cleanup. This is a
 local shared-kernel boundary, not a deployment or production certification.
 Publication remains unavailable until its separate trusted verifier is implemented.
+
+
+## Roadmap workflow
+
+Read [the current status](docs/roadmap/STATUS.md) and [master roadmap](docs/roadmap/Master_Roadmap.md)
+before choosing work. Sprint records under `docs/roadmap/sprints/` link actual commits,
+verification and blockers. The inventory distinguishes implemented B6b code from its
+still-open real-isolation verification gate; historical descriptions above are not
+proof of current release readiness.

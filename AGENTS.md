@@ -61,3 +61,12 @@ Do not write superficial tests solely to mirror each code line. A file with decl
 ## Change completion
 
 Run relevant pytest tests, Ruff formatting/lint and type checks; run migration and integration checks when persistence changes. Review the final diff and update design/setup notes when behavior changes. Report what changed, why, verification and unresolved limits. Avoid claiming a complete application when only a scaffold or contract exists.
+
+## Roadmap workflow
+
+Before selecting work, read [Master_Roadmap.md](docs/roadmap/Master_Roadmap.md),
+[STATUS.md](docs/roadmap/STATUS.md), the selected sprint record and refined contracts.
+Inspect actual HEAD and the working tree; credit existing verified work without rebuilding it.
+Complete one ready bounded unit and its acceptance checks, then update its record and STATUS
+with actual evidence, commit, blockers and next ready unit. Separate implemented, verified
+and unverified capabilities; split oversized work rather than waive acceptance criteria.
