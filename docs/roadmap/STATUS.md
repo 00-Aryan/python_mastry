@@ -40,7 +40,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Units | Credit / status | Remaining acceptance |
 |---|---|---|
 | S001 | Verified audit `ce6a023`; [record](sprints/S001.md) | Commit reference recorded in Git history |
-| S002 | In progress; [record](sprints/S002.md); public baseline/history and audit credited | Sprint push and live remote ancestry check pending |
+| S002 | Verified and published; [record](sprints/S002.md); checkpoint `759ce30` | Not merged; new branch CI was in progress |
 | S003 | Ready after S002 | Existing remote CI is credited; review explicit migration CLI/data coverage and add a distinct capability-gated isolation job without claiming skipped checks passed |
 | S004 | ADR/backend choice implemented in B6b | Preserve ADR; carry current-host capability verification into S010a rather than rebuild |
 | S005–S009 | Implemented in B6b; acceptance not fully verified | Reuse runtime, protocol, authority, leases and grader; run current-HEAD real checks |
@@ -84,6 +84,13 @@ not proof of completion; no weighted progress estimate has been assigned.
 
 ## Next action
 
-Current unit: **S002 GitHub baseline**; audit is verified and publication is pending.
-Next ready unit after its push/ancestry checks: **S003 Remote CI baseline**.
+S001 is complete at `ce6a023`. S002 is complete on `sprint/S002-github-baseline`,
+with live publication/ancestry verified at checkpoint `759ce30`; its completion-record
+commit follows that checkpoint. The sprint branch is published, not merged; main
+remains the audited B6b baseline. New branch CI was in progress when checked.
+
+**Next ready unit: S003 Remote CI baseline.** Reuse the already successful baseline
+pipeline, review standalone migration checks and introduce a distinct capability-gated
+runner verification job. Do not infer runner passes from skipped tests. No S003
+implementation or application feature was started in this audit.
 B6b verification closure remains a release blocker before publication-dependent work.
