@@ -179,7 +179,12 @@ class Controller:
                 schema = self.local / "agent-schema.json"
                 atomic_write(schema, AgentResult.model_json_schema())
                 prompt = (self.root / "docs/automation/sprint_prompt.md").read_text()
+                record = unit.acceptance_record or f"docs/roadmap/sprints/{unit.id}.md"
+                record_path = Path(record)
+                if record_path.is_absolute() or ".." in record_path.parts:
+                    raise RuntimeError("Acceptance reference must stay inside trusted checkout")
                 prompt += f"\nUnit: {unit.id}. Profile: {unit.profile}. Only this bounded unit.\n"
+                prompt += "\nTrusted acceptance record:\n" + (self.root / record_path).read_text()
                 execute(
                     [
                         config.codex,
@@ -392,6 +397,34 @@ def main() -> None:
                 controller.preflight(controller.configuration())
                 if not (controller.local / "scheduled-smoke.json").is_file():
                     raise RuntimeError("Real scheduled-launch smoke must succeed before enable")
+                from mastery_backend.automation.windows_scheduler import POWERSHELL
+
+                scheduled = json.loads(
+                    execute(
+                        [
+                            POWERSHELL,
+                            "-NoProfile",
+                            "-Command",
+                            "$t=Get-ScheduledTaskInfo -TaskName PythonMastery-Smoke; "
+                            "[PSCustomObject]@{result=$t.LastTaskResult; "
+                            "started=([DateTimeOffset]$t.LastRunTime).ToUnixTimeSeconds()} "
+                            "| ConvertTo-Json -Compress",
+                        ],
+                        controller.root,
+                        timeout_seconds=30,
+                    )
+                )
+                marker = json.loads((controller.local / "scheduled-smoke.json").read_text())
+                finished = datetime.fromisoformat(marker["time"]).timestamp()
+                if (
+                    scheduled["result"] != 0
+                    or not 0 <= finished - scheduled["started"] <= 300
+                    or marker.get("uid") != os.getuid()
+                    or marker.get("result") != "success"
+                ):
+                    raise RuntimeError(
+                        "Scheduled task completion does not match fresh smoke evidence"
+                    )
                 (controller.local / "DISABLED").unlink(missing_ok=True)
         elif args.command in {"run", "run-batch"}:
             count = args.maximum_units if args.command == "run-batch" else 1

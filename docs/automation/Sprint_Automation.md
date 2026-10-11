@@ -80,10 +80,18 @@ $script = '\\wsl.localhost\Ubuntu\home\aryan\projects\python_mastry\scripts\auto
 & $script -Mode Status
 ```
 
+Native task launcher logs are in `C:\Users\Aryan\AppData\Local\PythonMastery\launch-09.log`
+(and `launch-14.log`, `launch-19.log`, `launch-smoke.log`); each launch replaces its file.
+Persistent phase/outcome records are in `.automation/logs`. Native tasks run a fixed
+cmd.exe redirection for these logs; parameters reject shell metacharacters and learner/
+model-generated commands never enter this launcher. Controller output is safe metadata.
+
 The scheduled smoke must create a fresh `.automation/scheduled-smoke.json` with the
 expected Ubuntu/uid1000 and successful authenticated Codex response. Check the actual
 PythonMastery-Smoke task's LastTaskResult is zero. A manually invoked CLI smoke alone
-is insufficient installation evidence. Once verified, enable the controller below.
+is insufficient installation evidence. Enable independently checks LastTaskResult and matches its start time to the successful
+marker; a fabricated/manual marker without matching scheduled execution is refused.
+Once verified, enable the controller below.
 
 ## Exact operating commands
 
@@ -149,3 +157,14 @@ completion require their own verification; launcher smoke does not prove these.
 Official references: [Codex non-interactive execution](https://learn.chatgpt.com/docs/non-interactive-mode),
 [Task principals](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal),
 [Task settings](https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset).
+
+
+To start the discovered disposable cluster after an operator-reviewed restart, from
+this checkout (never substitute a production data directory):
+
+```bash
+LD_LIBRARY_PATH="$PWD/.local-runner/postgres/usr/lib/x86_64-linux-gnu"   .local-runner/postgres/usr/lib/postgresql/18/bin/pg_ctl   -D .local-runner/postgres-data -l "$PWD/.local-runner/postgres.log"   -o '-h127.0.0.1 -p55432 -k/tmp' start
+```
+
+Configure a user PostgreSQL service separately for automatic startup. This installation
+has not verified cold-boot persistence. Tasks remain fail closed if the database is absent.

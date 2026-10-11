@@ -27,7 +27,7 @@ def test_native_xml_restricts_account_and_preserves_launch_arguments():
     assert find("MultipleInstancesPolicy") == "IgnoreNew"
     assert find("ExecutionTimeLimit") == "PT115M"
     assert find("DaysInterval") == "1"
-    assert '--exec "/bin/uv" run --locked scripts/automation/run_sprint.py run --slot 09' in find(
+    assert "--exec /bin/uv run --locked scripts/automation/run_sprint.py run --slot 09" in find(
         "Arguments"
     )
     assert b"Password" not in xml
@@ -41,4 +41,37 @@ def test_smoke_trigger_is_one_shot_and_unsafe_arguments_rejected():
     with pytest.raises(ValueError):
         task_xml(
             "account", 'bad"argument', "aryan", Path("/project"), "/uv", datetime.now(UTC), None
+        )
+
+
+def test_native_logging_keeps_fixed_command_and_rejects_shell_metacharacters():
+    xml = task_xml(
+        "account",
+        "Ubuntu",
+        "aryan",
+        Path("/project"),
+        "/uv",
+        datetime.now(UTC),
+        "09",
+        r"C:\Users\Aryan\AppData\Local\PythonMastery",
+    )
+    root = ElementTree.fromstring(xml)
+    arguments = root.find(".//{" + NAMESPACE + "}Arguments").text
+    assert "wsl.exe -d Ubuntu -u aryan --cd /project --exec /uv" in arguments
+    assert "launch-09.log" in arguments
+    assert "2>&1" in arguments
+    with pytest.raises(ValueError):
+        task_xml(
+            "account", "Ubuntu&evil", "aryan", Path("/project"), "/uv", datetime.now(UTC), None
+        )
+    with pytest.raises(ValueError):
+        task_xml(
+            "account",
+            "Ubuntu",
+            "aryan",
+            Path("/project"),
+            "/uv",
+            datetime.now(UTC),
+            None,
+            "bad&directory",
         )

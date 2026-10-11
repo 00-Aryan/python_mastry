@@ -31,7 +31,10 @@ $principal = New-ScheduledTaskPrincipal -UserId $account -LogonType Interactive 
 $settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -StartWhenAvailable `
     -WakeToRun -ExecutionTimeLimit (New-TimeSpan -Minutes 115)
 $wsl = "$env:SystemRoot\System32\wsl.exe"
-$prefix = '-d "{0}" -u "{1}" --cd "{2}" --exec "{3}" run --locked scripts/automation/run_sprint.py ' -f `
+if (($Distribution,$LinuxUser,$Project,$Uv | Where-Object { $_ -match '[\s"%&<>|^]' }).Count) {
+    throw 'Use native Python registration for arguments requiring Windows quoting.'
+}
+$prefix = '-d {0} -u {1} --cd {2} --exec {3} run --locked scripts/automation/run_sprint.py ' -f `
     $Distribution,$LinuxUser,$Project,$Uv
 if ($Mode -eq 'Smoke') {
     $name = 'PythonMastery-Smoke'

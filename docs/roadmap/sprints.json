@@ -1,10 +1,43 @@
 {
   "version": 1,
   "units": [
-    {"id": "S001", "status": "verified"},
-    {"id": "S002", "status": "verified", "dependencies": ["S001"]},
-    {"id": "S003", "status": "verified", "dependencies": ["S002"]},
-    {"id": "S010a", "status": "ready", "profile": "isolation", "dependencies": ["S003"]},
-    {"id": "S012", "status": "planned", "dependencies": ["S010a"]}
+    {
+      "id": "S001",
+      "status": "verified",
+      "acceptance_record": "docs/roadmap/sprints/S001.md"
+    },
+    {
+      "id": "S002",
+      "status": "verified",
+      "dependencies": [
+        "S001"
+      ],
+      "acceptance_record": "docs/roadmap/sprints/S002.md"
+    },
+    {
+      "id": "S003",
+      "status": "verified",
+      "dependencies": [
+        "S002"
+      ],
+      "acceptance_record": "docs/roadmap/sprints/S003.md"
+    },
+    {
+      "id": "S010a",
+      "status": "ready",
+      "profile": "isolation",
+      "dependencies": [
+        "S003"
+      ],
+      "acceptance_record": "docs/roadmap/sprints/S010a.md"
+    },
+    {
+      "id": "S012",
+      "status": "planned",
+      "dependencies": [
+        "S010a"
+      ],
+      "acceptance_record": "docs/roadmap/Master_Roadmap.md"
+    }
   ]
 }

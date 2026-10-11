@@ -21,6 +21,7 @@ class StrictRecord(BaseModel):
 class Unit(StrictRecord):
     id: str = Field(pattern=r"^(S[0-9]{3}[a-z]?|AUTO[0-9]{3})$")
     dependencies: list[str] = Field(default_factory=list)
+    acceptance_record: str | None = None
     status: Literal["ready", "planned", "running", "pending_ci", "blocked", "verified"]
     profile: Literal["baseline", "isolation"] = "baseline"
     attempts: int = Field(default=0, ge=0, le=2)

@@ -1,6 +1,7 @@
 """Native XML registration when Windows policy disallows PowerShell script files."""
 
 import argparse
+import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 from xml.etree import ElementTree
@@ -21,10 +22,11 @@ def task_xml(
     uv: str,
     boundary: datetime,
     slot: str | None,
+    log_directory: str | None = None,
 ) -> bytes:
     # Argument quoting rejects quotes rather than attempting a second shell language.
     values = (distribution, user, str(project), uv)
-    if any('"' in value or "\n" in value for value in values):
+    if any(any(character in value for character in '"\n%&<>|^') for value in values):
         raise ValueError("Task arguments contain unsupported characters")
     ElementTree.register_namespace("", NAMESPACE)
     root = ElementTree.Element("Task", xmlns=NAMESPACE, version="1.4")
@@ -62,11 +64,35 @@ def task_xml(
     actions.set("Context", "Author")
     action = child(actions, "Exec")
     child(action, "Command", r"C:\Windows\System32\wsl.exe")
-    arguments = (
-        f'-d "{distribution}" -u "{user}" --cd "{project}" --exec "{uv}" '
-        "run --locked scripts/automation/run_sprint.py "
+    arguments = subprocess.list2cmdline(
+        [
+            "-d",
+            distribution,
+            "-u",
+            user,
+            "--cd",
+            str(project),
+            "--exec",
+            uv,
+            "run",
+            "--locked",
+            "scripts/automation/run_sprint.py",
+            *(["smoke"] if slot is None else ["run", "--slot", slot]),
+        ]
     )
-    arguments += "smoke" if slot is None else f"run --slot {slot}"
+    if log_directory is not None:
+        if any(character in log_directory for character in '\n%&<>|^"'):
+            raise ValueError("Unsafe log directory")
+        child(action, "WorkingDirectory", log_directory)
+        command_node = action.find("Command")
+        assert command_node is not None
+        command_node.text = r"C:\Windows\System32\cmd.exe"
+        log_name = "smoke" if slot is None else slot
+        arguments = (
+            r"/d /c C:\Windows\System32\wsl.exe "
+            + arguments
+            + f' > "{log_directory}\\launch-{log_name}.log" 2>&1'
+        )
     child(action, "Arguments", arguments)
     return bytes(ElementTree.tostring(root, encoding="utf-16", xml_declaration=True))
 
@@ -120,6 +146,17 @@ def main() -> None:
     )
     if actual != args.linux_user:
         raise RuntimeError("WSL user discovery differs from requested account")
+    log_directory = execute(
+        [
+            POWERSHELL,
+            "-NoProfile",
+            "-Command",
+            '$p=Join-Path $env:LOCALAPPDATA "PythonMastery"; '
+            "New-Item -ItemType Directory -Force -Path $p | Out-Null; $p",
+        ],
+        project,
+        timeout_seconds=30,
+    )
     directory = project / ".automation/tasks"
     directory.mkdir(parents=True, mode=0o700, exist_ok=True)
     now = datetime.now(ZoneInfo("Asia/Kolkata"))
@@ -136,7 +173,14 @@ def main() -> None:
         path = directory / (name + ".xml")
         path.write_bytes(
             task_xml(
-                discovery[0], args.distribution, args.linux_user, project, args.uv, boundary, slot
+                discovery[0],
+                args.distribution,
+                args.linux_user,
+                project,
+                args.uv,
+                boundary,
+                slot,
+                log_directory,
             )
         )
         windows_path = execute(["/usr/bin/wslpath", "-w", str(path)], project)

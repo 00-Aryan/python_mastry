@@ -154,6 +154,8 @@ def test_claimed_success_still_runs_independent_checks_and_never_pushes_failure(
     )
     (controller.root / "docs/automation").mkdir(parents=True)
     (controller.root / "docs/automation/sprint_prompt.md").write_text("fixed prompt")
+    (controller.root / "docs/roadmap/sprints").mkdir(parents=True)
+    (controller.root / "docs/roadmap/sprints/S010a.md").write_text("trusted acceptance")
     state = controller.state()
     state.units[0].profile = "baseline"
     controller.save(state)
@@ -221,3 +223,44 @@ def test_publish_requires_exact_journal_sha_and_required_ci(tmp_path, monkeypatc
 def test_output_limit_terminates_process(tmp_path):
     with pytest.raises(RuntimeError, match="output exceeded"):
         execute(["/usr/bin/yes"], tmp_path, timeout_seconds=3)
+
+
+@pytest.mark.parametrize(
+    "task_result,started,enabled",
+    [(0, 1791753130, True), (1, 1791753130, False), (0, 1791750000, False)],
+)
+def test_enable_requires_matching_real_task_completion(
+    tmp_path, monkeypatch, task_result, started, enabled
+):
+    import mastery_backend.automation.controller as module
+
+    controller = setup_controller(tmp_path)
+    controller.config_path.write_text(
+        Configuration(
+            uv="/uv", gh="/gh", codex="/codex", database_url="postgresql://localhost/mastery_test"
+        ).model_dump_json()
+    )
+    (controller.local / "DISABLED").touch()
+    (controller.local / "scheduled-smoke.json").write_text(
+        json.dumps(
+            {
+                "time": "2026-10-11T21:12:17.223723+00:00",
+                "uid": module.os.getuid(),
+                "result": "success",
+            }
+        )
+    )
+    monkeypatch.setattr(module.Controller, "preflight", lambda self, config: None)
+    monkeypatch.setattr(
+        module,
+        "execute",
+        lambda *args, **kwargs: json.dumps({"result": task_result, "started": started}),
+    )
+    monkeypatch.setattr("sys.argv", ["controller", "--root", str(tmp_path), "enable"])
+    if enabled:
+        module.main()
+        assert not (controller.local / "DISABLED").exists()
+    else:
+        with pytest.raises(SystemExit):
+            module.main()
+        assert (controller.local / "DISABLED").exists()
