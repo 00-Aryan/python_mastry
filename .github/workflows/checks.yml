@@ -1,5 +1,13 @@
 name: Backend checks
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_isolation:
+        type: boolean
+        default: false
+        description: Run on the dedicated mastery-isolation capability host
 permissions:
   contents: read
 jobs:
@@ -29,5 +37,46 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy src migrations
+      - name: Verify migration CLI and schema
+        env:
+          DATABASE_URL: postgresql+psycopg://mastery:ci_only_password@localhost:5432/mastery_test
+        run: |
+          uv run alembic upgrade head
+          uv run alembic current
+          uv run alembic check
       - run: uv run pytest --cov=mastery_backend --cov-report=term-missing
       - run: uv build
+
+  isolation:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_isolation
+    runs-on: [self-hosted, linux, x64, mastery-isolation]
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: mastery
+          POSTGRES_PASSWORD: ci_only_password
+          POSTGRES_DB: mastery_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U mastery -d mastery_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      RUN_ISOLATION_TESTS: '1'
+      TEST_DATABASE_URL: postgresql+psycopg://mastery:ci_only_password@localhost:5432/mastery_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.23'
+      - run: uv sync --locked
+      - name: Require real host capabilities
+        run: |
+          test "$(id -u)" != 0
+          command -v bwrap
+          systemctl --user is-active default.target
+          test -f /sys/fs/cgroup/cgroup.controllers
+      - run: uv run pytest tests/test_local_isolation.py tests/integration/test_local_runner.py -q -W error
