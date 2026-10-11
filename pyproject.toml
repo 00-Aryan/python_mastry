@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 mastery-backend = "mastery_backend.cli:main"
+mastery-worker = "mastery_backend.worker_cli:main"
 mastery-content = "mastery_backend.content_cli:main"
 
 [build-system]

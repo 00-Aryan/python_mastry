@@ -711,7 +711,7 @@ def test_real_b5_upgrade_preserves_receipts_and_refuses_history_downgrade(
     database_connection.rollback()
     assert (
         database_connection.scalar(text("SELECT version_num FROM alembic_version"))
-        == "0007_evaluation_lifecycle"
+        == "0008_local_execution"
     )
     database_connection.commit()
     assert attempt_client.get(response.headers["Location"]).status_code == 200
@@ -778,7 +778,7 @@ def test_runner_infrastructure_result_backoff_and_protocol_privacy(
     execution = worker(seeded_storage, attempt_clock, adapter)
     request = execution.claim()
     for changes in [
-        {"protocol_version": 2},
+        {"protocol_version": 3},
         {"outcome": "made_up"},
         {"diagnostics": "PRIVATE_SOLUTION"},
         {"stdout": SOURCE},

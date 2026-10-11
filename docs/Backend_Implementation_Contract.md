@@ -479,3 +479,16 @@ Adapter implementations live only in tests; application and worker reject inject
 outside APP_ENV=test. Future real runner admission requires authenticated identity/
 results and adversarially verified execution isolation. Synthetic outcomes prove
 orchestration only, not correctness of source or future runner security.
+
+
+## Released B6b local execution boundary
+
+B6a's release restrictions above describe its historical baseline. B6b introduces a
+separate operator-authenticated local worker, Bubblewrap/systemd/seccomp boundary,
+outside-sandbox grading and immutable signed provenance. The API still never executes
+source or accepts callbacks. Default admission remains unavailable; only development
+with fresh authenticated readiness is allowed. Protocol v2 pins exact runtime/profile
+hashes without editing v1 history. Learner-safe runtime/resource failures are distinct
+from retryable infrastructure failures. See decision 0009, Local_Runner_Setup and
+B6b_Verification for required controls, actual capabilities and remaining limitations.
+Publication verifier, deployed authentication, recommendations and mastery are excluded.

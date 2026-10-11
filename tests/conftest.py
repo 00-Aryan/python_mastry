@@ -86,3 +86,19 @@ def complete_draft() -> dict[str, object]:
             "expected_complexity": "O(1)",
         },
     }
+
+
+@pytest.fixture(scope="session")
+def isolated_runtime(tmp_path_factory):
+    import os
+
+    from mastery_backend.infrastructure.runner.local_sandbox import LocalSandbox
+    from mastery_backend.infrastructure.runner.runtime_image import build_runtime
+
+    if os.environ.get("RUN_ISOLATION_TESTS") != "1":
+        pytest.skip("Set RUN_ISOLATION_TESTS=1 on a Bubblewrap/systemd/cgroup-v2 Linux host")
+    runtime = tmp_path_factory.mktemp("sealed-runtime") / "runtime"
+    build_runtime(runtime)
+    sandbox = LocalSandbox(runtime)
+    sandbox.startup_check()
+    return runtime

@@ -16,8 +16,18 @@ class RunnerAdapter(Protocol):
 
 
 def require_supported_runner(adapter: RunnerAdapter | None, environment: str) -> RunnerAdapter:
-    # There are no reviewed real adapters yet. This is not an environment switch
-    # that enables a fake in local development or production.
+    from mastery_backend.application.local_evaluation_runner import LocalIsolatedRunner
+    from mastery_backend.application.worker_authority import LocalRunnerAdmission
+
+    if environment in {"development", "test"} and type(adapter) is LocalIsolatedRunner:
+        adapter.authenticate()
+        return adapter
+    if environment in {"development", "test"} and type(adapter) is LocalRunnerAdmission:
+        if adapter.check() != (adapter.identity, adapter.evaluator_policy_id):
+            raise ContentError(
+                "EVALUATION_UNAVAILABLE", "Isolated worker changed; retry admission."
+            )
+        return adapter
     if environment != "test" or adapter is None:
         raise ContentError(
             "EVALUATION_UNAVAILABLE", "A supported isolated evaluator is unavailable."

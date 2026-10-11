@@ -15,15 +15,15 @@ from mastery_backend.infrastructure.observability.logging import logger
 
 class HealthResponse(BaseModel):
     status: Literal["alive", "ready"]
-    release_stage: Literal["B6a-evaluation-lifecycle"] = "B6a-evaluation-lifecycle"
+    release_stage: Literal["B6b-local-isolated-runner"] = "B6b-local-isolated-runner"
     database: Literal["not_checked", "connected"] = "not_checked"
-    evaluation: Literal["not_integrated"] = "not_integrated"
+    evaluation: Literal["not_checked", "unavailable", "available"] = "not_checked"
 
 
 class PublicConfigResponse(BaseModel):
     api_version: Literal["v1"] = "v1"
     application_version: str = __version__
-    release_stage: Literal["B6a-evaluation-lifecycle"] = "B6a-evaluation-lifecycle"
+    release_stage: Literal["B6b-local-isolated-runner"] = "B6b-local-isolated-runner"
     capabilities: list[str] = [
         "attempt_lifecycle",
         "server_timers",
@@ -52,7 +52,19 @@ def read_readiness(request: Request) -> HealthResponse | JSONResponse:
     except SQLAlchemyError:
         logger.exception("database_unavailable")
         return error_response(503, "DATABASE_UNAVAILABLE", "The database is unavailable.")
-    return HealthResponse(status="ready", database="connected")
+    evaluation: Literal["unavailable", "available"] = "unavailable"
+    if request.app.state.settings.local_runner_enabled:
+        from mastery_backend.application.clock import SystemClock
+        from mastery_backend.application.worker_authority import LocalRunnerAdmission
+        from mastery_backend.domain.content import ContentError
+
+        try:
+            LocalRunnerAdmission(request.app.state.session_factory, SystemClock())
+        except ContentError:
+            pass  # Worker availability does not change database/API readiness.
+        else:
+            evaluation = "available"
+    return HealthResponse(status="ready", database="connected", evaluation=evaluation)
 
 
 @config_router.get(

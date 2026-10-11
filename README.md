@@ -292,9 +292,9 @@ checks. Execution, grading, recommendations and mastery remain future increments
 B6a adds POST /api/v1/submissions/{id}/evaluations with expected_revision and
 Idempotency-Key, GET /api/v1/evaluations/{id}, and bounded
 GET /api/v1/attempts/{id}/evaluations. Default admission returns 503
-EVALUATION_UNAVAILABLE: no supported isolated runner exists. RUNNER_URL cannot enable
+EVALUATION_UNAVAILABLE unless a supported isolated worker is enabled and ready. RUNNER_URL cannot enable
 execution; test adapters are defined only in tests and rejected outside APP_ENV=test.
-No source is interpreted or executed by this backend.
+The API never interprets or executes learner source.
 
 When a supported adapter is introduced, admission atomically pins an immutable
 submission, published test bundle and evaluator policy, records a pending job and
@@ -311,5 +311,22 @@ Results do not end attempts, award eligibility or change mastery.
 
 Read [evaluation rules](docs/decisions/0008_evaluation_lifecycle.md) for state/protocol,
 identity and isolation release gates, and [B6a verification](docs/B6a_Verification.md)
-for actual tests and unverified guarantees. Real runner integration, publication
-verification, recommendations and mastery remain outside this increment.
+for actual tests and unverified guarantees. Publication verification, recommendations and mastery remain outside this increment.
+
+
+## B6b local isolated worker
+
+A separate `mastery-worker` process executes Python using Bubblewrap, systemd cgroup
+limits and an explicit seccomp profile. It grades bounded JSON outside the sandbox,
+authenticates with an operator-provisioned credential and records signed immutable
+provenance. The API holds only a short-lived worker admission descriptor. Default
+`LOCAL_RUNNER_ENABLED=false` denies new evaluations with 503; missing capabilities,
+credentials or readiness keep them unavailable. Health readiness reports evaluation
+availability separately from API/database readiness.
+
+Follow [local WSL setup](docs/Local_Runner_Setup.md), [trust boundary and controls](docs/decisions/0009_local_isolated_runner.md)
+and [B6b verification](docs/B6b_Verification.md). No host project directories/private
+assets/credentials enter isolation. Real verification includes adversarial submissions
+and a real killed supervisor, with independent systemd timeout cleanup. This is a
+local shared-kernel boundary, not a deployment or production certification.
+Publication remains unavailable until its separate trusted verifier is implemented.

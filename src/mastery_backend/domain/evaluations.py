@@ -4,12 +4,14 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from mastery_backend.domain.content import ContentError, ContentValue
 
 EvaluationState = Literal["pending", "running", "passed", "failed", "infrastructure_error"]
-Outcome = Literal["passed", "incorrect", "syntax_error", "resource_limit", "infrastructure_error"]
+Outcome = Literal[
+    "passed", "incorrect", "syntax_error", "runtime_error", "resource_limit", "infrastructure_error"
+]
 TERMINAL_STATES = frozenset({"passed", "failed", "infrastructure_error"})
 POLICY_ID = UUID("00000000-0000-0000-0000-000000000201")
 POLICY_CONFIG = {
@@ -31,15 +33,25 @@ def validate_evaluation_transition(before: str, after: str) -> None:
 
 
 class EvaluationPolicy(ContentValue):
-    protocol_version: Literal[1]
+    protocol_version: Literal[1, 2]
+    runtime_image_hash: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    isolation_profile_hash: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     maximum_dispatches: int = Field(ge=1, le=3)
     lease_seconds: int = Field(ge=1, le=30)
     deadline_seconds: int = Field(ge=1, le=300)
     backoff_seconds: int = Field(ge=1, le=10)
 
+    @model_validator(mode="after")
+    def validate_runtime_pins(self) -> "EvaluationPolicy":
+        if self.protocol_version == 2 and (
+            self.runtime_image_hash is None or self.isolation_profile_hash is None
+        ):
+            raise ValueError("Protocol v2 requires runtime and isolation policy hashes")
+        return self
+
 
 class RunnerCorrelation(ContentValue):
-    protocol_version: Literal[1] = 1
+    protocol_version: Literal[1, 2] = 1
     job_id: UUID
     generation: int = Field(ge=1)
     lease_token: UUID

@@ -729,7 +729,7 @@ def test_real_migration_preserves_b4_and_refuses_submission_erasure(
     database_connection.rollback()
     assert (
         database_connection.scalar(text("SELECT version_num FROM alembic_version"))
-        == "0007_evaluation_lifecycle"
+        == "0008_local_execution"
     )
     assert database_connection.scalar(text("SELECT count(*) FROM submissions")) == 1
     database_connection.commit()

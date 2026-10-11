@@ -120,8 +120,16 @@ def submission_service(
     return SubmissionService(factory, clock, request.app.state.settings.max_code_bytes)
 
 
-def runner_adapter() -> RunnerAdapter | None:
-    return None
+def runner_adapter(
+    request: Request,
+    factory: Annotated[sessionmaker[Session], Depends(session_factory)],
+    clock: Annotated[Clock, Depends(server_clock)],
+) -> RunnerAdapter | None:
+    if not request.app.state.settings.local_runner_enabled:
+        return None
+    from mastery_backend.application.worker_authority import LocalRunnerAdmission
+
+    return LocalRunnerAdmission(factory, clock)
 
 
 def evaluation_service(

@@ -14,9 +14,9 @@ def test_health_is_explicit_about_release(client: TestClient, path: str, status:
     assert response.status_code == 200
     assert response.json() == {
         "status": status,
-        "release_stage": "B6a-evaluation-lifecycle",
+        "release_stage": "B6b-local-isolated-runner",
         "database": "connected" if path == "/health/ready" else "not_checked",
-        "evaluation": "not_integrated",
+        "evaluation": "not_checked" if status == "alive" else "unavailable",
     }
     assert response.headers["cache-control"] == "no-store"
 

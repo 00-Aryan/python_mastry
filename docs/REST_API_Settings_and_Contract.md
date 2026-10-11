@@ -756,3 +756,49 @@ recovery and file responsibilities, and [B6a verification](B6a_Verification.md) 
 checks. Production publication, execution, grading, recommendations and mastery remain
 unavailable. Public config adds evaluation_lifecycle; release_stage is
 B6a-evaluation-lifecycle, evaluation health stays not_integrated.
+
+## Released B6b local isolated runner (10 October 2026)
+
+Evaluation routes, ownership, pagination, permanent request receipts, lock ordering,
+leases and bounded retries retain B6a behavior. `LOCAL_RUNNER_ENABLED=false` is the
+safe default. Set true only in local development after provisioning and starting
+`mastery-worker`; an authenticated worker heartbeat valid for 15 seconds is required.
+Missing, expired or revoked readiness returns `503 EVALUATION_UNAVAILABLE` before
+creating a job or changing its attempt. A heartbeat is bounded discovery information,
+not a guarantee that a worker cannot die immediately afterward. Every real invocation
+checks runtime integrity and live resource controls before sending source; failed
+controls produce infrastructure failure and never ordinary subprocess execution.
+There are no HTTP worker-result/registration endpoints. Learner credentials cannot
+claim jobs, register workers, renew readiness or authenticate results. Production
+remains disabled. The API contains only an admission descriptor, never an executor.
+
+Protocol v1/policies/jobs remain immutable. Protocol v2 pins runtime image and isolation
+profile hashes in a new evaluator policy; no existing policy is edited. It adds
+`runtime_error` to the safe outcome categories. `passed` means the selected bundle
+matched trusted outside-sandbox comparisons; `incorrect`, `syntax_error`,
+`runtime_error` and `resource_limit` are learner failures. `infrastructure_error`
+retains bounded retry/recovery and is never an incorrect answer or mastery observation.
+No source, output, exception text, hidden test input/expected value, test count or
+solution is returned in evaluation status/history. Output is treated as untrusted
+bounded JSON, with type-aware equality and no pickle/expression evaluation.
+
+Each test uses fresh isolation. Only source, function name and that test's argument
+values enter it; expected values, other tests, leases and credentials remain in trusted
+worker memory. The operator-provisioned owner-only credential signs append-only run
+provenance. Result application requires fresh worker authentication, a valid signature,
+all correlation pins, current generation/token, and an unexpired lease. Duplicate
+same-generation dispatch returns recorded results without rerunning source; duplicate
+or stale result delivery cannot replace terminal state. Infrastructure retries receive
+a fresh generation/token and run fresh sandboxes. A crash after provenance commit but
+before result application can replay its result while the lease is valid; after expiry
+normal recovery creates a new generation. SIGTERM cancels work; SIGKILL cleanup is
+bounded by the independently enforced three-second systemd service lifetime.
+
+The function contract's return is JSON data; valid inputs are supplied by published
+bundles. Runtime exceptions, malformed/non-finite/deep returns, missing functions and
+blocked syscalls are safe runtime failures. Memory/storage exhaustion, CPU/wall expiry
+and excessive output are resource failures. Startup/unsupported bundles/protocols are
+infrastructure failures. Limits and local setup are specified in
+[decision 0009](decisions/0009_local_isolated_runner.md) and [runner setup](Local_Runner_Setup.md).
+Trusted publication verification remains unavailable; B6b adds no publication bypass.
+Recommendations, mastery and deployment are excluded.

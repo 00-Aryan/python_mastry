@@ -123,7 +123,8 @@ class EvaluationService:
                 if attempt.revision != expected_revision:
                     raise ContentError("STALE_REVISION", "Attempt changed; reload before retrying.")
                 validate_submission_lifecycle(attempt.lifecycle_state)
-                policy = evaluation_policy(session, POLICY_ID)
+                policy_id = getattr(adapter, "evaluator_policy_id", POLICY_ID)
+                policy = evaluation_policy(session, policy_id)
                 bundle = repo.bundle(submission.question_version_id, submission.purpose)
                 phase = attempts.phase(attempt.id)
                 now = normalized_server_time(self.clock.now())
@@ -143,7 +144,7 @@ class EvaluationService:
                     question_version_id=submission.question_version_id,
                     policy_version_id=submission.policy_version_id,
                     test_bundle_id=bundle.id,
-                    evaluator_policy_version_id=POLICY_ID,
+                    evaluator_policy_version_id=policy_id,
                     purpose=submission.purpose,
                     runner_identity=adapter.identity,
                     status="pending",

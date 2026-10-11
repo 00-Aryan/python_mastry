@@ -61,7 +61,7 @@ class EvaluationJob(Base):
         ),
         CheckConstraint(
             "category IS NULL OR category IN "
-            "('passed','incorrect','syntax_error','resource_limit','infrastructure_error')",
+            "('passed','incorrect','syntax_error','runtime_error','resource_limit','infrastructure_error')",
             name="ck_evaluation_category",
         ),
         CheckConstraint(
@@ -77,7 +77,7 @@ class EvaluationJob(Base):
             "(status IN ('pending','running') AND finished_at IS NULL AND category IS NULL)"
             " OR (status = 'passed' AND category = 'passed' AND finished_at IS NOT NULL)"
             " OR (status = 'failed' AND category IN ('incorrect','syntax_error',"
-            "'resource_limit') AND finished_at IS NOT NULL) OR "
+            "'runtime_error','resource_limit') AND finished_at IS NOT NULL) OR "
             "(status = 'infrastructure_error' AND category = 'infrastructure_error' "
             "AND finished_at IS NOT NULL)",
             name="ck_evaluation_result",

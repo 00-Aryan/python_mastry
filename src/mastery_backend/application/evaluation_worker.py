@@ -105,6 +105,7 @@ class EvaluationWorker:
             )
             assert submission is not None and bundle is not None and contract is not None
             return RunnerRequest(
+                protocol_version=policy.protocol_version,
                 job_id=job.id,
                 request_id=intent.request_id,
                 generation=job.generation,
@@ -144,7 +145,9 @@ class EvaluationWorker:
             submission = session.get(Submission, job.submission_id)
             bundle = session.get(TestBundle, job.test_bundle_id)
             assert submission is not None and bundle is not None
+            policy = evaluation_policy(session, job.evaluator_policy_version_id)
             expected = RunnerCorrelation(
+                protocol_version=policy.protocol_version,
                 job_id=job.id,
                 generation=job.generation,
                 lease_token=job.lease_token,
@@ -161,6 +164,10 @@ class EvaluationWorker:
                 result.model_dump(include=set(RunnerCorrelation.model_fields))
                 != expected.model_dump()
             ):
+                return False
+            from mastery_backend.application.local_evaluation_runner import LocalIsolatedRunner
+
+            if type(adapter) is LocalIsolatedRunner and not adapter.verify_result(result):
                 return False
             if result.outcome == "infrastructure_error":
                 self.retry_or_finish(session, job, "RUNNER_INFRASTRUCTURE", now)

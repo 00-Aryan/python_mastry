@@ -41,3 +41,5 @@ pgdata/
 postgres-data/
 .pgpass
 .pg_service.conf
+
+.local-runner/
