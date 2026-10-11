@@ -339,3 +339,5 @@ before choosing work. Sprint records under `docs/roadmap/sprints/` link actual c
 verification and blockers. The inventory distinguishes implemented B6b code from its
 still-open real-isolation verification gate; historical descriptions above are not
 proof of current release readiness.
+
+Unattended sprint operation: [setup and exact controls](docs/automation/Sprint_Automation.md).

@@ -43,3 +43,5 @@ postgres-data/
 .pg_service.conf
 
 .local-runner/
+
+.automation/

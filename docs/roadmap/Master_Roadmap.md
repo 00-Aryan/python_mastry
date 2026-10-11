@@ -1056,3 +1056,247 @@ Current GitHub documentation consulted:
 
 The engineering structure, release gates, micro-sprint counts, dates and evidence defaults are this project's planning choices. GitHub documentation supports repository/CI mechanics; it does not validate the schedule or pedagogy.
 
+## 16. Unattended local sprint execution — one-time setup
+
+### Goal
+
+Routine coding sessions must run without manually sending a new
+prompt after every completed sprint.
+
+Chat reminders provide notifications. Actual coding requires a
+local scheduler, Codex CLI and a sprint controller.
+
+### 16.1 Runtime and schedule
+
+Windows Task Scheduler launches the registered WSL distribution
+and sprint controller at:
+
+- 09:00 Asia/Kolkata
+- 14:00 Asia/Kolkata
+- 19:00 Asia/Kolkata
+
+Discover the actual Windows account, WSL distribution, Linux user,
+tool paths and Windows timezone before registering tasks.
+Do not assume the distribution is named Ubuntu.
+
+Run under the user's account, not Windows SYSTEM.
+Do not store passwords in scripts or repository files.
+
+Document:
+- Whether the user must be logged in.
+- Wake and missed-run behavior.
+- How to enable, disable and inspect scheduled tasks.
+- Where execution logs and failure reports are stored.
+
+The computer must be available. Required authentication,
+PostgreSQL and runner/systemd capabilities must be ready.
+A powered-off computer cannot execute local coding sessions.
+
+Use the installed Codex CLI's supported non-interactive execution
+mode. Verify its version, help and authentication before use.
+
+Use workspace-write sandboxing with explicitly configured
+non-interactive approval behavior. Do not silently disable the
+sandbox when an operation is blocked.
+
+The controller handles fixed Git/check commands and durable
+state outside the agent task. It must not execute arbitrary
+model-generated shell text as unrestricted controller commands.
+
+### 16.2 Project files
+
+Create files only when their behavior is implemented:
+
+| Path | Responsibility |
+|---|---|
+| scripts/automation/run_sprint.py | Preflight, locking, sprint selection, agent invocation, verification and recovery |
+| scripts/automation/register_windows_tasks.ps1 | Inspect, register and disable scheduled Windows tasks |
+| docs/automation/Sprint_Automation.md | Installation, operation, logs, recovery and disable instructions |
+| docs/roadmap/sprints.json | Validated sprint IDs, prerequisites and acceptance references |
+| docs/automation/sprint_prompt.md | Fixed unattended task instructions |
+| tests/automation/ | Controller behavior tests using controlled external-process substitutes |
+
+Keep runtime locks, local execution state, full agent logs and
+credentials in ignored local storage.
+
+Do not store credentials in prompts or machine-readable manifests.
+
+The controller and verification configuration must be protected
+from ordinary sprint edits. Changes to automation require their
+own explicit scope and review.
+
+### 16.3 AUTO001 — install and verify automation
+
+AUTO001 is an additional setup unit. It consumes a daily slot and
+may move the baseline schedule.
+
+Deliverable:
+Implement the controller, its tests, operating documentation and
+Windows-to-WSL task registration.
+
+Acceptance criteria:
+
+- Installed Codex, gh and uv are detected and authenticated where required.
+- Repository, branch, database and relevant capabilities are checked.
+- A dry run selects the next ready sprint without changing source.
+- A real scheduled task launches a bounded test run in the correct WSL account.
+- Only one controller instance can mutate the automation worktree.
+- State updates are atomic and recover after interruption.
+- Duplicate launches cannot repeat the same session or exceed its budget.
+- Verification runs independently of the agent's success claims.
+- Remote CI is checked for the exact pushed commit.
+- Authentication, network, database and capability failures become recorded blockers.
+- Logs identify the session, sprint, starting commit and outcome.
+- Enable, disable, status and recovery commands are documented.
+- No force pushes, destructive cleanup, automatic main merges or deployments occur.
+
+Unit tests alone do not prove that Windows scheduling is installed.
+A real scheduled-launch smoke test is required.
+
+### 16.4 Branch and worktree strategy
+
+Use a dedicated automation worktree and one sequential branch:
+
+automation/daily-sprints
+
+Base it on the latest verified commit containing the roadmap,
+status records and refined instructions.
+
+The current known starting branch is:
+
+sprint/S002-github-baseline at f26b2f8
+
+After S003, use its verified successor if newer.
+
+Do not start from an older main that lacks the roadmap/status work.
+Do not overwrite uncommitted changes in the user's working tree.
+
+Subsequent dependent sprints may build on verified commits on the
+automation branch. A manual main merge is not required after every
+sprint.
+
+Review accumulated changes periodically. Main remains stable.
+Automatic pushes target only the configured automation branch.
+
+### 16.5 Per-session execution
+
+1. Acquire a process lock.
+2. Check the enabled flag, local date, session identity and daily budget.
+3. Inspect unfinished work and pending CI from the previous session.
+4. Verify repository state, authentication and required capabilities.
+5. Select one ready unfinished sprint from authoritative state.
+6. Read its scope, prerequisites and acceptance criteria.
+7. Run one bounded non-interactive Codex task.
+8. Run the appropriate project checks independently.
+9. Validate the changed files, scope and structured task result.
+10. Commit verified work and push the dedicated branch.
+11. Wait for required CI on that exact commit, with a timeout.
+12. Record the result and release the lock.
+
+Record outcomes such as:
+
+- Verified
+- Blocked
+- Awaiting CI
+- Interrupted
+
+An agent message saying "done" is not sufficient evidence.
+
+Do not start a dependent sprint while its prerequisite is awaiting
+verification. A genuinely independent ready task may be selected
+when its prerequisites permit it.
+
+### 16.6 Daily budget and retries
+
+The default limit is three distinct sprint attempts per local day.
+
+Each scheduled session has a unique identity so a duplicate launch
+cannot consume the same slot twice.
+
+Repair retries remain within the current sprint and have a separate
+explicit limit. Repeated failures must not create an unlimited loop.
+
+If a sprint is too large:
+- Preserve its work.
+- Record what remains.
+- Split it into bounded units where appropriate.
+- Update dependencies and schedule.
+- Do not mark it complete to satisfy the daily target.
+
+Provide an optional batch mode:
+
+run-batch --maximum-units 3
+
+Batch mode may immediately continue to the next ready unit after
+verified completion when explicitly enabled.
+
+Scheduled mode and batch mode share the same process lock,
+execution ledger and daily budget. They must not independently
+run three units each.
+
+### 16.7 Recovery and failure handling
+
+Persist enough information to recover after controller, agent,
+network or machine interruption:
+
+- Session and sprint IDs.
+- Starting commit and active branch.
+- Execution phase.
+- Agent process/result location.
+- Verification commands and actual results.
+- Created commit and pushed SHA.
+- CI state.
+- Blocker and next recovery action.
+
+On restart, reconcile actual Git and CI state before repeating an
+operation. Do not create duplicate commits or restart an already
+completed sprint solely because the previous acknowledgement was lost.
+
+Authentication failure, unavailable dependencies, failed checks or
+required isolation failures must remain visible blockers.
+
+Do not turn skipped tests into passes.
+
+Ordinary successful sessions require no new user prompt.
+Material design decisions and unresolved blockers may still require
+operator intervention.
+
+### 16.8 Verification boundaries
+
+Keep these claims separate:
+
+- Controller unit tests passed.
+- Windows task registered.
+- Actual scheduled launch succeeded.
+- Backend regression CI passed.
+- Real learner-code isolation checks passed.
+
+A green backend CI run without enabled real-isolation checks does
+not establish sandbox correctness.
+
+Controller tests may substitute Codex/Git/check processes to test
+orchestration. Those substitutes must never produce production
+evaluation or mastery evidence.
+
+### 16.9 Current installation state
+
+At the time this section was added:
+
+- Three chat reminder schedules exist.
+- Public repository 00-Aryan/python_mastry is the accepted baseline.
+- S001 and S002 are reported complete.
+- S003 is being verified.
+- Local coding automation has not yet been demonstrated installed.
+- B6b real-isolation verification remains a separate open gate.
+
+Update this state with actual evidence after AUTO001.
+Do not preserve these statements as permanent status.
+
+### 16.10 Official implementation references
+
+- Codex non-interactive mode:
+  https://learn.chatgpt.com/docs/non-interactive-mode
+- Codex CLI reference:
+  https://learn.chatgpt.com/docs/cli/reference
+- Windows scheduled tasks:
+  https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks-create

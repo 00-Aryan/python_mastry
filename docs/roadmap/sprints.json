@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "units": [
+    {"id": "S001", "status": "verified"},
+    {"id": "S002", "status": "verified", "dependencies": ["S001"]},
+    {"id": "S003", "status": "verified", "dependencies": ["S002"]},
+    {"id": "S010a", "status": "ready", "profile": "isolation", "dependencies": ["S003"]},
+    {"id": "S012", "status": "planned", "dependencies": ["S010a"]}
+  ]
+}

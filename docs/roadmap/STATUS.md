@@ -87,14 +87,17 @@ not proof of completion; no weighted progress estimate has been assigned.
 S001 is complete at `ce6a023`. S002 is complete on `sprint/S002-github-baseline`,
 with live publication/ancestry verified at checkpoint `759ce30`; its completion-record
 commit follows that checkpoint. The sprint branch is published, not merged; main
-remains the audited B6b baseline. New branch CI was in progress when checked.
+remains the audited B6b baseline. Exact-commit S003 CI passed when checked.
 
 **User-authorized next unit: AUTO001 unattended sprint automation.** Reuse the already successful baseline
 pipeline, review standalone migration checks and introduce a distinct capability-gated
-runner verification job. Do not infer runner passes from skipped tests. No S003
-implementation or application feature was started in this audit.
+runner verification job. Do not infer runner passes from skipped tests. S003 implementation and exact-commit verification are recorded above.
 B6b verification closure remains a release blocker before publication-dependent work.
 
 S003 is verified against exact implementation commit `c7e5812` and remote run
 38173778698. Alembic CLI checks passed; the new isolation job was skipped.
 AUTO001 follows by explicit user instruction; no older main baseline was used.
+
+AUTO001 is being implemented on sprint/AUTO001-unattended-controller. Its controller
+selects S010a next; S012 stays blocked by unverified real isolation. Scheduling and
+remote CI results will be recorded in sprints/AUTO001.md after actual checks.
