@@ -39,8 +39,8 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 
 | Units | Credit / status | Remaining acceptance |
 |---|---|---|
-| S001 | Verified audit; [record](sprints/S001.md) | Commit reference recorded in Git history |
-| S002 | Ready; public repository/history already exists and is credited | Bounded tracked-history audit, sprint push and remote ancestry check |
+| S001 | Verified audit `ce6a023`; [record](sprints/S001.md) | Commit reference recorded in Git history |
+| S002 | In progress; [record](sprints/S002.md); public baseline/history and audit credited | Sprint push and live remote ancestry check pending |
 | S003 | Ready after S002 | Existing remote CI is credited; review explicit migration CLI/data coverage and add a distinct capability-gated isolation job without claiming skipped checks passed |
 | S004 | ADR/backend choice implemented in B6b | Preserve ADR; carry current-host capability verification into S010a rather than rebuild |
 | S005–S009 | Implemented in B6b; acceptance not fully verified | Reuse runtime, protocol, authority, leases and grader; run current-HEAD real checks |
@@ -84,6 +84,6 @@ not proof of completion; no weighted progress estimate has been assigned.
 
 ## Next action
 
-Run **S002 GitHub baseline**, reusing the existing public remote/history and performing
-only its remaining audit/push checks. After S002, **S003 Remote CI baseline** is next.
+Current unit: **S002 GitHub baseline**; audit is verified and publication is pending.
+Next ready unit after its push/ancestry checks: **S003 Remote CI baseline**.
 B6b verification closure remains a release blocker before publication-dependent work.
