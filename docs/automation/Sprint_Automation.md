@@ -56,7 +56,22 @@ Initialization preserves existing automation branches/worktrees and refuses dirt
 source trees. No reset/cleanup of failed work occurs. The worktree starts at the verified
 S003 successor containing this controller, not the older main branch.
 
-From Windows PowerShell, use the actual repository script:
+This host blocks PowerShell script files under its existing execution policy. Native
+registration was used without changing that policy. Exact WSL controls:
+
+```bash
+uv run --locked scripts/automation/register_windows_tasks.py install --distribution Ubuntu --linux-user aryan
+uv run --locked scripts/automation/register_windows_tasks.py smoke --distribution Ubuntu --linux-user aryan
+uv run --locked scripts/automation/register_windows_tasks.py status
+uv run --locked scripts/automation/register_windows_tasks.py disable
+uv run --locked scripts/automation/register_windows_tasks.py enable
+```
+
+The native smoke uses an actual one-time trigger 30 seconds in the future. Both
+registration implementations target the same names; use one. Native tasks allow battery
+operation; PowerShell defaults may require AC power. The script-based alternative
+requires an operator-approved script policy; do not bypass or weaken it automatically.
+From Windows PowerShell, use the actual repository script if permitted:
 
 ```powershell
 $script = '\\wsl.localhost\Ubuntu\home\aryan\projects\python_mastry\scripts\automation\register_windows_tasks.ps1'

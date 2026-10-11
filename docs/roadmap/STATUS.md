@@ -41,7 +41,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 |---|---|---|
 | S001 | Verified audit `ce6a023`; [record](sprints/S001.md) | Commit reference recorded in Git history |
 | S002 | Verified and published; [record](sprints/S002.md); checkpoint `759ce30` | Not merged; new branch CI was in progress |
-| S003 | Verified at `c7e5812`; [record](sprints/S003.md), run 38173778698 passed | Existing remote CI is credited; review explicit migration CLI/data coverage and add a distinct capability-gated isolation job without claiming skipped checks passed |
+| S003 | Verified at `c7e5812`; [record](sprints/S003.md), run 38173778698 passed | Migration CLI verified; distinct real-isolation job remains skipped/open |
 | S004 | ADR/backend choice implemented in B6b | Preserve ADR; carry current-host capability verification into S010a rather than rebuild |
 | S005–S009 | Implemented in B6b; acceptance not fully verified | Reuse runtime, protocol, authority, leases and grader; run current-HEAD real checks |
 | S010–S011 | Adversarial/crash test code exists; verification incomplete | Execute on supported host; distinguish actual SIGKILL from clock-controlled abandoned leases and actual transport interruption |

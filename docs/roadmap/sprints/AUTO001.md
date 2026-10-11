@@ -11,8 +11,13 @@ Windows registration uses discovered identities, interactive limited logon and n
 See docs/automation/Sprint_Automation.md for trust boundary, paths and operating commands.
 
 Actual local checks: locked sync/lock check, Ruff/format, strict mypy (97 source files),
-17 controller tests, source/wheel builds and Alembic upgrade/current/check passed.
-Full PostgreSQL regression: 320 passed, 25 real-isolation skips (the three added
-controller cases were then verified in the 17-test focused suite). The initial run
+19 controller tests, source/wheel builds and Alembic upgrade/current/check passed.
+Full PostgreSQL regression: 320 passed, 25 real-isolation skips (the five added
+controller/scheduler cases were then verified in the 19-test focused suite). The initial run
 used a nonexistent database role and failed; corrected after querying current_user.
 Exact-commit remote CI and actual Task Scheduler smoke remain pending. No scheduling-installed claim yet. B6b isolation remains open.
+
+Actual Windows registration: three daily tasks created with schtasks XML under
+ARYAN-KUMAR\Aryan, InteractiveToken/LeastPrivilege, India timezone. PowerShell script
+policy rejected the script-based path; policy was preserved. Authenticated scheduled
+smoke and final exact-commit CI remain pending.
