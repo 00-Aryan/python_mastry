@@ -31,7 +31,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Assistance | `6cebf2a`; irreversible grants, waits and full-solution escape | [B4](../B4_Verification.md), remote regressions | Grant does not prove reading; no scoring |
 | Source receipts | `eb015cd`; immutable source and evidence snapshots | [B5](../B5_Verification.md), remote regressions | Receipt alone is not correctness |
 | Evaluation lifecycle | `ad75f15`; dispatch intent, leases, retries and protected terminal results | [B6a](../B6a_Verification.md), remote regressions | Synthetic B6a results prove orchestration only |
-| B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | **B6b_Verification.md absent; 25 real-runner cases skipped remotely; full current-HEAD isolation gate open** |
+| B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | **[B6b verification](../B6b_Verification.md) records a blocked cloud trial; historical real-runner skips are not verification; isolation gate open** |
 | Publication, pilot pack, browser drafts/workspace | Planned S012–S036 | No accepted implementation evidence | No production publication bypass; no complete usable branch |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
@@ -44,7 +44,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S003 | Verified at `c7e5812`; [record](sprints/S003.md), run 38173778698 passed | Migration CLI verified; distinct real-isolation job remains skipped/open |
 | S004 | ADR/backend choice implemented in B6b | Preserve ADR; carry current-host capability verification into S010a rather than rebuild |
 | S005–S009 | Implemented in B6b; acceptance not fully verified | Reuse runtime, protocol, authority, leases and grader; run current-HEAD real checks |
-| S010–S011 | Adversarial/crash test code exists; verification incomplete | Execute on supported host; distinguish actual SIGKILL from clock-controlled abandoned leases and actual transport interruption |
+| S010a (S010–S011 closure) | Cloud trial blocked; [record](sprints/S010a.md); no acceptance credit | Execute on supported host; distinguish actual SIGKILL from clock-controlled abandoned leases and actual transport interruption |
 | S012–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 Proposed split **S010a — B6b verification closure** is a verification unit, not new runner
@@ -74,7 +74,7 @@ not enabled. The initial sandboxed TestClient run stalled and was interrupted; i
 successful outside-sandbox rerun is recorded in S001.
 
 Known documentation debt: README still starts with B6a and includes older endpoint/
-release descriptions; its B6b section links the missing verification record. Refined
+release descriptions; its B6b section now links the blocked verification record. Refined
 B6b API section and current code/OpenAPI take precedence. S001 records this debt;
 it does not certify every README claim or complete the B6b verification increment.
 
@@ -82,22 +82,35 @@ R0/R1/R2/R3 gates remain **open**. No verified publication, complete pilot/brows
 evidence/recommendation loop or hosted release exists. Calendar targets are allocations,
 not proof of completion; no weighted progress estimate has been assigned.
 
-## Next action
+## Current trial and next action
 
-S001 is complete at `ce6a023`. S002 is complete on `sprint/S002-github-baseline`,
-with live publication/ancestry verified at checkpoint `759ce30`; its completion-record
-commit follows that checkpoint. The sprint branch is published, not merged; main
-remains the audited B6b baseline. Exact-commit S003 CI passed when checked.
+Exactly one unit was selected on 12 October 2026 (Asia/Kolkata): **S010a — B6b
+verification closure**, whose S003 prerequisite is verified. No completed sprint
+was repeated and no second unit was attempted.
 
-**User-authorized next unit: AUTO001 unattended sprint automation.** Reuse the already successful baseline
-pipeline, review standalone migration checks and introduce a distinct capability-gated
-runner verification job. Do not infer runner passes from skipped tests. S003 implementation and exact-commit verification are recorded above.
-B6b verification closure remains a release blocker before publication-dependent work.
+The new task started on `work` at `895b8e5`, equal to live `origin/main`, with no
+roadmap files. Remote branch inspection recovered the latest roadmap at
+`sprint/AUTO001-unattended-controller`, `fbef14449dbd990c34ca9145efc32e2640084d47`.
+Its exact-commit [CI run 38175538531](https://github.com/00-Aryan/python_mastry/actions/runs/38175538531)
+passed ordinary checks; its isolation job was **skipped**. This supersedes the
+older pending-CI note without claiming current cloud scheduling or runner readiness.
+The dedicated trial branch is `sprint/S010a-cloud-trial-blocker`, based on that SHA.
 
-S003 is verified against exact implementation commit `c7e5812` and remote run
-38173778698. Alembic CLI checks passed; the new isolation job was skipped.
-AUTO001 follows by explicit user instruction; no older main baseline was used.
+The published cloud environment's existing PostgreSQL 18.6 container started and
+accepted connections. Locked sync and Alembic current/check passed. The running
+API returned HTTP 200 for liveness/readiness, with database `connected` and
+evaluation `unavailable`. This confirms the local API/database environment only.
 
-AUTO001 is being implemented on sprint/AUTO001-unattended-controller. Its controller
-selects S010a next; S012 stays blocked by unverified real isolation. Scheduling and
-remote CI results will be recorded in sprints/AUTO001.md after actual checks.
+**S010a is blocked:** `systemctl --user is-system-running` returned `offline`
+(exit 1), and `systemctl --user status` failed because the user bus/runtime
+variables are absent. The mandatory user systemd manager is unavailable.
+`LOCAL_RUNNER_ENABLED=false` remains unchanged. See the exact checks and unrun
+acceptance requirements in [B6b_Verification.md](../B6b_Verification.md).
+No learner source, adversarial workload or replacement isolation backend was run.
+
+Next eligible unit remains **S010a**, to resume only on a supported host with all
+mandatory controls. There is **no runnable next unit in the current recorded
+chain** on this host; S012 still depends on verified S010a. The protected automation
+manifest/controller were not edited or invoked: their dependency-ready label is
+not a claim that this host meets the capability gate. No scheduling was enabled.
+This branch records the blocker for review; main remains unchanged.
