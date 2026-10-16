@@ -47,7 +47,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S005–S009 | Implemented in B6b; acceptance not fully verified | Reuse runtime, protocol, authority, leases and grader; run current-HEAD real checks |
 | S010–S011 | Adversarial/crash test code exists; verification incomplete | Execute on supported host; distinguish actual SIGKILL from clock-controlled abandoned leases and actual transport interruption |
 | S010a | **Blocked**; [record](sprints/S010a.md); real checks executed locally | Cancellation corrected locally by S010b; actual acknowledgement-loss/wall-clock recovery remain unverified |
-| S010b | **Awaiting CI**; [record](sprints/S010b.md), 376 real/PostgreSQL tests passed locally | Exact-pushed-commit remote checks pending; S010a remains Blocked |
+| S010b | **Verified** at `cca8c50`; [record](sprints/S010b.md); remote run 38881670423 passed | Local 376 passed/no skips; remote 342 passed/34 skips; S010a recovery gaps remain |
 | S012–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
@@ -134,12 +134,16 @@ Genuine control/bootstrap/pipe failures retain their meaning. No authority/lease
 Local checks passed: 13 deterministic supervisor cases; five consecutive three-phase
 real cancellation matrices; **376 PostgreSQL/real-isolation regressions with zero skips**;
 locked sync/lock check, migrations at 0008, Ruff/format, strict mypy and package/installed
-probe checks. Exact outgoing commit CI is pending. Existing four AUTO001 files were
+probe checks. Exact implementation `cca8c50` passed [CI run 38881670423](https://github.com/00-Aryan/python_mastry/actions/runs/38881670423)
+with **342 passed / 34 skipped**, plus all required quality/migration/build checks.
+The separate remote isolation job skipped; local real-isolation evidence remains distinct.
+Existing four AUTO001 files were
 preserved byte-for-byte and excluded from this unit's commits.
 
 ## Next action
 
-Finish S010b's exact-pushed-commit CI recording. **S010a remains Blocked**, even after
+S010b is **Verified** at `cca8c50`, with a separate documentation closeout.
+**S010a remains Blocked**, even after
 cancellation is resolved: real acknowledgement-loss and wall-clock lease recovery are
 still unverified. Next ready scope is remaining **S011 actual recovery evidence**;
 no such work was started. S012 remains blocked. No scheduling, worker enablement,

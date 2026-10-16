@@ -135,9 +135,13 @@ probe passed. No operational worker was provisioned or enabled. The supervisor c
 naturally changes the existing isolation-profile hash; immutable old policy pins remain
 unchanged. Future operator provisioning must use the reviewed new profile.
 
-Exact-pushed-commit CI is pending and will be recorded separately; local JUnit/logs are
+Exact implementation `cca8c50e6af18115ba6d41ec7da980d7407a0d5c` passed
+[remote run 38881670423](https://github.com/00-Aryan/python_mastry/actions/runs/38881670423): locked sync,
+migrations, Ruff/format, strict mypy, **342 passed / 34 skipped**, source/wheel builds.
+The separate isolation job was skipped; the local 376-passed real run remains separate
+evidence. S010b is **Verified** for its bounded scope. Local JUnit/logs are
 ignored in `.local-runner/s010b-evidence/`. Existing dirty AUTO001 files remain unchanged.
-The S010b cancellation blocker is locally resolved, but S010a stays **Blocked** for
+The S010b cancellation blocker is resolved, but S010a stays **Blocked** for
 real acknowledgement-loss and wall-clock lease recovery. Neither was implemented or
 verified here. Remote isolation certification, cold-start/deployed checks and production
 readiness remain unverified. Next scope is remaining S011 recovery evidence, not begun.
