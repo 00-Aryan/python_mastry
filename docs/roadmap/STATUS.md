@@ -26,15 +26,16 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Capability | Implementation / commit | Verification evidence | Open limits |
 |---|---|---|---|
 | B0 + database foundation | `766756a`; settings, API, SQLAlchemy/Alembic | [B0](../B0_Verification.md), [B1](../B1_Verification.md); remote baseline CI | Local-only authentication; no deployed gate |
-| Question storage | `0907fb7`; normalized drafts, versions and DB immutability | [B1](../B1_Verification.md), remote regressions | Trusted publication verifier unavailable; controlled test fixtures are not a bypass |
+| Question storage | `0907fb7`; normalized drafts, versions and DB immutability | [B1](../B1_Verification.md), remote regressions | Local publication requires fresh approved verification evidence; deployed identity remains unverified |
 | Skill graph | `9f79410`; existing skills/mappings, DAG locks and bounded reads | [B2](../B2_Verification.md), remote regressions | Guidance only; no recommendations implemented |
 | Attempts/timers | `589db46`; owned pinned attempts, durable server time | [B3](../B3_Verification.md), remote regressions | No browser workspace or deployed identity |
 | Assistance | `6cebf2a`; irreversible grants, waits and full-solution escape | [B4](../B4_Verification.md), remote regressions | Grant does not prove reading; no scoring |
 | Source receipts | `eb015cd`; immutable source and evidence snapshots | [B5](../B5_Verification.md), remote regressions | Receipt alone is not correctness |
 | Evaluation lifecycle | `ad75f15`; dispatch intent, leases, retries and protected terminal results | [B6a](../B6a_Verification.md), remote regressions | Synthetic B6a results prove orchestration only |
 | B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | [B6b reconciliation](../B6b_Verification.md): real host checks executed locally; local verification closure **Verified** at `9ca97d2` after explicit S010a/S011 audit; remote/deployed isolation certification remains unverified |
-| Publication verification artifacts | `955b082`; local isolated reference CLI, immutable private snapshot/report pins | [S012](sprints/S012.md): 394 local passed/no skips; exact-commit remote CI passed | Publication consumption is S013; stronger quality validation is S014; no deployed attestation |
-| Publication transition, pilot pack, browser drafts/workspace | Planned S013–S036 | No accepted completion evidence | No production publication bypass; no complete usable branch |
+| Publication verification artifacts | `955b082`; local isolated reference CLI, immutable private snapshot/report pins | [S012](sprints/S012.md): 394 local passed/no skips; exact-commit remote CI passed | S013 consumes approved reports; stronger quality validation is S014; no deployed attestation |
+| Safe local publication | `e2ca64e`; approved immutable evidence and final revision/hash/freshness recheck | [S013](sprints/S013.md): 429 local passed/no skips; exact implementation CI passed | Missing usable evidence retains 503; no S014 quality or deployment certification |
+| Pilot pack, browser drafts/workspace | Planned S014–S036 | No accepted completion evidence | No complete usable branch or hosted release |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
 ## Roadmap reconciliation
@@ -51,7 +52,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S010b | **Verified** at `cca8c50`; [record](sprints/S010b.md); remote run 38881670423 passed | Local 376 passed/no skips; remote 342 passed/34 skips; S010a recovery gaps remain |
 | S011 | **Verified** at `9ca97d2`; [record](sprints/S011.md); CI 38938550175 passed | Actual wire acknowledgement-loss and elapsed-time recovery; no production readiness claim |
 | S012 | **Verified locally** at `955b082`; [record](sprints/S012.md); CI 38945673491 passed | 394 local passed/no skips; 348 remote passed/46 isolation skips; publication integration remains S013 |
-| S013 | **Awaiting exact-commit CI**; [record](sprints/S013.md) | 429 local passed/no skips; configured publication only; remote CI pending |
+| S013 | **Verified locally** at `e2ca64e`; [record](sprints/S013.md); CI 38949458995 passed | 429 local passed/no skips; 381 remote passed/48 isolation skips; explicit report/policy gates |
 | S014–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
@@ -107,8 +108,9 @@ S010a reconciliation, which records a blocker rather than certifying completion.
 B6b API section and current code/OpenAPI take precedence. S001 records this debt;
 it does not certify every README claim or complete the B6b verification increment.
 
-R0/R1/R2/R3 gates remain **open**. No verified publication, complete pilot/browser flow,
-evidence/recommendation loop or hosted release exists. Calendar targets are allocations,
+R0/R1/R2/R3 gates remain **open**. Local S013 publication is verified with explicit
+evidence gates; a complete pilot/browser flow, evidence/recommendation loop and
+hosted release remain unverified. Calendar targets are allocations,
 not proof of completion; no weighted progress estimate has been assigned.
 
 ## S010a local reconciliation — 16 October 2026
@@ -169,11 +171,11 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S013 — Safe publication transition** has passed local acceptance and awaits
-exact-commit CI; see its [record](sprints/S013.md). S014 is next once S013 closes,
-not started. Local publication requires fresh approved S012 evidence; missing
-configuration/usable evidence retains 503. No operational worker, AUTO001 continuation,
-scheduling, merge or deployment changes occurred.
+**S014 — Question-quality verifier** is next ready, not started. S013 is Verified
+for local scope at `e2ca64e`; see its [record](sprints/S013.md) and exact-commit CI.
+Local publication requires fresh approved S012 evidence; missing configuration/usable
+evidence retains 503. No actual .env, operational worker, AUTO001 continuation,
+scheduling, merge or deployment change occurred.
 
 
 ## S012 local acceptance — 16 October 2026
@@ -214,6 +216,11 @@ Local final PostgreSQL/real-isolation suite: **429 passed, zero failures/skips**
 198.55 s. Locked dependencies, Ruff/format (179 files), strict mypy (104 files),
 Alembic CLI/no drift, builds, package/source parity and installed mandatory fresh
 isolation probe passed. All AUTO001 dirty files are preserved and excluded; .env,
-scheduling and operational worker state were not changed. Exact-commit CI is pending.
-Local publication is implemented/locally verified; no deployed certification or S014
-quality claim. S014 follows after S013 closeout, not started.
+scheduling and operational worker state were not changed. Exact implementation
+`e2ca64e606783e60d6fba00980e3452df87f795f` passed
+[CI 38949458995](https://github.com/00-Aryan/python_mastry/actions/runs/38949458995):
+**381 passed / 48 isolation skips**, zero failures, 129.21 s, plus all configured
+quality/migration/build checks. The separate isolation job skipped. S013 is **Verified
+for local scope**; this documentation closeout follows its implementation evidence.
+Remote/deployed isolation, production authentication and S014 quality remain unverified
+or future. No local S013 blocker. S014 is next ready, not started.
