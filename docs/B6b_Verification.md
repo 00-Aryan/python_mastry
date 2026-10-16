@@ -145,3 +145,48 @@ The S010b cancellation blocker is resolved, but S010a stays **Blocked** for
 real acknowledgement-loss and wall-clock lease recovery. Neither was implemented or
 verified here. Remote isolation certification, cold-start/deployed checks and production
 readiness remain unverified. Next scope is remaining S011 recovery evidence, not begun.
+
+## S011 — real recovery gap closure (in progress)
+
+Starting implementation baseline `3d105be`, with S010b fix `cca8c50` unchanged.
+New verification uses the production worker/adapter and SystemClock in real child
+processes. A test-only loopback PostgreSQL proxy withholds a selected actual server
+COMMIT reply and closes the connection. This is real wire acknowledgement loss, not
+an ignored Python return or fabricated adapter result. Only the trusted disposable DB
+connection uses plaintext for frame inspection; learner network isolation is unchanged.
+
+The targeted run passed four cases (99.45 s): provenance-commit acknowledgement loss,
+terminal-commit acknowledgement loss, and SIGKILL after completed dispatch / confirmed
+running learner entry. Independent connections observed durable state. Lost provenance
+acknowledgement requeued infrastructure work without marking the learner incorrect;
+lost terminal acknowledgement retained one final result. Authentic expired/stale results
+were rejected, generation/token changed after real 30-second lease and 5-second backoff,
+and duplicate application could not create a second terminal event. Initial killed-worker
+scenarios took 36.72 / 38.27 s; the strengthened full run additionally tests actual
+heartbeat expiry, five-second recovery span and post-recovery credential revocation.
+
+The S010a acceptance reconciliation below is explicit. Its status is not changed until
+all required current checks and exact-commit publication evidence are inspected.
+
+| S010a requirement | Evidence / review |
+|---|---|
+| Reuse existing runner and boundaries | No production code change in S011; source remains S010b, no API executor/callback |
+| Mandatory startup and immutable runtime/profile | Fresh isolated test runtime and installed-wheel mandatory probe; policy pins unchanged |
+| Actual correct/incorrect/syntax/runtime grading | Existing real PostgreSQL runner tests, repeated in complete suite |
+| Resource/process/network/filesystem/privacy/fresh state | Existing real isolation/protocol tests, repeated in complete suite |
+| Hostile/malformed bounded protocol | S010a's seven extra real checks plus existing JSON rules, repeated |
+| Cancellation and full cleanup | S010b's three deterministic real phases; targeted 16 checks passed, full rerun |
+| Unrelated workload survival | S010a real sentinel test, repeated; no production service touched |
+| Real worker crash during learner execution | New child waits for an actual learner stderr marker before SIGKILL; unit/cgroup inspected |
+| Actual acknowledgement loss | New one-shot wire proxy suppresses actual PostgreSQL COMMIT response at provenance and terminal transactions |
+| Real-time lease/backoff and stale authority | SystemClock plus actual waits, authentic stale signatures/new generations/revocation checks |
+| Duplicate delivery and terminal immutability | Durable provenance/cache and one-terminal-event assertions, existing DB guards |
+| Upgrade/data/schema checks | Existing migration/data tests plus CLI upgrade/current/check at 0008 |
+| Packages/static/locked dependencies | Current sync/check, Ruff/format, strict mypy, builds, artifact byte/privacy inventory and installed probe passed |
+| Full real-isolation regression, zero skips | Final result pending; prior baseline 376 passed, new targeted four passed |
+
+Limits remain: a local shared-kernel boundary is not production security certification.
+These tests cover selected commit-loss windows, not every network/database failure.
+TLS/remote runner transport, host reboot, cold WSL setup, deployed controls and production
+readiness remain unverified and are not implied by local gap closure. Finite measurements
+are not clock-drift or load certification. No scheduling or operational worker changed.
