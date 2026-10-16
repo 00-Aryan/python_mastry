@@ -1,6 +1,7 @@
 # Current roadmap status
 
-Audited 12 October 2026 (Asia/Kolkata). Read [Master_Roadmap.md](Master_Roadmap.md)
+Initial audit: 12 October 2026. S003 end-of-day closeout: 15 October 2026
+(Asia/Kolkata). Read [Master_Roadmap.md](Master_Roadmap.md)
 and the selected sprint record before choosing work. Status reflects evidence, not dates.
 
 ## Baseline and workflow
@@ -41,7 +42,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 |---|---|---|
 | S001 | Verified audit `ce6a023`; [record](sprints/S001.md) | Commit reference recorded in Git history |
 | S002 | Verified and published; [record](sprints/S002.md); checkpoint `759ce30` | Not merged; new branch CI was in progress |
-| S003 | Verified at `c7e5812`; [record](sprints/S003.md), run 38173778698 passed | Migration CLI verified; distinct real-isolation job remains skipped/open |
+| S003 | **Verified** at current audited HEAD `fbef144`; [record](sprints/S003.md), exact-commit run 38175538531 passed | 329 passed / 25 skipped; separate isolation job skipped; dirty AUTO001 changes excluded |
 | S004 | ADR/backend choice implemented in B6b | Preserve ADR; carry current-host capability verification into S010a rather than rebuild |
 | S005–S009 | Implemented in B6b; acceptance not fully verified | Reuse runtime, protocol, authority, leases and grader; run current-HEAD real checks |
 | S010–S011 | Adversarial/crash test code exists; verification incomplete | Execute on supported host; distinguish actual SIGKILL from clock-controlled abandoned leases and actual transport interruption |
@@ -57,6 +58,27 @@ a focused fix; do not waive gates or rebuild implemented units. Reconcile its ef
 with S010/S011 rather than adding invented completion percentages.
 
 ## Actual verification and gaps
+
+S003 closeout inspected current HEAD `fbef14449dbd990c34ca9145efc32e2640084d47`
+on `sprint/AUTO001-unattended-controller`. The live origin branch matches exactly;
+main remains `895b8e5`. [Remote run 38175538531](https://github.com/00-Aryan/python_mastry/actions/runs/38175538531)
+completed successfully for this exact SHA. Its required `checks` job and actual logs
+confirm locked sync, PostgreSQL 18, Alembic upgrade/current/check at `0008_local_execution`,
+**329 passed / 25 skipped**, Ruff, formatting (157 files), strict mypy (98 source files),
+and source/wheel builds. The distinct isolation job was skipped: runner isolation is
+explicitly unverified. This exact-commit run, not the older environment result below,
+is the basis for S003 **Verified**.
+
+Four existing AUTO001 working-tree changes remain outside that CI evidence:
+`docs/roadmap/sprints.json`, `src/mastery_backend/automation/controller.py`,
+`src/mastery_backend/automation/state.py`, and `tests/automation/test_controller.py`.
+They were preserved unchanged. This documentation-only closeout has no S003 blocker
+or repair. The S003 documentation-only closeout commit follows the audited SHA and
+does not replace its implementation verification reference.
+No AUTO001 acceptance or current scheduling-state claim is made by this closeout.
+
+Historical evidence follows; statements about earlier workflow gaps describe those
+older commits, not the current S003 pipeline.
 
 [Remote run 38172676544](https://github.com/00-Aryan/python_mastry/actions/runs/38172676544)
 at `895b8e5` completed successfully, push-triggered. Retrieved actual job steps/logs:
@@ -84,20 +106,17 @@ not proof of completion; no weighted progress estimate has been assigned.
 
 ## Next action
 
-S001 is complete at `ce6a023`. S002 is complete on `sprint/S002-github-baseline`,
-with live publication/ancestry verified at checkpoint `759ce30`; its completion-record
-commit follows that checkpoint. The sprint branch is published, not merged; main
-remains the audited B6b baseline. Exact-commit S003 CI passed when checked.
+S003 is **Verified** at `fbef14449dbd990c34ca9145efc32e2640084d47`, remote run
+38175538531. No merge or deployment occurred. S001/S002 history and the previously
+published S003 branch are preserved; no earlier work was restarted.
 
-**User-authorized next unit: AUTO001 unattended sprint automation.** Reuse the already successful baseline
-pipeline, review standalone migration checks and introduce a distinct capability-gated
-runner verification job. Do not infer runner passes from skipped tests. S003 implementation and exact-commit verification are recorded above.
-B6b verification closure remains a release blocker before publication-dependent work.
+Next ready verification card: **[S010a — B6b verification closure](sprints/S010a.md)**.
+Reuse existing runner code; run its real-isolation and recovery acceptance checks on a
+supported host and record actual results. B6b remains a release blocker; S012 cannot
+advance on skipped tests. S004's existing architecture work should be credited rather
+than rebuilt.
 
-S003 is verified against exact implementation commit `c7e5812` and remote run
-38173778698. Alembic CLI checks passed; the new isolation job was skipped.
-AUTO001 follows by explicit user instruction; no older main baseline was used.
-
-AUTO001 is being implemented on sprint/AUTO001-unattended-controller. Its controller
-selects S010a next; S012 stays blocked by unverified real isolation. Scheduling and
-remote CI results will be recorded in sprints/AUTO001.md after actual checks.
+Existing AUTO001 implementation and four dirty files remain unfinished work outside
+this closeout. AUTO001 was not resumed or certified. No next card was started; any
+continuation requires a separate scoped task. See [S003](sprints/S003.md) for the
+exact audited branch/SHA, commands, job evidence and preserved working-tree limits.
