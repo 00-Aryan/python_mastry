@@ -807,3 +807,19 @@ infrastructure failures. Limits and local setup are specified in
 [decision 0009](decisions/0009_local_isolated_runner.md) and [runner setup](Local_Runner_Setup.md).
 Trusted publication verification remains unavailable; B6b adds no publication bypass.
 Recommendations, mastery and deployment are excluded.
+
+## S012 — Publication verification artifacts (local authoring command)
+
+The separate `uv run mastery-content verify-reference --version-id UUID
+--expected-revision N --runtime PATH` command stores immutable, bounded reports from
+real B6b-isolated reference runs. It requires the configured database-backed local
+content_admin and development settings. Reports pin canonical authored bytes,
+revision/content/bundle/reference hashes and immutable verifier/evaluator/runtime
+versions. They expose only aggregate categories/counts to the local admin; private
+snapshots have no public endpoint. Unavailable controls cannot produce a passing
+report. [Decision 0010](decisions/0010_publication_artifacts.md) defines limits,
+failure/retry behavior, trust boundary and file responsibilities.
+
+No HTTP endpoint or publication response changes in S012. The default publication
+path still returns 503 VERIFICATION_UNAVAILABLE, including when an S012 report passed.
+S013 integrates artifacts with publication revalidation; S014 adds quality checks.

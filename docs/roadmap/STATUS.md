@@ -49,7 +49,8 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S010a | **Verified locally** at `9ca97d2`; [explicit acceptance audit](sprints/S010a.md) | Local 380 passed/no skips; remote/deployed certification excluded |
 | S010b | **Verified** at `cca8c50`; [record](sprints/S010b.md); remote run 38881670423 passed | Local 376 passed/no skips; remote 342 passed/34 skips; S010a recovery gaps remain |
 | S011 | **Verified** at `9ca97d2`; [record](sprints/S011.md); CI 38938550175 passed | Actual wire acknowledgement-loss and elapsed-time recovery; no production readiness claim |
-| S012–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
+| S012 | **Awaiting exact-commit CI**; [record](sprints/S012.md) | Exact-commit remote CI pending; publication integration remains S013 |
+| S013–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
 features: run current-HEAD real isolation + PostgreSQL regressions, CLI migration/data
@@ -166,7 +167,25 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S012 — publication verification artifacts** is next ready, not started. Production
-publication remains unavailable. This S011 documentation closeout follows the tested
-verification implementation; its commit/CI are reported separately. No operational
-worker, AUTO001 continuation, scheduling, merge or deployment changes occurred.
+**S012 — publication verification artifacts** is the active bounded card. See its
+[record](sprints/S012.md) for local checks and exact-commit CI. S013 is the next card
+once S012 closes; it has not started. API publication remains unavailable even after
+a passing S012 artifact. No operational worker, AUTO001 continuation, scheduling,
+merge or deployment changes occurred.
+
+
+## S012 local acceptance — 16 October 2026
+
+Separate local trusted reference-verification artifacts are implemented; no API
+publication integration is enabled. The CLI captures canonical private draft bytes,
+runs reference examples/tests under unchanged B6b isolation outside transactions,
+and stores append-only hash/version-pinned bounded reports. Migration 0009 reuses
+immutable evaluator policies and refuses report-history deletion. See
+[the acceptance record](sprints/S012.md) and [decision 0010](../decisions/0010_publication_artifacts.md).
+
+Final local PostgreSQL/real-isolation suite: **394 passed, zero skips**, 218.14 s,
+including cancellation and real recovery regressions. Locked dependencies,
+Ruff/format (174 files), strict mypy (103 files), migrations/no drift, source/wheel
+build and installed-wheel fresh isolation probe passed. Four dirty AUTO001 files
+are unchanged and excluded from this increment. Exact pushed-commit CI is pending;
+remote/deployed isolation remains unverified. S013 is next after S012 closeout.

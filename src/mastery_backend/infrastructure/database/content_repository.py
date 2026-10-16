@@ -8,6 +8,9 @@ from sqlalchemy.orm import Session
 
 from mastery_backend.domain.content import ContentError, DraftContent
 from mastery_backend.infrastructure.database import content_models as models
+from mastery_backend.infrastructure.database.publication_models import (
+    PublicationVerificationArtifact,
+)
 
 
 class ContentRepository:
@@ -226,7 +229,12 @@ class ContentRepository:
             .select_from(models.QuestionLink)
             .where(models.QuestionLink.target_version_id == version.id)
         )
-        if referenced:
+        verification_history = self.session.scalar(
+            select(func.count())
+            .select_from(PublicationVerificationArtifact)
+            .where(PublicationVerificationArtifact.question_version_id == version.id)
+        )
+        if referenced or verification_history:
             raise ContentError("VERSION_REFERENCED", "Referenced versions cannot be deleted.")
         self.session.delete(version)
         self.session.flush()

@@ -8,6 +8,7 @@ from mastery_backend.infrastructure.database import (
     assistance_models,  # noqa: F401
     attempt_models,  # noqa: F401
     evaluation_models,  # noqa: F401
+    publication_models,  # noqa: F401
     submission_models,  # noqa: F401
     worker_models,  # noqa: F401
 )

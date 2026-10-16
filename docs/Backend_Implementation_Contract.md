@@ -492,3 +492,13 @@ hashes without editing v1 history. Learner-safe runtime/resource failures are di
 from retryable infrastructure failures. See decision 0009, Local_Runner_Setup and
 B6b_Verification for required controls, actual capabilities and remaining limitations.
 Publication verifier, deployed authentication, recommendations and mastery are excluded.
+
+### S012 implementation refinement: reference-verification artifacts
+
+[Decision 0010](decisions/0010_publication_artifacts.md) defines a separate local
+admin command which captures immutable authored bytes, runs reference code only in
+existing B6b isolation outside transactions, and appends a pinned bounded report.
+Migration 0009 preserves report history and existing immutable evaluator policies.
+Reports are private authoring evidence; they do not publish questions or grant
+learner correctness/mastery. API publication remains unavailable until the separate
+S013 report-consumption/revalidation increment. Broader quality validation is S014.

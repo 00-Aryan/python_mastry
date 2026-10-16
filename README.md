@@ -4,6 +4,10 @@ This is the local **B6a evaluation-lifecycle increment**, building on the tested
 
 Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers, progressive assistance, immutable source receipts, evaluation orchestration and the documented CLI-seeded local development identity are implemented. Deployed authentication, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
 
+S012 adds a separate local `mastery-content verify-reference` command and immutable
+reference-verification artifacts. See [its setup, limits and publication boundary](docs/decisions/0010_publication_artifacts.md).
+Publication remains unavailable until S013; a passing artifact does not certify test quality.
+
 ## Quick start in WSL and VS Code
 
 Install uv using its official instructions: https://docs.astral.sh/uv/getting-started/installation/
