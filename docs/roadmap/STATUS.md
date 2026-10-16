@@ -32,7 +32,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Assistance | `6cebf2a`; irreversible grants, waits and full-solution escape | [B4](../B4_Verification.md), remote regressions | Grant does not prove reading; no scoring |
 | Source receipts | `eb015cd`; immutable source and evidence snapshots | [B5](../B5_Verification.md), remote regressions | Receipt alone is not correctness |
 | Evaluation lifecycle | `ad75f15`; dispatch intent, leases, retries and protected terminal results | [B6a](../B6a_Verification.md), remote regressions | Synthetic B6a results prove orchestration only |
-| B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | [B6b reconciliation](../B6b_Verification.md): real host checks executed locally; S010b cancellation fix passed local real checks; acknowledgement-loss/wall-clock recovery keep acceptance **Blocked** |
+| B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | [B6b reconciliation](../B6b_Verification.md): real host checks executed locally; local verification closure **Verified** at `9ca97d2` after explicit S010a/S011 audit; remote/deployed isolation certification remains unverified |
 | Publication, pilot pack, browser drafts/workspace | Planned S012–S036 | No accepted implementation evidence | No production publication bypass; no complete usable branch |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
@@ -46,8 +46,9 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S004 | ADR/backend choice implemented in B6b | Preserve ADR; carry current-host capability verification into S010a rather than rebuild |
 | S005–S009 | Implemented in B6b; acceptance not fully verified | Reuse runtime, protocol, authority, leases and grader; run current-HEAD real checks |
 | S010–S011 | Adversarial/crash test code exists; verification incomplete | Execute on supported host; distinguish actual SIGKILL from clock-controlled abandoned leases and actual transport interruption |
-| S010a | **Blocked**; [record](sprints/S010a.md); real checks executed locally | Cancellation corrected locally by S010b; actual acknowledgement-loss/wall-clock recovery remain unverified |
+| S010a | **Verified locally** at `9ca97d2`; [explicit acceptance audit](sprints/S010a.md) | Local 380 passed/no skips; remote/deployed certification excluded |
 | S010b | **Verified** at `cca8c50`; [record](sprints/S010b.md); remote run 38881670423 passed | Local 376 passed/no skips; remote 342 passed/34 skips; S010a recovery gaps remain |
+| S011 | **Verified** at `9ca97d2`; [record](sprints/S011.md); CI 38938550175 passed | Actual wire acknowledgement-loss and elapsed-time recovery; no production readiness claim |
 | S012–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
@@ -140,11 +141,32 @@ The separate remote isolation job skipped; local real-isolation evidence remains
 Existing four AUTO001 files were
 preserved byte-for-byte and excluded from this unit's commits.
 
+## S011 real recovery and S010a reconciliation
+
+Verification checkpoint `9ca97d2577d4d8619f20595b9b1253881f8188a3` adds only tests
+and records; production worker/cancellation code is unchanged from `3d105be`/S010b.
+Real loopback PostgreSQL COMMIT replies were withheld after durable server completion
+at provenance and terminal transactions. Real killed workers recovered after unchanged
+30-second leases/five-second backoff, with actual stale signatures, nonce/generation,
+readiness, duplicate/terminal and revoked-credential checks. Independent connections
+verified durable state; running unit/cgroup cleanup was observed.
+
+Targeted recovery: 4 passed; cancellation: 16 passed. Full PostgreSQL/real-isolation
+suite: **380 passed / zero skips**, 200.86 s. Static/format/type, locked dependencies,
+migrations/data checks and packages/installed mandatory probe passed. Exact-commit
+[CI run 38938550175](https://github.com/00-Aryan/python_mastry/actions/runs/38938550175)
+passed with **342 passed / 38 skipped** plus required quality/migration/build checks.
+The remote isolation job was skipped; local capable-host evidence is distinct.
+
+S010a is **Verified for its local scope** only after the [full criterion matrix](../B6b_Verification.md)
+was reconciled against current real evidence; S011 completion alone did not close it.
+Historical failures and Blocked checkpoints remain recorded. Remote capable-host CI,
+cold-start/deployed behavior and production security certification remain unverified.
+All four dirty AUTO001 files and scheduling/local state were preserved unchanged.
+
 ## Next action
 
-S010b is **Verified** at `cca8c50`, with a separate documentation closeout.
-**S010a remains Blocked**, even after
-cancellation is resolved: real acknowledgement-loss and wall-clock lease recovery are
-still unverified. Next ready scope is remaining **S011 actual recovery evidence**;
-no such work was started. S012 remains blocked. No scheduling, worker enablement,
-AUTO001 continuation, merge or deployment occurred.
+**S012 — publication verification artifacts** is next ready, not started. Production
+publication remains unavailable. This S011 documentation closeout follows the tested
+verification implementation; its commit/CI are reported separately. No operational
+worker, AUTO001 continuation, scheduling, merge or deployment changes occurred.

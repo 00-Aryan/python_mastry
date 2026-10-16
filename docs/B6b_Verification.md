@@ -1,6 +1,8 @@
 # B6b verification reconciliation — S010a
 
-Recorded 16 October 2026 (Asia/Kolkata). **Acceptance blocked**, not production-ready.
+Recorded 16 October 2026 (Asia/Kolkata). **Local B6b verification acceptance Verified**
+after the explicit S011 reconciliation below; not production-ready. Historical Blocked
+snapshots remain below as evidence, rather than being silently rewritten.
 B6b implementation is credited at `895b8e5`; at S010a start its runner/worker source
 and existing real-runner tests were unchanged from that commit. S010b updates follow below. This verification started from
 `d30c5d9dc4541068cd027186d20f52e303d940ad`, the documentation-only S003 closeout.
@@ -146,7 +148,7 @@ real acknowledgement-loss and wall-clock lease recovery. Neither was implemented
 verified here. Remote isolation certification, cold-start/deployed checks and production
 readiness remain unverified. Next scope is remaining S011 recovery evidence, not begun.
 
-## S011 — real recovery gap closure (in progress)
+## S011 — real recovery gap closure
 
 Starting implementation baseline `3d105be`, with S010b fix `cca8c50` unchanged.
 New verification uses the production worker/adapter and SystemClock in real child
@@ -183,10 +185,39 @@ all required current checks and exact-commit publication evidence are inspected.
 | Duplicate delivery and terminal immutability | Durable provenance/cache and one-terminal-event assertions, existing DB guards |
 | Upgrade/data/schema checks | Existing migration/data tests plus CLI upgrade/current/check at 0008 |
 | Packages/static/locked dependencies | Current sync/check, Ruff/format, strict mypy, builds, artifact byte/privacy inventory and installed probe passed |
-| Full real-isolation regression, zero skips | Final result pending; prior baseline 376 passed, new targeted four passed |
+| Full real-isolation regression, zero skips | **380 passed / no skips**, 200.86 s; all current real checks repeated |
 
 Limits remain: a local shared-kernel boundary is not production security certification.
 These tests cover selected commit-loss windows, not every network/database failure.
 TLS/remote runner transport, host reboot, cold WSL setup, deployed controls and production
 readiness remain unverified and are not implied by local gap closure. Finite measurements
 are not clock-drift or load certification. No scheduling or operational worker changed.
+
+Final strengthened S011 run: **380 passed, no skips**, 200.86 s. Both killed-worker
+cases verified actual stale heartbeat expiry, expired authentic results, new lease
+nonces/generations, duplicate terminal protection and credential revocation. Actual
+elapsed totals were 36.42 / 39.56 s, with full five-second backoff spans checked using
+monotonic time. Unit/cgroup cleanup and post-suite absence of active temporary services
+were confirmed. Package/static/locked dependency/migration checks passed as above.
+No production/cancellation source changed from `3d105be`. All S010a local acceptance
+rows have concrete evidence; exact-commit CI passed as recorded below. This explicit
+reconciliation, not S011 completion alone, is the basis of any status change.
+
+### Final local acceptance decision
+
+All rows of the S010a matrix above are supported by actual current checks; none is
+closed merely because S011 is complete. S010a and S011 are **Verified for their local
+scopes** at verification checkpoint `9ca97d2577d4d8619f20595b9b1253881f8188a3`.
+[CI run 38938550175](https://github.com/00-Aryan/python_mastry/actions/runs/38938550175)
+passed locked sync, migration CLI, Ruff/format, strict mypy and builds, with
+**342 passed / 38 skipped**, 134.93 s. The hosted isolation job was skipped;
+**380 passed / no skips** on the actual capable host remains separate evidence.
+The four S011 cases add four explicit non-isolation skips; the existing AUTO001
+verification policy still needs separate review and was preserved unchanged.
+
+Current source has no S011 production/cancellation change. The explicit wire faults,
+real SystemClock waits, signed stale-result checks and cleanup observations close the
+previous local acknowledgement-loss/wall-clock gaps. They do not establish TLS/remote
+runner transport, reboot/cold-start/deployed behavior, arbitrary distributed failures
+or production isolation certification. Publication remains disabled; next card S012
+is not implemented by this work. No operational worker or scheduling changed.
