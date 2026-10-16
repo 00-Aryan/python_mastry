@@ -1,6 +1,6 @@
 # Current roadmap status
 
-Initial audit: 12 October 2026. S003 end-of-day closeout: 15 October 2026
+Initial audit: 12 October 2026. S003 closeout: 15 October 2026; S010a reconciliation: 16 October 2026
 (Asia/Kolkata). Read [Master_Roadmap.md](Master_Roadmap.md)
 and the selected sprint record before choosing work. Status reflects evidence, not dates.
 
@@ -32,7 +32,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Assistance | `6cebf2a`; irreversible grants, waits and full-solution escape | [B4](../B4_Verification.md), remote regressions | Grant does not prove reading; no scoring |
 | Source receipts | `eb015cd`; immutable source and evidence snapshots | [B5](../B5_Verification.md), remote regressions | Receipt alone is not correctness |
 | Evaluation lifecycle | `ad75f15`; dispatch intent, leases, retries and protected terminal results | [B6a](../B6a_Verification.md), remote regressions | Synthetic B6a results prove orchestration only |
-| B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | **B6b_Verification.md absent; 25 real-runner cases skipped remotely; full current-HEAD isolation gate open** |
+| B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | [B6b reconciliation](../B6b_Verification.md): real host checks executed locally; cancellation reproduced twice, acceptance **Blocked**; remote real-isolation gate still open |
 | Publication, pilot pack, browser drafts/workspace | Planned S012–S036 | No accepted implementation evidence | No production publication bypass; no complete usable branch |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
@@ -42,13 +42,15 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 |---|---|---|
 | S001 | Verified audit `ce6a023`; [record](sprints/S001.md) | Commit reference recorded in Git history |
 | S002 | Verified and published; [record](sprints/S002.md); checkpoint `759ce30` | Not merged; new branch CI was in progress |
-| S003 | **Verified** at current audited HEAD `fbef144`; [record](sprints/S003.md), exact-commit run 38175538531 passed | 329 passed / 25 skipped; separate isolation job skipped; dirty AUTO001 changes excluded |
+| S003 | **Verified** implementation baseline `fbef144`; [record](sprints/S003.md), exact-commit run 38175538531 passed | 329 passed / 25 skipped; separate isolation job skipped; dirty AUTO001 changes excluded |
 | S004 | ADR/backend choice implemented in B6b | Preserve ADR; carry current-host capability verification into S010a rather than rebuild |
 | S005–S009 | Implemented in B6b; acceptance not fully verified | Reuse runtime, protocol, authority, leases and grader; run current-HEAD real checks |
 | S010–S011 | Adversarial/crash test code exists; verification incomplete | Execute on supported host; distinguish actual SIGKILL from clock-controlled abandoned leases and actual transport interruption |
+| S010a | **Blocked**; [record](sprints/S010a.md); real checks executed locally | Reproduced startup/cancellation race; remaining actual acknowledgement-loss/recovery evidence |
+| S010b | **Ready**, [focused follow-up](sprints/S010b.md), not started | Deterministic cancellation phase behavior; then rerun S010a |
 | S012–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
-Proposed split **S010a — B6b verification closure** is a verification unit, not new runner
+**S010a — B6b verification closure** is a verification unit, not new runner
 features: run current-HEAD real isolation + PostgreSQL regressions, CLI migration/data
 checks, package/installed-worker checks and actual recovery exercises; write
 `docs/B6b_Verification.md` with exact results/capabilities and residual blockers. Include
@@ -96,7 +98,8 @@ not enabled. The initial sandboxed TestClient run stalled and was interrupted; i
 successful outside-sandbox rerun is recorded in S001.
 
 Known documentation debt: README still starts with B6a and includes older endpoint/
-release descriptions; its B6b section links the missing verification record. Refined
+release descriptions. Its previously missing B6b verification link now resolves to the
+S010a reconciliation, which records a blocker rather than certifying completion. Refined
 B6b API section and current code/OpenAPI take precedence. S001 records this debt;
 it does not certify every README claim or complete the B6b verification increment.
 
@@ -104,19 +107,31 @@ R0/R1/R2/R3 gates remain **open**. No verified publication, complete pilot/brows
 evidence/recommendation loop or hosted release exists. Calendar targets are allocations,
 not proof of completion; no weighted progress estimate has been assigned.
 
+## S010a local reconciliation — 16 October 2026
+
+S003 records were committed separately at `d30c5d9`; its implementation verification
+remains `fbef144`/run 38175538531. Authorized host checks found active user systemd and
+mandatory cgroup controls; a stale runtime failed closed, while fresh test runtimes
+passed startup. No sandbox control was removed and no operational worker was enabled.
+
+Local PostgreSQL regressions: **329 passed / 25 skipped**. Opt-in complete existing
+suite: **354 passed / no skips**, including actual OS worker SIGKILL and resource/privacy
+checks. Seven new real protocol/cleanup checks passed. However, cancellation failed
+in the initial opt-in run and independently reproduced (bootstrap unavailable instead
+of cancelled). This intermittent failure blocks S010a despite the successful full run.
+Final combined suite: **361 passed / no skips**; the independent failure still blocks
+acceptance. Static, migration, locked dependency, build and installed-wheel checks passed. Local working-tree evidence
+is distinct from remote exact-commit CI; no new remote isolation pass is claimed.
+
 ## Next action
 
-S003 is **Verified** at `fbef14449dbd990c34ca9145efc32e2640084d47`, remote run
-38175538531. No merge or deployment occurred. S001/S002 history and the previously
-published S003 branch are preserved; no earlier work was restarted.
+**S010a is Blocked. Next ready card: [S010b — Cancellation phase ordering](sprints/S010b.md).**
+Reproduce and resolve startup/handshake/running cancellation deterministically, retain
+all controls, then rerun S010a and address remaining actual acknowledgement-loss and
+real-time recovery evidence. The capable host is available; the reproduced behavior,
+not an assumed missing-systemd environment, is the current blocker. S012 remains blocked.
 
-Next ready verification card: **[S010a — B6b verification closure](sprints/S010a.md)**.
-Reuse existing runner code; run its real-isolation and recovery acceptance checks on a
-supported host and record actual results. B6b remains a release blocker; S012 cannot
-advance on skipped tests. S004's existing architecture work should be credited rather
-than rebuilt.
-
-Existing AUTO001 implementation and four dirty files remain unfinished work outside
-this closeout. AUTO001 was not resumed or certified. No next card was started; any
-continuation requires a separate scoped task. See [S003](sprints/S003.md) for the
-exact audited branch/SHA, commands, job evidence and preserved working-tree limits.
+Four pre-existing dirty AUTO001 files and local state were preserved unchanged. Their
+completion, automation/scheduling, S004, publication, merge and deployment are outside
+this unit. The new S010b card was documented only; no next card was started. See the
+[S010a record](sprints/S010a.md) and [B6b evidence](../B6b_Verification.md).
