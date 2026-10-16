@@ -823,3 +823,26 @@ failure/retry behavior, trust boundary and file responsibilities.
 No HTTP endpoint or publication response changes in S012. The default publication
 path still returns 503 VERIFICATION_UNAVAILABLE, including when an S012 report passed.
 S013 integrates artifacts with publication revalidation; S014 adds quality checks.
+
+## S013 — Safe local publication
+
+POST /api/v1/admin/question-versions/{id}/publish retains the existing body
+`{"expected_revision": N}`, admin authentication and Idempotency-Key. The local API
+requires PUBLICATION_EVALUATOR_POLICY_VERSION_ID approving an existing immutable S012
+policy. The report must match the question version/revision, exact canonical content,
+bundle/reference hashes, trusted verifier/version, supported runtime/evaluator pins
+and complete passing counts. The latest report is selected; older successes cannot
+bypass a newer failure. No HTTP proof/outcome field is accepted.
+
+Missing approval/report, unsupported policy or infrastructure-unavailable verification
+returns 503 VERIFICATION_UNAVAILABLE. Stale revision/report/time, failed reference or
+mismatched content returns the documented 409 family (VERIFICATION_STALE,
+VERIFICATION_FAILED, VERIFICATION_MISMATCH, plus existing lifecycle/revision errors).
+Reports expire exactly at 24 hours; future timestamps reject. Verification reads
+happen outside the authoring transaction, then all evidence and content are rechecked
+under final locks. Same successful command replays after authorization, even after
+report expiry; failures do not record success. Public detail/lists/errors never expose
+reports or private assets. See [decision 0011](decisions/0011_safe_publication.md) for
+precise ordering, trust, setup and limitations. This supersedes historical statements
+that local publication is always unavailable: it remains unavailable without these
+gates. S014 question quality and deployed authentication/isolation are not certified.

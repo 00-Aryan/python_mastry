@@ -51,7 +51,8 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S010b | **Verified** at `cca8c50`; [record](sprints/S010b.md); remote run 38881670423 passed | Local 376 passed/no skips; remote 342 passed/34 skips; S010a recovery gaps remain |
 | S011 | **Verified** at `9ca97d2`; [record](sprints/S011.md); CI 38938550175 passed | Actual wire acknowledgement-loss and elapsed-time recovery; no production readiness claim |
 | S012 | **Verified locally** at `955b082`; [record](sprints/S012.md); CI 38945673491 passed | 394 local passed/no skips; 348 remote passed/46 isolation skips; publication integration remains S013 |
-| S013–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
+| S013 | **Awaiting exact-commit CI**; [record](sprints/S013.md) | 429 local passed/no skips; configured publication only; remote CI pending |
+| S014–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
 features: run current-HEAD real isolation + PostgreSQL regressions, CLI migration/data
@@ -168,11 +169,11 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S013 — Safe publication transition** is next ready, not started. S012 is Verified
-for local scope at `955b082`; see its [record](sprints/S012.md) for actual checks
-and exact-commit CI. API publication remains unavailable even after
-a passing S012 artifact. No operational worker, AUTO001 continuation, scheduling,
-merge or deployment changes occurred.
+**S013 — Safe publication transition** has passed local acceptance and awaits
+exact-commit CI; see its [record](sprints/S013.md). S014 is next once S013 closes,
+not started. Local publication requires fresh approved S012 evidence; missing
+configuration/usable evidence retains 503. No operational worker, AUTO001 continuation,
+scheduling, merge or deployment changes occurred.
 
 
 ## S012 local acceptance — 16 October 2026
@@ -197,3 +198,22 @@ migration and build checks passed. The separate isolation job skipped. S012 is
 separate documentation closeout follows the implementation evidence. S013 is next
 ready, not started. API publication still returns 503 until that integration;
 question-quality certification is S014. No remaining local S012 blocker.
+
+
+## S013 local acceptance — 16 October 2026 (UTC)
+
+S013 connects immutable S012 reports to the existing two-transaction publication
+transition. Explicit evaluator-policy approval, trusted report/version, complete
+passing results, exact content/component pins and age <24 hours are enforced again
+under final question/version locks. No reference execution occurs in the API.
+Missing approval/evidence or unavailable verification preserves 503. Schema head
+remains 0009; no new migration or weakened immutability/worker/isolation controls.
+See [decision 0011](../decisions/0011_safe_publication.md).
+
+Local final PostgreSQL/real-isolation suite: **429 passed, zero failures/skips**,
+198.55 s. Locked dependencies, Ruff/format (179 files), strict mypy (104 files),
+Alembic CLI/no drift, builds, package/source parity and installed mandatory fresh
+isolation probe passed. All AUTO001 dirty files are preserved and excluded; .env,
+scheduling and operational worker state were not changed. Exact-commit CI is pending.
+Local publication is implemented/locally verified; no deployed certification or S014
+quality claim. S014 follows after S013 closeout, not started.

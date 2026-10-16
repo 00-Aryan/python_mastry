@@ -120,7 +120,7 @@ def delete_question_draft(
     responses={
         503: {
             "model": ErrorEnvelope,
-            "description": "VERIFICATION_UNAVAILABLE until trusted reference verification exists; "
+            "description": "VERIFICATION_UNAVAILABLE without an approved usable reference report; "
             "draft stays unchanged",
         }
     },

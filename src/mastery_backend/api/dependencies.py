@@ -12,6 +12,7 @@ from mastery_backend.application.clock import Clock, SystemClock
 from mastery_backend.application.content_service import ContentService
 from mastery_backend.application.evaluation_service import EvaluationService
 from mastery_backend.application.identity_service import read_development_principal
+from mastery_backend.application.publication_report_verifier import StoredReferenceVerifier
 from mastery_backend.application.publication_verification import (
     ReferenceVerifier,
     UnavailableReferenceVerifier,
@@ -58,8 +59,19 @@ def content_administrator(principal: Annotated[Principal, Depends(current_princi
     return principal
 
 
-def reference_verifier() -> ReferenceVerifier:
-    return UnavailableReferenceVerifier()
+def server_clock() -> Clock:
+    return SystemClock()
+
+
+def reference_verifier(
+    request: Request,
+    factory: Annotated[sessionmaker[Session], Depends(session_factory)],
+    clock: Annotated[Clock, Depends(server_clock)],
+) -> ReferenceVerifier:
+    policy_id = request.app.state.settings.publication_evaluator_policy_version_id
+    if policy_id is None:
+        return UnavailableReferenceVerifier()
+    return StoredReferenceVerifier(factory, clock, policy_id)
 
 
 def content_service(
@@ -92,10 +104,6 @@ def skill_service(
 def learner(principal: Annotated[Principal, Depends(current_principal)]) -> Principal:
     require_learner(principal)
     return principal
-
-
-def server_clock() -> Clock:
-    return SystemClock()
 
 
 def attempt_service(

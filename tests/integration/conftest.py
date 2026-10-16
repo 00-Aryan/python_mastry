@@ -12,6 +12,7 @@ from sqlalchemy import Connection, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session, sessionmaker
 
+from mastery_backend.domain.publication_artifacts import PublicationSnapshot
 from mastery_backend.infrastructure.database.session import create_database_engine
 from mastery_backend.settings import Settings
 
@@ -209,7 +210,11 @@ def published_question(
     from mastery_backend.application.publication_verification import VerificationProof
 
     class TransitionFixtureVerifier:
-        def verify(self, immutable_snapshot: bytes, content_hash: str) -> VerificationProof:
+        def recheck(self, session, snapshot, proof):
+            """Test-only transition fixture."""
+
+        def verify(self, snapshot: PublicationSnapshot) -> VerificationProof:
+            immutable_snapshot, content_hash = snapshot.immutable_snapshot, snapshot.content_hash
             assert hashlib.sha256(immutable_snapshot).hexdigest() == content_hash
             return VerificationProof(
                 content_hash=content_hash,

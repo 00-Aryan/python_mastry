@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     db_connect_timeout_seconds: int = Field(default=5, ge=1, le=60)
     db_statement_timeout_ms: int = Field(default=5000, ge=1, le=60000)
     local_runner_enabled: bool = False
+    publication_evaluator_policy_version_id: UUID | None = None
     auth_mode: Literal["development_identity", "session"] = "development_identity"
     development_user_id: UUID | None = None
     api_host: str = "127.0.0.1"

@@ -1,5 +1,8 @@
 """Persist reference artifacts and their immutable evaluator configuration; never commit."""
 
+from uuid import UUID
+
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -27,3 +30,15 @@ def append_artifact(
         raise ContentError("VERIFICATION_MISMATCH", "Evaluator policy does not match.")
     session.add(artifact)
     session.flush()
+
+
+def latest_artifact(session: Session, version_id: UUID) -> PublicationVerificationArtifact | None:
+    return session.scalar(
+        select(PublicationVerificationArtifact)
+        .where(PublicationVerificationArtifact.question_version_id == version_id)
+        .order_by(
+            PublicationVerificationArtifact.created_at.desc(),
+            PublicationVerificationArtifact.id.desc(),
+        )
+        .limit(1)
+    )

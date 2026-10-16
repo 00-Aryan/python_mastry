@@ -502,3 +502,14 @@ Migration 0009 preserves report history and existing immutable evaluator policie
 Reports are private authoring evidence; they do not publish questions or grant
 learner correctness/mastery. API publication remains unavailable until the separate
 S013 report-consumption/revalidation increment. Broader quality validation is S014.
+
+### S013 implementation refinement: safe local publication
+
+[Decision 0011](decisions/0011_safe_publication.md) connects the existing two-phase
+publication transition to immutable S012 evidence. Explicit approval of an immutable
+evaluator-policy ID, exact snapshot/component pins, trusted verifier/version, passing
+bounded results and age <24 hours are required. The API reads evidence outside the
+authoring transaction and rechecks it with revision/hash/references/archival/admin
+under final locks. It never executes code. Missing approval/usable evidence retains
+503. Local publication can succeed with accepted evidence; S014 quality validation,
+production authentication and remote/deployed certification remain separate.

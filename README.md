@@ -6,7 +6,10 @@ Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server tim
 
 S012 adds a separate local `mastery-content verify-reference` command and immutable
 reference-verification artifacts. See [its setup, limits and publication boundary](docs/decisions/0010_publication_artifacts.md).
-Publication remains unavailable until S013; a passing artifact does not certify test quality.
+S013 permits local publication only with a fresh, passing, exactly pinned artifact and
+explicit approved evaluator policy. [Publication setup and rejection rules](docs/decisions/0011_safe_publication.md)
+explain the gate; missing configuration/evidence remains 503. S014 test-quality checks
+and remote/deployed certification remain future work.
 
 ## Quick start in WSL and VS Code
 
@@ -59,7 +62,7 @@ The direct Uvicorn command uses its CLI host/port options; it does not read API_
 | POST /api/v1/admin/questions | Question identity and first draft; admin role and Idempotency-Key required |
 | POST /api/v1/admin/questions/{question_id}/versions | New draft with server-assigned version number |
 | GET/PATCH/DELETE /api/v1/admin/question-versions/{version_id} | Admin preview, revision-checked draft edit/delete |
-| POST /api/v1/admin/question-versions/{version_id}/publish | Validates completeness; 503 until trusted reference verification exists |
+| POST /api/v1/admin/question-versions/{version_id}/publish | Validates complete content and fresh approved S012 evidence; 503 without usable verification |
 | POST /api/v1/admin/questions/{question_id}/archive | Explicit revision-checked archival; preserves published history |
 | GET /api/v1/skills; /api/v1/skills/{skill_id}; /api/v1/skills/graph | Bounded skill catalogs and graph/neighborhood snapshots |
 | POST /api/v1/admin/skills; PATCH /api/v1/admin/skills/{skill_id} | Admin skill creation and revision-checked metadata edits |

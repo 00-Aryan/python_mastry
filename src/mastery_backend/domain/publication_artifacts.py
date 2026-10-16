@@ -2,9 +2,10 @@
 
 import hashlib
 import json
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Annotated
-from uuid import UUID
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from pydantic import Field, model_validator
 
@@ -14,7 +15,7 @@ from mastery_backend.domain.content import (
     DraftContent,
     content_snapshot,
 )
-from mastery_backend.domain.evaluations import Outcome
+from mastery_backend.domain.evaluations import EvaluationPolicy, Outcome
 
 VERIFIER_IDENTITY = "local-reference-verifier"
 VERIFIER_VERSION = "reference-v1"
@@ -75,3 +76,84 @@ class PublicationArtifactSummary(ContentValue):
     verifier_version: str
     created_at: datetime
     result: ReferenceCheckResult
+
+
+REPORT_MAX_AGE_SECONDS = 86400
+
+
+@dataclass(frozen=True)
+class PublicationSnapshot:
+    question_version_id: UUID
+    revision: int
+    immutable_snapshot: bytes
+    content_hash: str
+
+
+def reference_evaluator_policy(image_hash: str, profile_hash: str) -> EvaluationPolicy:
+    return EvaluationPolicy(
+        protocol_version=2,
+        runtime_image_hash=image_hash,
+        isolation_profile_hash=profile_hash,
+        maximum_dispatches=1,
+        lease_seconds=10,
+        deadline_seconds=10,
+        backoff_seconds=5,
+    )
+
+
+def reference_evaluator_policy_id(policy: EvaluationPolicy) -> UUID:
+    return uuid5(
+        NAMESPACE_URL, "publication-reference-v1:" + digest(policy.model_dump_json().encode())
+    )
+
+
+def validate_publication_artifact(
+    report: PublicationArtifactSummary,
+    stored_snapshot: bytes,
+    expected: PublicationSnapshot,
+    approved_policy_id: UUID,
+    policy: EvaluationPolicy,
+    now: datetime,
+) -> None:
+    if report.verifier_identity != VERIFIER_IDENTITY or report.verifier_version != VERIFIER_VERSION:
+        raise ContentError("VERIFICATION_MISMATCH", "Unsupported reference verifier.")
+    if (
+        report.evaluator_policy_version_id != approved_policy_id
+        or policy.protocol_version != 2
+        or policy.runtime_image_hash is None
+        or policy.isolation_profile_hash is None
+        or policy
+        != reference_evaluator_policy(policy.runtime_image_hash, policy.isolation_profile_hash)
+        or reference_evaluator_policy_id(policy) != approved_policy_id
+    ):
+        raise ContentError(
+            "VERIFICATION_UNAVAILABLE", "An approved verifier policy is unavailable."
+        )
+    if report.question_version_id != expected.question_version_id:
+        raise ContentError("VERIFICATION_MISMATCH", "Verification belongs to another version.")
+    if report.revision != expected.revision:
+        raise ContentError(
+            "VERIFICATION_STALE", "Verify the current draft revision before publishing."
+        )
+    content = verification_inputs(stored_snapshot)
+    if (
+        stored_snapshot != expected.immutable_snapshot
+        or digest(stored_snapshot) != report.content_hash
+        or report.content_hash != expected.content_hash
+        or content.solution is None
+        or report.bundle_hash != digest(bundle_bytes(content))
+        or report.reference_hash != digest(content.solution.reference_code.encode())
+        or report.result.total_cases != len(content.examples) + len(content.test_cases)
+    ):
+        raise ContentError("VERIFICATION_MISMATCH", "Verification does not match this content.")
+    age = (now - report.created_at).total_seconds()
+    if not 0 <= age < REPORT_MAX_AGE_SECONDS:
+        raise ContentError("VERIFICATION_STALE", "Reference verification expired; verify again.")
+    if report.result.outcome == "infrastructure_error":
+        raise ContentError(
+            "VERIFICATION_UNAVAILABLE", "Trusted reference verification is unavailable."
+        )
+    if report.result.outcome != "passed":
+        raise ContentError(
+            "VERIFICATION_FAILED", "Reference verification failed; revise and verify again."
+        )

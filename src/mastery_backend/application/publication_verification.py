@@ -1,10 +1,12 @@
-"""Verification boundary. No executor is implemented in this storage increment."""
+"""Publication evidence boundary; implementations never execute code in the API."""
 
 from typing import Protocol
 
 from pydantic import Field
+from sqlalchemy.orm import Session
 
 from mastery_backend.domain.content import ContentError, ContentValue
+from mastery_backend.domain.publication_artifacts import PublicationSnapshot
 
 
 class VerificationProof(ContentValue):
@@ -14,11 +16,20 @@ class VerificationProof(ContentValue):
 
 
 class ReferenceVerifier(Protocol):
-    def verify(self, immutable_snapshot: bytes, content_hash: str) -> VerificationProof: ...
+    def verify(self, snapshot: PublicationSnapshot) -> VerificationProof: ...
+
+    def recheck(
+        self, session: Session, snapshot: PublicationSnapshot, proof: VerificationProof
+    ) -> None: ...
 
 
 class UnavailableReferenceVerifier:
-    def verify(self, immutable_snapshot: bytes, content_hash: str) -> VerificationProof:
+    def verify(self, snapshot: PublicationSnapshot) -> VerificationProof:
         raise ContentError(
             "VERIFICATION_UNAVAILABLE", "Trusted reference verification is unavailable."
         )
+
+    def recheck(
+        self, session: Session, snapshot: PublicationSnapshot, proof: VerificationProof
+    ) -> None:
+        self.verify(snapshot)

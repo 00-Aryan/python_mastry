@@ -19,6 +19,7 @@ from mastery_backend.application.content_seed_service import seed_development_id
 from mastery_backend.application.skill_service import SkillService
 from mastery_backend.domain.content import ContentError
 from mastery_backend.domain.identity import Principal
+from mastery_backend.domain.publication_artifacts import PublicationSnapshot
 from mastery_backend.infrastructure.database import content_models as models
 from mastery_backend.infrastructure.database.skill_repository import SkillRepository
 
@@ -710,7 +711,11 @@ def test_prerequisites_leave_published_content_available_and_archival_preserves_
     from mastery_backend.application.publication_verification import VerificationProof
 
     class TransitionOnlyVerifier:
-        def verify(self, immutable_snapshot: bytes, content_hash: str) -> VerificationProof:
+        def recheck(self, session, snapshot, proof):
+            """Test-only transition fixture."""
+
+        def verify(self, snapshot: PublicationSnapshot) -> VerificationProof:
+            immutable_snapshot, content_hash = snapshot.immutable_snapshot, snapshot.content_hash
             assert isinstance(immutable_snapshot, bytes)
             return VerificationProof(
                 content_hash=content_hash,

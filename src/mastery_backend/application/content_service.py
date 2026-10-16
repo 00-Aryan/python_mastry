@@ -19,6 +19,7 @@ from mastery_backend.domain.content import (
 )
 from mastery_backend.domain.content_records import AdminQuestionVersion, QuestionLifecycle
 from mastery_backend.domain.identity import Principal
+from mastery_backend.domain.publication_artifacts import PublicationSnapshot
 from mastery_backend.infrastructure.database.content_models import (
     Question,
     QuestionFamily,
@@ -208,7 +209,10 @@ class ContentService:
             if repository.question(version.question_id).archived_at is not None:
                 raise ContentError("QUESTION_ARCHIVED", "Archived questions cannot be published.")
         digest = content_digest(content)
-        proof = self.verifier.verify(content_snapshot(content), digest)
+        snapshot = PublicationSnapshot(
+            version_id, expected_revision, content_snapshot(content), digest
+        )
+        proof = self.verifier.verify(snapshot)
         if proof.content_hash != digest:
             raise ContentError("VERIFICATION_MISMATCH", "Verification does not match this content.")
 
@@ -223,6 +227,7 @@ class ContentService:
             repository.validate_references(current, version.id)
             if repository.question(version.question_id).archived_at is not None:
                 raise ContentError("QUESTION_ARCHIVED", "Archived questions cannot be published.")
+            self.verifier.recheck(session, snapshot, proof)
             version.status = "published"
             version.published_at = datetime.now(UTC)
             version.verification_json = proof.model_dump(mode="json")

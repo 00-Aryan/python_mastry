@@ -24,6 +24,7 @@ from mastery_backend.application.publication_verification import (
 )
 from mastery_backend.domain.content import ContentError, DraftContent
 from mastery_backend.domain.identity import Principal
+from mastery_backend.domain.publication_artifacts import PublicationSnapshot
 from mastery_backend.infrastructure.database import content_models as models
 
 ADMIN_ID = UUID("00000000-0000-0000-0000-000000000001")
@@ -43,7 +44,11 @@ class TestReferenceVerifier:
 
     __test__ = False
 
-    def verify(self, immutable_snapshot: bytes, content_hash: str) -> VerificationProof:
+    def recheck(self, session, snapshot, proof):
+        """Test-only transition fixture; no production evidence approval."""
+
+    def verify(self, snapshot: PublicationSnapshot) -> VerificationProof:
+        immutable_snapshot, content_hash = snapshot.immutable_snapshot, snapshot.content_hash
         assert isinstance(immutable_snapshot, bytes)
         assert json.loads(immutable_snapshot)["solution"]["reference_code"]
         return VerificationProof(
@@ -317,11 +322,11 @@ def test_publication_verifies_outside_transaction_and_rechecks_snapshot(
     release = Event()
 
     class BlockingVerifier(TestReferenceVerifier):
-        def verify(self, immutable_snapshot: bytes, content_hash: str) -> VerificationProof:
+        def verify(self, snapshot: PublicationSnapshot) -> VerificationProof:
             assert seeded_storage.kw["bind"].pool.checkedout() == 0
             entered.set()
             assert release.wait(timeout=10)
-            return super().verify(immutable_snapshot, content_hash)
+            return super().verify(snapshot)
 
     publishing_service = ContentService(seeded_storage, BlockingVerifier())
     with ThreadPoolExecutor(max_workers=1) as pool:
@@ -683,7 +688,7 @@ def test_verification_hash_mismatch_cannot_publish(
     complete_draft: dict[str, object],
 ) -> None:
     class WrongProof(TestReferenceVerifier):
-        def verify(self, immutable_snapshot: bytes, content_hash: str) -> VerificationProof:
+        def verify(self, snapshot: PublicationSnapshot) -> VerificationProof:
             return VerificationProof(
                 content_hash="0" * 64, verifier_version="test-only", verification_id="wrong"
             )
@@ -759,7 +764,7 @@ def test_content_errors_do_not_disclose_private_data_or_stack_traces(
     draft = create_draft(storage_client, complete_draft)
 
     class FailedVerifier(TestReferenceVerifier):
-        def verify(self, immutable_snapshot: bytes, content_hash: str) -> VerificationProof:
+        def verify(self, snapshot: PublicationSnapshot) -> VerificationProof:
             raise RuntimeError("PRIVATE_SOLUTION PRIVATE_TEST_INPUT")
 
     storage_client.app.dependency_overrides[reference_verifier] = FailedVerifier

@@ -1,7 +1,7 @@
 """Capture authoring snapshots, isolate reference runs, then append immutable reports."""
 
 import time
-from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
+from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -9,7 +9,6 @@ from mastery_backend.application.admin_commands import AdminCommands
 from mastery_backend.application.clock import Clock
 from mastery_backend.application.content_service import ContentService
 from mastery_backend.domain.content import ContentError, content_snapshot, validate_publication
-from mastery_backend.domain.evaluations import EvaluationPolicy
 from mastery_backend.domain.identity import Principal
 from mastery_backend.domain.publication_artifacts import (
     MAXIMUM_CASES,
@@ -19,6 +18,8 @@ from mastery_backend.domain.publication_artifacts import (
     ReferenceCheckResult,
     bundle_bytes,
     digest,
+    reference_evaluator_policy,
+    reference_evaluator_policy_id,
     verification_inputs,
 )
 from mastery_backend.infrastructure.database.content_repository import ContentRepository
@@ -62,17 +63,8 @@ class PublicationArtifactService:
         total = len(content.examples) + len(content.test_cases)
         if not 1 <= total <= MAXIMUM_CASES:
             raise ContentError("VERIFICATION_LIMIT", "Verification supports at most 64 cases.")
-        policy = EvaluationPolicy(
-            protocol_version=2,
-            runtime_image_hash=self.sandbox.image_hash,
-            isolation_profile_hash=self.sandbox.profile_hash,
-            maximum_dispatches=1,
-            lease_seconds=10,
-            deadline_seconds=10,
-            backoff_seconds=5,
-        )
-        policy_bytes = policy.model_dump_json().encode()
-        policy_id = uuid5(NAMESPACE_URL, "publication-reference-v1:" + digest(policy_bytes))
+        policy = reference_evaluator_policy(self.sandbox.image_hash, self.sandbox.profile_hash)
+        policy_id = reference_evaluator_policy_id(policy)
         checked = 0
         outcome = "infrastructure_error"
         try:
