@@ -101,6 +101,7 @@ class ContentRepository:
                 "patterns",
                 "examples",
                 "test_cases",
+                "incorrect_solutions",
                 "assistance_steps",
                 "links",
             ):
@@ -151,6 +152,10 @@ class ContentRepository:
         ]
         version.assistance_steps = [
             models.QuestionAssistanceStep(**step.model_dump()) for step in content.assistance_steps
+        ]
+        version.incorrect_solutions = [
+            models.QuestionIncorrectSolution(**candidate.model_dump())
+            for candidate in content.incorrect_solutions
         ]
         version.solution = (
             models.QuestionSolution(**content.solution.model_dump()) if content.solution else None
@@ -214,6 +219,16 @@ class ContentRepository:
             }
             if version.solution
             else None,
+            "incorrect_solutions": [
+                {
+                    "position": candidate.position,
+                    "label": candidate.label,
+                    "source_code": candidate.source_code,
+                }
+                for candidate in sorted(
+                    version.incorrect_solutions, key=lambda value: value.position
+                )
+            ],
             "revision_links": [
                 {"target_version_id": link.target_version_id, "link_type": link.link_type}
                 for link in sorted(

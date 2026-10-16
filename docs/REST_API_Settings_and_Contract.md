@@ -846,3 +846,23 @@ reports or private assets. See [decision 0011](decisions/0011_safe_publication.m
 precise ordering, trust, setup and limitations. This supersedes historical statements
 that local publication is always unavailable: it remains unavailable without these
 gates. S014 question quality and deployed authentication/isolation are not certified.
+
+## S014 — Private question-quality assets and stronger publication evidence
+
+Admin draft create/preview/PATCH now accepts `incorrect_solutions`, an ordered private
+list (max eight) of `{position, label, source_code}`. PATCH replaces the collection
+under existing revision/admin rules. Public question DTOs and assistance responses
+exclude it. Two through eight distinct plausible candidates are required for quality
+verification; each must pass public examples and fail at least one private test.
+Contracts/examples/reference behavior and supported ValueError policy are checked by
+the separate isolated command. No HTTP execution or client-provided success proof.
+
+The command now writes immutable `quality-v2` reports with bounded quality counts/
+reason codes. Publication requires fresh approved v2 evidence and its matching quality
+row, while retaining S013's final-lock exact snapshot/revision/hash checks and replay.
+Missing/unavailable/legacy evidence preserves 503; failed quality is 409
+VERIFICATION_FAILED. Existing v1 history/publications remain intact; v1 cannot approve
+new publication. No automatic operator policy approval. Migration 0010 retains old
+bytes and protects new candidate assets and quality evidence against mutation.
+See [decision 0012](decisions/0012_question_quality.md) for exact checks, supported
+signature/type semantics, limits, policy upgrade and certification boundaries.

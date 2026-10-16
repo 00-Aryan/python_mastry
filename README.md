@@ -8,8 +8,10 @@ S012 adds a separate local `mastery-content verify-reference` command and immuta
 reference-verification artifacts. See [its setup, limits and publication boundary](docs/decisions/0010_publication_artifacts.md).
 S013 permits local publication only with a fresh, passing, exactly pinned artifact and
 explicit approved evaluator policy. [Publication setup and rejection rules](docs/decisions/0011_safe_publication.md)
-explain the gate; missing configuration/evidence remains 503. S014 test-quality checks
-and remote/deployed certification remain future work.
+explain the gate; missing configuration/evidence remains 503. S014 adds private
+misconception programs and [bounded question-quality checks](docs/decisions/0012_question_quality.md).
+New publication requires quality-v2 evidence; old reports/publications remain intact.
+Remote/deployed certification remains unverified.
 
 ## Quick start in WSL and VS Code
 

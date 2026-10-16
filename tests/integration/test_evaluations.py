@@ -711,7 +711,7 @@ def test_real_b5_upgrade_preserves_receipts_and_refuses_history_downgrade(
     database_connection.rollback()
     assert (
         database_connection.scalar(text("SELECT version_num FROM alembic_version"))
-        == "0009_publication_artifacts"
+        == "0010_question_quality"
     )
     database_connection.commit()
     assert attempt_client.get(response.headers["Location"]).status_code == 200

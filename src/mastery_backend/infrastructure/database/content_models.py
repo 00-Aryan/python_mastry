@@ -179,6 +179,9 @@ class QuestionVersion(Base):
     assistance_steps: Mapped[list[QuestionAssistanceStep]] = relationship(
         cascade="all, delete-orphan", lazy="selectin"
     )
+    incorrect_solutions: Mapped[list[QuestionIncorrectSolution]] = relationship(
+        cascade="all, delete-orphan", lazy="selectin"
+    )
     solution: Mapped[QuestionSolution | None] = relationship(
         cascade="all, delete-orphan", lazy="selectin"
     )
@@ -324,3 +327,22 @@ class IdempotencyRecord(Base):
     status_code: Mapped[int] = mapped_column(Integer)
     location: Mapped[str | None] = mapped_column(String(200))
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class QuestionIncorrectSolution(Base):
+    __tablename__ = "question_incorrect_solutions"
+    __table_args__ = (
+        UniqueConstraint("version_id", "position", name="uq_incorrect_position"),
+        UniqueConstraint("version_id", "label", name="uq_incorrect_label"),
+        CheckConstraint(
+            "position > 0 AND length(source_code) BETWEEN 1 AND 65536", name="ck_incorrect_source"
+        ),
+        CheckConstraint("label ~ '^[A-Z][A-Z0-9_-]{1,63}$'", name="ck_incorrect_label"),
+    )
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    version_id: Mapped[UUID] = mapped_column(
+        ForeignKey("question_versions.id", ondelete="RESTRICT")
+    )
+    position: Mapped[int]
+    label: Mapped[str] = mapped_column(String(64))
+    source_code: Mapped[str] = mapped_column(Text)

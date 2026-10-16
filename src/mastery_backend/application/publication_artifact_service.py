@@ -1,6 +1,5 @@
 """Capture authoring snapshots, isolate reference runs, then append immutable reports."""
 
-import time
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Session, sessionmaker
@@ -15,7 +14,6 @@ from mastery_backend.domain.publication_artifacts import (
     VERIFIER_IDENTITY,
     VERIFIER_VERSION,
     PublicationArtifactSummary,
-    ReferenceCheckResult,
     bundle_bytes,
     digest,
     reference_evaluator_policy,
@@ -27,12 +25,8 @@ from mastery_backend.infrastructure.database.publication_models import (
     PublicationVerificationArtifact,
 )
 from mastery_backend.infrastructure.database.publication_repository import append_artifact
-from mastery_backend.infrastructure.observability.logging import logger
-from mastery_backend.infrastructure.runner.local_sandbox import (
-    LocalSandbox,
-    equal_json,
-    validate_json,
-)
+from mastery_backend.infrastructure.runner.local_sandbox import LocalSandbox
+from mastery_backend.infrastructure.runner.reference_quality import grade_quality
 
 
 class PublicationArtifactService:
@@ -65,47 +59,10 @@ class PublicationArtifactService:
             raise ContentError("VERIFICATION_LIMIT", "Verification supports at most 64 cases.")
         policy = reference_evaluator_policy(self.sandbox.image_hash, self.sandbox.profile_hash)
         policy_id = reference_evaluator_policy_id(policy)
-        checked = 0
-        outcome = "infrastructure_error"
         try:
-            self.sandbox.startup_check()
-            started = time.monotonic()
-            cases = [(case.input, case.expected_output) for case in content.examples]
-            cases.extend((case.input, case.expected_output) for case in content.test_cases)
-            for inputs, expected in cases:
-                if time.monotonic() - started >= 10:
-                    outcome = "resource_limit"
-                    break
-                validate_json(inputs)
-                validate_json(expected)
-                output = self.sandbox.execute(
-                    content.solution.reference_code, content.contract.function_name, list(inputs)
-                )
-                checked += 1
-                if output.category != "returned":
-                    outcome = output.category
-                    break
-                if not equal_json(output.value, expected):
-                    outcome = "incorrect"
-                    break
-            else:
-                outcome = "passed"
-        except (RuntimeError, OSError, ValueError):
-            # Internal errors never become learner/reference failures or expose private diagnostics.
-            # Infrastructure failure is a non-approving artifact; no output is retained.
-            logger.exception(
-                "publication_reference_infrastructure_failed",
-                extra={
-                    "question_version_id": str(version_id),
-                    "reason_code": "VERIFICATION_UNAVAILABLE",
-                },
-            )
-            outcome = "infrastructure_error"
+            result, quality = grade_quality(self.sandbox, content)
         finally:
             self.sandbox.cancel()
-        result = ReferenceCheckResult.model_validate(
-            {"outcome": outcome, "checked_cases": checked, "total_cases": total}
-        )
         summary = PublicationArtifactSummary(
             id=uuid4(),
             question_version_id=version_id,
@@ -118,6 +75,7 @@ class PublicationArtifactService:
             verifier_version=VERIFIER_VERSION,
             created_at=self.clock.now(),
             result=result,
+            quality=quality,
         )
         with self.factory.begin() as session:
             # Revocation during execution denies persistence. Historical bytes may differ from
@@ -128,11 +86,12 @@ class PublicationArtifactService:
             append_artifact(
                 session,
                 PublicationVerificationArtifact(
-                    **summary.model_dump(exclude={"result"}),
+                    **summary.model_dump(exclude={"result", "quality"}),
                     requested_by=principal.user_id,
                     snapshot_bytes=snapshot,
                     result_json=result.model_dump(),
                 ),
                 policy.model_dump(),
+                quality,
             )
         return summary

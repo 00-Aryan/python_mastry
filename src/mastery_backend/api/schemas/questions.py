@@ -13,6 +13,7 @@ from mastery_backend.domain.content import (
     DraftContent,
     Example,
     FunctionContract,
+    IncorrectSolution,
     Mode,
     RevisionLink,
     SkillMapping,
@@ -47,6 +48,7 @@ class PatchDraft(ExpectedRevision):
     assistance_steps: list[AssistanceStep] | None = None
     solution: Solution | None = None
     revision_links: list[RevisionLink] | None = None
+    incorrect_solutions: list[IncorrectSolution] | None = Field(default=None, max_length=8)
 
     @model_validator(mode="after")
     def validate_patch(self) -> "PatchDraft":

@@ -16,9 +16,10 @@ from mastery_backend.domain.content import (
     content_snapshot,
 )
 from mastery_backend.domain.evaluations import EvaluationPolicy, Outcome
+from mastery_backend.domain.question_quality import QualityCheckResult
 
 VERIFIER_IDENTITY = "local-reference-verifier"
-VERIFIER_VERSION = "reference-v1"
+VERIFIER_VERSION = "quality-v2"
 MAXIMUM_CASES = 64
 MAXIMUM_SNAPSHOT_BYTES = 1048576
 Hash = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
@@ -76,6 +77,7 @@ class PublicationArtifactSummary(ContentValue):
     verifier_version: str
     created_at: datetime
     result: ReferenceCheckResult
+    quality: QualityCheckResult | None = None
 
 
 REPORT_MAX_AGE_SECONDS = 86400
@@ -95,15 +97,15 @@ def reference_evaluator_policy(image_hash: str, profile_hash: str) -> Evaluation
         runtime_image_hash=image_hash,
         isolation_profile_hash=profile_hash,
         maximum_dispatches=1,
-        lease_seconds=10,
-        deadline_seconds=10,
+        lease_seconds=30,
+        deadline_seconds=30,
         backoff_seconds=5,
     )
 
 
 def reference_evaluator_policy_id(policy: EvaluationPolicy) -> UUID:
     return uuid5(
-        NAMESPACE_URL, "publication-reference-v1:" + digest(policy.model_dump_json().encode())
+        NAMESPACE_URL, "publication-quality-v2:" + digest(policy.model_dump_json().encode())
     )
 
 
@@ -115,6 +117,8 @@ def validate_publication_artifact(
     policy: EvaluationPolicy,
     now: datetime,
 ) -> None:
+    if report.verifier_version == "reference-v1":
+        raise ContentError("VERIFICATION_UNAVAILABLE", "Fresh quality verification is required.")
     if report.verifier_identity != VERIFIER_IDENTITY or report.verifier_version != VERIFIER_VERSION:
         raise ContentError("VERIFICATION_MISMATCH", "Unsupported reference verifier.")
     if (
@@ -146,14 +150,21 @@ def validate_publication_artifact(
         or report.result.total_cases != len(content.examples) + len(content.test_cases)
     ):
         raise ContentError("VERIFICATION_MISMATCH", "Verification does not match this content.")
+    if report.quality is None:
+        raise ContentError("VERIFICATION_UNAVAILABLE", "Quality verification is unavailable.")
+    if report.quality.total_candidates != len(content.incorrect_solutions):
+        raise ContentError("VERIFICATION_MISMATCH", "Quality evidence does not match this content.")
     age = (now - report.created_at).total_seconds()
     if not 0 <= age < REPORT_MAX_AGE_SECONDS:
         raise ContentError("VERIFICATION_STALE", "Reference verification expired; verify again.")
-    if report.result.outcome == "infrastructure_error":
+    if (
+        report.result.outcome == "infrastructure_error"
+        or report.quality.reason_code == "INFRASTRUCTURE_ERROR"
+    ):
         raise ContentError(
             "VERIFICATION_UNAVAILABLE", "Trusted reference verification is unavailable."
         )
-    if report.result.outcome != "passed":
+    if report.result.outcome != "passed" or report.quality.reason_code != "PASSED":
         raise ContentError(
             "VERIFICATION_FAILED", "Reference verification failed; revise and verify again."
         )

@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
+from question_quality_fixtures import INCORRECT_SOLUTIONS
 
 from mastery_backend.domain.content import ContentError, DraftContent, content_snapshot
 from mastery_backend.domain.publication_artifacts import (
@@ -16,11 +17,14 @@ from mastery_backend.domain.publication_artifacts import (
     reference_evaluator_policy_id,
     validate_publication_artifact,
 )
+from mastery_backend.domain.question_quality import QualityCheckResult
 
 
 @pytest.fixture
 def evidence(complete_draft):
-    content = DraftContent.model_validate(complete_draft)
+    content = DraftContent.model_validate(
+        {**complete_draft, "incorrect_solutions": INCORRECT_SOLUTIONS}
+    )
     snapshot = content_snapshot(content)
     policy = reference_evaluator_policy("1" * 64, "2" * 64)
     policy_id = reference_evaluator_policy_id(policy)
@@ -34,8 +38,11 @@ def evidence(complete_draft):
         reference_hash=digest(content.solution.reference_code.encode()),
         evaluator_policy_version_id=policy_id,
         verifier_identity="local-reference-verifier",
-        verifier_version="reference-v1",
+        verifier_version="quality-v2",
         created_at=datetime(2026, 10, 16, tzinfo=UTC),
+        quality=QualityCheckResult(
+            reason_code="PASSED", total_candidates=2, killed_candidates=2, executions=6
+        ),
         result=ReferenceCheckResult(outcome="passed", checked_cases=2, total_cases=2),
     )
     return report, context, policy

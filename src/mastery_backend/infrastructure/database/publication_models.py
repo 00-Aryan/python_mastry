@@ -25,7 +25,8 @@ class PublicationVerificationArtifact(Base):
             name="ck_publication_artifact_hashes",
         ),
         CheckConstraint(
-            "verifier_identity = 'local-reference-verifier' AND verifier_version = 'reference-v1'",
+            "verifier_identity = 'local-reference-verifier' AND "
+            "verifier_version IN ('reference-v1','quality-v2')",
             name="ck_publication_artifact_verifier",
         ),
         CheckConstraint(
@@ -66,3 +67,31 @@ class PublicationVerificationArtifact(Base):
     verifier_version: Mapped[str] = mapped_column(String(100))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     result_json: Mapped[dict[str, Any]] = mapped_column(JSONB)
+
+
+class PublicationQualityEvidence(Base):
+    __tablename__ = "publication_quality_evidence"
+    __table_args__ = (
+        CheckConstraint(
+            "reason_code IN ('PASSED','INVALID_CONTRACT','INVALID_CANDIDATES',"
+            "'REFERENCE_FAILED','WEAK_SUITE','INFRASTRUCTURE_ERROR','RESOURCE_LIMIT')",
+            name="ck_quality_reason",
+        ),
+        CheckConstraint(
+            "total_candidates BETWEEN 0 AND 8 AND killed_candidates BETWEEN 0 AND "
+            "total_candidates AND executions BETWEEN 0 AND 256",
+            name="ck_quality_counts",
+        ),
+        CheckConstraint(
+            "reason_code <> 'PASSED' OR (total_candidates >= 2 AND "
+            "killed_candidates = total_candidates AND executions >= 2 + 2 * total_candidates)",
+            name="ck_quality_passed",
+        ),
+    )
+    artifact_id: Mapped[UUID] = mapped_column(
+        ForeignKey("publication_verification_artifacts.id", ondelete="RESTRICT"), primary_key=True
+    )
+    reason_code: Mapped[str] = mapped_column(String(32))
+    total_candidates: Mapped[int]
+    killed_candidates: Mapped[int]
+    executions: Mapped[int]

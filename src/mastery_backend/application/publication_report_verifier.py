@@ -14,8 +14,10 @@ from mastery_backend.domain.publication_artifacts import (
     PublicationSnapshot,
     validate_publication_artifact,
 )
+from mastery_backend.domain.question_quality import QualityCheckResult
 from mastery_backend.infrastructure.database.evaluation_models import EvaluationPolicyVersion
 from mastery_backend.infrastructure.database.publication_models import (
+    PublicationQualityEvidence,
     PublicationVerificationArtifact,
 )
 from mastery_backend.infrastructure.database.publication_repository import latest_artifact
@@ -30,8 +32,13 @@ class StoredReferenceVerifier:
     def _proof(
         self, session: Session, snapshot: PublicationSnapshot, row: PublicationVerificationArtifact
     ) -> VerificationProof:
+        if row.verifier_version == "reference-v1":
+            raise ContentError(
+                "VERIFICATION_UNAVAILABLE", "Fresh quality verification is required."
+            )
+        quality_row = session.get(PublicationQualityEvidence, row.id)
         policy = session.get(EvaluationPolicyVersion, row.evaluator_policy_version_id)
-        if policy is None or policy.version_code != "publication-v1-" + self.approved_policy_id.hex:
+        if policy is None or policy.version_code != "publication-v2-" + self.approved_policy_id.hex:
             raise ContentError(
                 "VERIFICATION_UNAVAILABLE", "An approved verifier policy is unavailable."
             )
@@ -45,9 +52,19 @@ class StoredReferenceVerifier:
                     **{
                         field: getattr(row, field)
                         for field in PublicationArtifactSummary.model_fields
-                        if field != "result"
+                        if field not in {"result", "quality"}
                     },
                     "result": row.result_json,
+                    "quality": QualityCheckResult.model_validate(
+                        {
+                            "reason_code": quality_row.reason_code,
+                            "total_candidates": quality_row.total_candidates,
+                            "killed_candidates": quality_row.killed_candidates,
+                            "executions": quality_row.executions,
+                        }
+                    )
+                    if quality_row is not None
+                    else None,
                 }
             )
             validate_publication_artifact(

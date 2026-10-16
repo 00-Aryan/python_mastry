@@ -22,6 +22,7 @@ from mastery_backend.domain.publication_artifacts import (
     reference_evaluator_policy,
     reference_evaluator_policy_id,
 )
+from mastery_backend.domain.question_quality import QualityCheckResult
 from mastery_backend.infrastructure.database.content_models import (
     IdempotencyRecord,
     QuestionVersion,
@@ -63,7 +64,21 @@ def controlled_report(factory, version_id, content, clock, **changes):
     for field, value in changes.items():
         setattr(row, field, value)
     with factory.begin() as session:
-        append_artifact(session, row, policy.model_dump())
+        quality = QualityCheckResult(
+            reason_code="PASSED"
+            if row.result_json["outcome"] == "passed"
+            else (
+                "INFRASTRUCTURE_ERROR"
+                if row.result_json["outcome"] == "infrastructure_error"
+                else "REFERENCE_FAILED"
+            ),
+            total_candidates=len(content.incorrect_solutions),
+            killed_candidates=len(content.incorrect_solutions)
+            if row.result_json["outcome"] == "passed"
+            else 0,
+            executions=6,
+        )
+        append_artifact(session, row, policy.model_dump(), quality)
     return row
 
 
@@ -176,7 +191,8 @@ def test_current_revision_and_latest_failed_report_are_required(seeded_storage, 
 
 
 @pytest.mark.parametrize(
-    "mutation", ["revision", "hash", "archive", "expiry", "report", "role", "reference"]
+    "mutation",
+    ["revision", "hash", "archive", "expiry", "report", "role", "reference", "candidate_hash"],
 )
 def test_changes_during_verification_reject_after_relocking(
     seeded_storage, complete_draft, mutation
@@ -212,6 +228,15 @@ def test_changes_during_verification_reject_after_relocking(
                         ),
                         {"id": version_id},
                     )
+            elif mutation == "candidate_hash":
+                with seeded_storage.begin() as session:
+                    session.execute(
+                        text(
+                            "UPDATE question_incorrect_solutions SET source_code='changed' "
+                            "WHERE version_id=:id"
+                        ),
+                        {"id": version_id},
+                    )
             elif mutation == "archive":
                 with seeded_storage() as session:
                     question_id = session.get(QuestionVersion, version_id).question_id
@@ -241,6 +266,7 @@ def test_changes_during_verification_reject_after_relocking(
     expected = {
         "revision": "STALE_REVISION",
         "hash": "STALE_REVISION",
+        "candidate_hash": "STALE_REVISION",
         "archive": "QUESTION_ARCHIVED",
         "expiry": "VERIFICATION_STALE",
         "report": "VERIFICATION_STALE",
@@ -393,7 +419,7 @@ def test_unsupported_policy_and_authorization_deny_writes(
         session.add(
             EvaluationPolicyVersion(
                 id=policy_id,
-                version_code="publication-v1-" + policy_id.hex,
+                version_code="publication-v2-" + policy_id.hex,
                 configuration_json={"protocol_version": 999},
             )
         )

@@ -77,6 +77,12 @@ class Solution(ContentValue):
     expected_complexity: NonEmptyText
 
 
+class IncorrectSolution(ContentValue):
+    position: int = Field(ge=1)
+    label: Code
+    source_code: NonEmptyText
+
+
 class RevisionLink(ContentValue):
     target_version_id: UUID
     link_type: Literal["variation", "transfer", "review"]
@@ -97,6 +103,7 @@ class DraftContent(ContentValue):
     test_cases: list[TestCase] = Field(default_factory=list, max_length=500)
     assistance_steps: list[AssistanceStep] = Field(default_factory=list, max_length=20)
     solution: Solution | None = None
+    incorrect_solutions: list[IncorrectSolution] = Field(default_factory=list, max_length=8)
     revision_links: list[RevisionLink] = Field(default_factory=list, max_length=100)
 
     @model_validator(mode="after")
@@ -106,6 +113,8 @@ class DraftContent(ContentValue):
             self.pattern_ids,
             [mapping.skill_id for mapping in self.skill_mappings],
             [example.position for example in self.examples],
+            [candidate.position for candidate in self.incorrect_solutions],
+            [candidate.label for candidate in self.incorrect_solutions],
             [test.position for test in self.test_cases],
             [step.position for step in self.assistance_steps],
             [(link.target_version_id, link.link_type) for link in self.revision_links],

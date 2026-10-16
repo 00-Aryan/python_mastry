@@ -7,20 +7,25 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from mastery_backend.domain.content import ContentError
+from mastery_backend.domain.question_quality import QualityCheckResult
 from mastery_backend.infrastructure.database.evaluation_models import EvaluationPolicyVersion
 from mastery_backend.infrastructure.database.publication_models import (
+    PublicationQualityEvidence,
     PublicationVerificationArtifact,
 )
 
 
 def append_artifact(
-    session: Session, artifact: PublicationVerificationArtifact, configuration: dict[str, object]
+    session: Session,
+    artifact: PublicationVerificationArtifact,
+    configuration: dict[str, object],
+    quality: QualityCheckResult | None = None,
 ) -> None:
     session.execute(
         insert(EvaluationPolicyVersion)
         .values(
             id=artifact.evaluator_policy_version_id,
-            version_code="publication-v1-" + artifact.evaluator_policy_version_id.hex,
+            version_code="publication-v2-" + artifact.evaluator_policy_version_id.hex,
             configuration_json=configuration,
         )
         .on_conflict_do_nothing(index_elements=[EvaluationPolicyVersion.id])
@@ -30,6 +35,9 @@ def append_artifact(
         raise ContentError("VERIFICATION_MISMATCH", "Evaluator policy does not match.")
     session.add(artifact)
     session.flush()
+    if quality is not None:
+        session.add(PublicationQualityEvidence(artifact_id=artifact.id, **quality.model_dump()))
+        session.flush()
 
 
 def latest_artifact(session: Session, version_id: UUID) -> PublicationVerificationArtifact | None:

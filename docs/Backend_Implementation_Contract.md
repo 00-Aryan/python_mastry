@@ -513,3 +513,14 @@ authoring transaction and rechecks it with revision/hash/references/archival/adm
 under final locks. It never executes code. Missing approval/usable evidence retains
 503. Local publication can succeed with accepted evidence; S014 quality validation,
 production authentication and remote/deployed certification remain separate.
+
+### S014 implementation refinement: bounded question-quality verification
+
+[Decision 0012](decisions/0012_question_quality.md) defines private version-owned
+representative incorrect solutions, root JSON/signature/example checks, isolated
+reference/ValueError/candidate execution and immutable bounded quality evidence.
+A candidate must pass examples and be killed by private tests. This is declared-
+misconception coverage, not proof against every incorrect program or validation of
+free-text/nested constraints. Migration 0010 preserves historical reports/publications;
+new publication requires quality-v2 evidence in addition to unchanged S013 gates.
+No source runs in the API and no learner scoring/worker/deployment capability is enabled.

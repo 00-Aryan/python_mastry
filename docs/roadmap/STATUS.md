@@ -53,7 +53,8 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S011 | **Verified** at `9ca97d2`; [record](sprints/S011.md); CI 38938550175 passed | Actual wire acknowledgement-loss and elapsed-time recovery; no production readiness claim |
 | S012 | **Verified locally** at `955b082`; [record](sprints/S012.md); CI 38945673491 passed | 394 local passed/no skips; 348 remote passed/46 isolation skips; publication integration remains S013 |
 | S013 | **Verified locally** at `e2ca64e`; [record](sprints/S013.md); CI 38949458995 passed | 429 local passed/no skips; 381 remote passed/48 isolation skips; explicit report/policy gates |
-| S014–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
+| S014 | **Awaiting exact-commit CI**; [record](sprints/S014.md) | 466 local passed/no skips; explicit quality-v2 approval required; remote CI pending |
+| S015–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
 features: run current-HEAD real isolation + PostgreSQL regressions, CLI migration/data
@@ -171,10 +172,10 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S014 — Question-quality verifier** is next ready, not started. S013 is Verified
-for local scope at `e2ca64e`; see its [record](sprints/S013.md) and exact-commit CI.
-Local publication requires fresh approved S012 evidence; missing configuration/usable
-evidence retains 503. No actual .env, operational worker, AUTO001 continuation,
+**S014 — Question-quality verifier** passed local acceptance and awaits exact-commit
+CI; see its [record](sprints/S014.md). New publication requires fresh approved quality-v2
+evidence plus S013 final locks/revision/hash checks; absent usable evidence remains 503.
+S015 follows closeout and has not started. No actual .env, operational worker, AUTO001,
 scheduling, merge or deployment change occurred.
 
 
@@ -224,3 +225,22 @@ quality/migration/build checks. The separate isolation job skipped. S013 is **Ve
 for local scope**; this documentation closeout follows its implementation evidence.
 Remote/deployed isolation, production authentication and S014 quality remain unverified
 or future. No local S013 blocker. S014 is next ready, not started.
+
+
+## S014 local acceptance — 17 October 2026 (Asia/Kolkata)
+
+Private version-owned misconception programs and immutable bounded quality evidence
+are implemented. Contracts, examples, isolated reference/invalid-input behavior and
+plausible incorrect programs are checked; every candidate must be killed by private
+tests. Missing/weak/invalid assets cannot approve publication. Migration 0010 retains
+old immutable bytes/receipts and adds protected normalized candidates/quality rows.
+New publication requires fresh approved quality-v2 evidence; all S013 final-lock and
+fail-closed gates remain. No automatic policy approval; old publications are retained
+without retroactive quality certification. See [decision 0012](../decisions/0012_question_quality.md).
+
+Final local PostgreSQL/real-isolation: **466 passed, zero failures/skips**, 199.78 s.
+Locked dependencies, Ruff/format (187 files), strict mypy (107 files), migration CLI/no
+drift, source/wheel/source parity and installed fresh mandatory isolation probe passed.
+All AUTO001 changes and .env are preserved unchanged and excluded. Exact-commit CI
+is pending. S015 is next after closeout, not started. Broader semantic/test completeness,
+remote/deployed isolation and cross-host certification are not claimed.

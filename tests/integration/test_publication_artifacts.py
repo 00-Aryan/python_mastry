@@ -9,6 +9,7 @@ from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
+from question_quality_fixtures import INCORRECT_SOLUTIONS
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
@@ -30,7 +31,9 @@ FAMILY_ID = UUID("00000000-0000-0000-0000-000000000031")
 
 
 def create_version(factory, complete_draft, source="def echo(word): return word"):
-    content = DraftContent.model_validate(complete_draft)
+    content = DraftContent.model_validate(
+        {"incorrect_solutions": INCORRECT_SOLUTIONS, **complete_draft}
+    )
     content = content.model_copy(
         update={
             "solution": content.solution.model_copy(update={"reference_code": source}),
@@ -53,7 +56,7 @@ def verifier(factory, runtime):
     [
         ("def echo(word): return word", "passed"),
         ("def echo(word): return None", "incorrect"),
-        ("def echo(:", "syntax_error"),
+        ("def echo(:", "incorrect"),
         ("def echo(word): raise ValueError('PRIVATE_DIAGNOSTIC')", "runtime_error"),
     ],
 )
@@ -67,8 +70,13 @@ def test_real_reference_artifact_pins_and_safe_bounded_results(
     assert report.bundle_hash == digest(bundle_bytes(content))
     assert report.reference_hash == digest(source.encode())
     assert report.verifier_identity == "local-reference-verifier"
-    assert report.verifier_version == "reference-v1"
-    assert 0 < report.result.checked_cases <= report.result.total_cases == 2
+    assert report.verifier_version == "quality-v2"
+    assert 0 <= report.result.checked_cases <= report.result.total_cases == 2
+    if source == "def echo(:":
+        assert report.quality.reason_code == "INVALID_CONTRACT"
+        assert report.result.checked_cases == 0
+    else:
+        assert report.result.checked_cases > 0
     payload = report.model_dump_json()
     assert len(payload) < 2048
     for marker in [source, "PRIVATE_TEST_INPUT", "PRIVATE_DIAGNOSTIC", "PRIVATE_HINT"]:
@@ -101,7 +109,7 @@ def test_real_reference_artifact_pins_and_safe_bounded_results(
     config = Config(str(Path(__file__).resolve().parents[2] / "alembic.ini"))
     with seeded_storage.kw["bind"].connect() as connection:
         config.attributes["connection"] = connection
-        with pytest.raises(DBAPIError, match="Cannot remove publication verification history"):
+        with pytest.raises(DBAPIError, match="Cannot remove question quality history"):
             command.downgrade(config, "0008_local_execution")
         connection.rollback()
     # Even a real passing artifact does not wire S013 or bypass the default 503 boundary.
