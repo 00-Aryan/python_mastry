@@ -32,7 +32,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Assistance | `6cebf2a`; irreversible grants, waits and full-solution escape | [B4](../B4_Verification.md), remote regressions | Grant does not prove reading; no scoring |
 | Source receipts | `eb015cd`; immutable source and evidence snapshots | [B5](../B5_Verification.md), remote regressions | Receipt alone is not correctness |
 | Evaluation lifecycle | `ad75f15`; dispatch intent, leases, retries and protected terminal results | [B6a](../B6a_Verification.md), remote regressions | Synthetic B6a results prove orchestration only |
-| B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | [B6b reconciliation](../B6b_Verification.md): real host checks executed locally; cancellation reproduced twice, acceptance **Blocked**; remote real-isolation gate still open |
+| B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | [B6b reconciliation](../B6b_Verification.md): real host checks executed locally; S010b cancellation fix passed local real checks; acknowledgement-loss/wall-clock recovery keep acceptance **Blocked** |
 | Publication, pilot pack, browser drafts/workspace | Planned S012–S036 | No accepted implementation evidence | No production publication bypass; no complete usable branch |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
@@ -46,8 +46,8 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S004 | ADR/backend choice implemented in B6b | Preserve ADR; carry current-host capability verification into S010a rather than rebuild |
 | S005–S009 | Implemented in B6b; acceptance not fully verified | Reuse runtime, protocol, authority, leases and grader; run current-HEAD real checks |
 | S010–S011 | Adversarial/crash test code exists; verification incomplete | Execute on supported host; distinguish actual SIGKILL from clock-controlled abandoned leases and actual transport interruption |
-| S010a | **Blocked**; [record](sprints/S010a.md); real checks executed locally | Reproduced startup/cancellation race; remaining actual acknowledgement-loss/recovery evidence |
-| S010b | **Ready**, [focused follow-up](sprints/S010b.md), not started | Deterministic cancellation phase behavior; then rerun S010a |
+| S010a | **Blocked**; [record](sprints/S010a.md); real checks executed locally | Cancellation corrected locally by S010b; actual acknowledgement-loss/wall-clock recovery remain unverified |
+| S010b | **Awaiting CI**; [record](sprints/S010b.md), 376 real/PostgreSQL tests passed locally | Exact-pushed-commit remote checks pending; S010a remains Blocked |
 | S012–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
@@ -123,15 +123,24 @@ Final combined suite: **361 passed / no skips**; the independent failure still b
 acceptance. Static, migration, locked dependency, build and installed-wheel checks passed. Local working-tree evidence
 is distinct from remote exact-commit CI; no new remote isolation pass is claimed.
 
+## S010b cancellation ordering
+
+Starting HEAD `7d05e81`; S003 documentation `d30c5d9` stays distinct from its verified
+implementation baseline `fbef144`. The original cancellation failure reproduced before
+the bounded fix. Explicit cancellation is now ordered around mandatory validation,
+READY and source send; cleanup/resource stops do not manufacture cancellation intent.
+Genuine control/bootstrap/pipe failures retain their meaning. No authority/lease changes.
+
+Local checks passed: 13 deterministic supervisor cases; five consecutive three-phase
+real cancellation matrices; **376 PostgreSQL/real-isolation regressions with zero skips**;
+locked sync/lock check, migrations at 0008, Ruff/format, strict mypy and package/installed
+probe checks. Exact outgoing commit CI is pending. Existing four AUTO001 files were
+preserved byte-for-byte and excluded from this unit's commits.
+
 ## Next action
 
-**S010a is Blocked. Next ready card: [S010b — Cancellation phase ordering](sprints/S010b.md).**
-Reproduce and resolve startup/handshake/running cancellation deterministically, retain
-all controls, then rerun S010a and address remaining actual acknowledgement-loss and
-real-time recovery evidence. The capable host is available; the reproduced behavior,
-not an assumed missing-systemd environment, is the current blocker. S012 remains blocked.
-
-Four pre-existing dirty AUTO001 files and local state were preserved unchanged. Their
-completion, automation/scheduling, S004, publication, merge and deployment are outside
-this unit. The new S010b card was documented only; no next card was started. See the
-[S010a record](sprints/S010a.md) and [B6b evidence](../B6b_Verification.md).
+Finish S010b's exact-pushed-commit CI recording. **S010a remains Blocked**, even after
+cancellation is resolved: real acknowledgement-loss and wall-clock lease recovery are
+still unverified. Next ready scope is remaining **S011 actual recovery evidence**;
+no such work was started. S012 remains blocked. No scheduling, worker enablement,
+AUTO001 continuation, merge or deployment occurred.

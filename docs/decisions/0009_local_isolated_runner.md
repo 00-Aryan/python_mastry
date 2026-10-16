@@ -85,3 +85,24 @@ process. Test authenticated readiness/revocation, immutable provenance, duplicat
 stale generations, actual abandoned lease recovery and unavailable API behavior.
 Run all regressions, PostgreSQL migrations, Ruff, strict mypy and package checks. Record
 real vs simulated crash cases explicitly, and report any unavailable controls/checks.
+
+
+## S010b cancellation ordering
+
+One sandbox instance executes sequentially; an explicit stop request remains latched
+and requires a new instance before further work. Cleanup and resource termination are
+not cancellation requests. Requests during mandatory control validation are recorded
+without stopping that validation; genuine validation failures remain infrastructure
+errors. After successful validation, cancellation is checked before/after the bounded
+READY wait. A malformed nonempty handshake remains a bootstrap failure; cancelled EOF
+is distinguished from uncancelled missing readiness. An already raised failure is not
+rewritten by a later request.
+
+A reentrant state lock serializes cancellation with readiness observation and the
+source-send boundary. Source transmission commits at its locked cancellation check;
+a subsequent request can interrupt that transmission. A broken pipe is reported as
+cancellation only when an explicit stop request exists. No catch-all exception handler
+converts bootstrap/control failures merely because a flag changed. Observed resource
+limits retain their category. All paths stop/reset the scoped unit and clear active
+state. Authentication, policy pins and leases are unchanged. Same-thread worker signal
+handlers may request cancellation; the lock is reentrant for that reason.

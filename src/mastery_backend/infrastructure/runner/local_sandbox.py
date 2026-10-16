@@ -8,6 +8,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from threading import RLock
 from typing import Literal
 from uuid import uuid4
 
@@ -29,17 +30,62 @@ class LocalSandbox:
         self.active_unit: str | None = None
         self.checked = False
         self.cancelled = False
+        self._state_lock = RLock()
+        self._controls_verified = False
 
     def cancel(self) -> None:
-        self.cancelled = True
-        if self.active_unit:
-            subprocess.run(
-                ["/usr/bin/systemctl", "--user", "stop", self.active_unit],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                timeout=5,
-                check=False,
-            )
+        # Keep control validation intact. The execution observes this request before READY/source.
+        # RLock also permits the worker's same-thread signal handler to request cancellation.
+        with self._state_lock:
+            self.cancelled = True
+            unit = self.active_unit if self._controls_verified else None
+        if unit is not None:
+            self._stop_unit(unit)
+
+    @staticmethod
+    def _stop_unit(unit: str) -> None:
+        subprocess.run(
+            ["/usr/bin/systemctl", "--user", "stop", unit],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=5,
+            check=False,
+        )
+
+    def _raise_if_cancelled(self) -> None:
+        if self.cancelled:
+            raise RuntimeError("Isolated execution was cancelled")
+
+    def wait_for_ready(self, process: subprocess.Popen[bytes]) -> None:
+        """Order a pending stop request against observation of a genuine bootstrap failure."""
+        assert process.stdout is not None
+        with self._state_lock:
+            self._raise_if_cancelled()
+        with selectors.DefaultSelector() as selector:
+            selector.register(process.stdout, selectors.EVENT_READ)
+            readable = selector.select(2)
+            with self._state_lock:
+                self._raise_if_cancelled()
+                frame = os.read(process.stdout.fileno(), 64) if readable else b""
+                # Cancellation can cause EOF, but cannot explain a malformed nonempty frame.
+                if frame and frame != b"READY\n":
+                    raise RuntimeError("Trusted sandbox bootstrap is unavailable")
+                self._raise_if_cancelled()
+                if not frame:
+                    raise RuntimeError("Trusted sandbox bootstrap is unavailable")
+
+    def send_payload(self, process: subprocess.Popen[bytes], payload: bytes) -> None:
+        """Serialize cancellation and source transmission after the validated handshake."""
+        assert process.stdin is not None
+        with self._state_lock:
+            self._raise_if_cancelled()
+            try:
+                process.stdin.write(payload)
+                process.stdin.close()
+            except BrokenPipeError:
+                # A same-thread signal handler can reenter while write/close is in progress.
+                self._raise_if_cancelled()
+                raise
 
     def verify_controls(self, unit: str, process: subprocess.Popen[bytes]) -> None:
         deadline = time.monotonic() + 2
@@ -92,6 +138,8 @@ class LocalSandbox:
         raise RuntimeError("Isolated service did not become ready")
 
     def execute(self, source: str, function: str, inputs: list[object]) -> SandboxOutput:
+        with self._state_lock:
+            self._raise_if_cancelled()
         hashes = verify_runtime(self.directory)
         if hashes != (self.image_hash, self.profile_hash):
             raise RuntimeError("Pinned runtime has changed")
@@ -104,8 +152,12 @@ class LocalSandbox:
         if len(payload) > 131072:
             raise RuntimeError("Runner input exceeds the bounded protocol")
         unit = "mastery-sandbox-" + uuid4().hex
-        self.active_unit = unit
-        self.cancelled = False
+        with self._state_lock:
+            self._raise_if_cancelled()
+            if self.active_unit is not None:
+                raise RuntimeError("A sandbox supports only one active execution")
+            self.active_unit = unit
+            self._controls_verified = False
         launcher = Path(__file__).with_name("sandbox_launcher.py")
         command = [
             "/usr/bin/systemd-run",
@@ -131,33 +183,25 @@ class LocalSandbox:
             str(self.directory / "image"),
             str(self.directory / "seccomp.bpf"),
         ]
-        process = subprocess.Popen(
-            command,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            start_new_session=True,
-        )
+        process: subprocess.Popen[bytes] | None = None
         output = bytearray()
         total = 0
         limited = False
         try:
-            self.verify_controls(unit, process)
-            assert (
-                process.stdin is not None
-                and process.stdout is not None
-                and process.stderr is not None
+            process = subprocess.Popen(
+                command,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                start_new_session=True,
             )
-            # A sealed bootstrap handshake proves startup succeeded before learner data is sent.
-            with selectors.DefaultSelector() as ready_selector:
-                ready_selector.register(process.stdout, selectors.EVENT_READ)
-                if (
-                    not ready_selector.select(2)
-                    or os.read(process.stdout.fileno(), 64) != b"READY\n"
-                ):
-                    raise RuntimeError("Trusted sandbox bootstrap is unavailable")
-            process.stdin.write(payload)
-            process.stdin.close()
+            self.verify_controls(unit, process)
+            with self._state_lock:
+                self._controls_verified = True
+                self._raise_if_cancelled()
+            assert process.stdout is not None and process.stderr is not None
+            self.wait_for_ready(process)
+            self.send_payload(process, payload)
             with selectors.DefaultSelector() as selector:
                 selector.register(process.stdout, selectors.EVENT_READ, True)
                 selector.register(process.stderr, selectors.EVENT_READ, False)
@@ -165,7 +209,7 @@ class LocalSandbox:
                 while selector.get_map():
                     if time.monotonic() >= deadline:
                         limited = True
-                        self.cancel()
+                        self._stop_unit(unit)
                         break
                     for key, _ in selector.select(0.05):
                         chunk = os.read(key.fd, 8192)
@@ -175,7 +219,7 @@ class LocalSandbox:
                         total += len(chunk)
                         if total > 65536:
                             limited = True
-                            self.cancel()
+                            self._stop_unit(unit)
                             break
                         if key.data:
                             output.extend(chunk)
@@ -210,21 +254,28 @@ class LocalSandbox:
             except (ValueError, RecursionError):
                 return SandboxOutput("runtime_error")
         finally:
-            self.cancel()
-            if process.poll() is None:
-                process.kill()
-            process.wait(timeout=5)
-            for stream in (process.stdin, process.stdout, process.stderr):
-                if stream is not None:
-                    stream.close()
-            subprocess.run(
-                ["/usr/bin/systemctl", "--user", "reset-failed", unit],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                timeout=2,
-                check=False,
-            )
-            self.active_unit = None
+            try:
+                self._stop_unit(unit)
+            finally:
+                try:
+                    if process is not None:
+                        if process.poll() is None:
+                            process.kill()
+                        process.wait(timeout=5)
+                        for stream in (process.stdin, process.stdout, process.stderr):
+                            if stream is not None:
+                                stream.close()
+                    subprocess.run(
+                        ["/usr/bin/systemctl", "--user", "reset-failed", unit],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        timeout=2,
+                        check=False,
+                    )
+                finally:
+                    with self._state_lock:
+                        self.active_unit = None
+                        self._controls_verified = False
 
     def startup_check(self) -> None:
         source = """import os, socket

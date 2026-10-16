@@ -791,7 +791,12 @@ same-generation dispatch returns recorded results without rerunning source; dupl
 or stale result delivery cannot replace terminal state. Infrastructure retries receive
 a fresh generation/token and run fresh sandboxes. A crash after provenance commit but
 before result application can replay its result while the lease is valid; after expiry
-normal recovery creates a new generation. SIGTERM cancels work; SIGKILL cleanup is
+normal recovery creates a new generation. SIGTERM requests cancellation. Requests during
+mandatory control validation are latched until validation completes; genuine control
+errors remain infrastructure failures. After validation, cancellation is ordered against
+READY observation and the locked source-send boundary. Cleanup/resource stops do not
+create cancellation requests, and an explicitly cancelled sandbox cannot be reused.
+Genuine bootstrap failures are not rewritten by later cancellation. SIGKILL cleanup is
 bounded by the independently enforced three-second systemd service lifetime.
 
 The function contract's return is JSON data; valid inputs are supplied by published

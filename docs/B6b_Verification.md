@@ -1,8 +1,8 @@
 # B6b verification reconciliation — S010a
 
 Recorded 16 October 2026 (Asia/Kolkata). **Acceptance blocked**, not production-ready.
-B6b implementation is credited at `895b8e5`; its runner/worker source and existing
-real-runner tests are unchanged from that commit. This verification started from
+B6b implementation is credited at `895b8e5`; at S010a start its runner/worker source
+and existing real-runner tests were unchanged from that commit. S010b updates follow below. This verification started from
 `d30c5d9dc4541068cd027186d20f52e303d940ad`, the documentation-only S003 closeout.
 S003 implementation verification remains separately pinned to
 `fbef14449dbd990c34ca9145efc32e2640084d47`, remote CI run 38175538531
@@ -110,3 +110,34 @@ Remote capable-host CI, cold WSL
 startup, deployed authentication/isolation, publication verification and production
 readiness are unverified. This shared-kernel local sandbox is not VM/kernel security
 certification. S012 publication-dependent work remains blocked.
+
+
+## S010b — bounded cancellation correction
+
+S010a checkpoint `7d05e81` remains historically Blocked. S010b started from that SHA,
+reproduced the original cancellation failure once more before changing code, and then
+separated explicit stop intent from finally/resource termination. Requests during
+mandatory validation are latched; validation errors retain their meaning. Pending
+cancellation is ordered at READY and source-send boundaries under a reentrant lock.
+Malformed nonempty handshakes, uncancelled EOF/timeouts and real broken pipes stay
+failures; this is not catch-all relabelling. Explicit cancellation stays latched on an
+instance, and launch/cleanup paths clear its active state. See ADR 0009 and the
+[S010b record](roadmap/sprints/S010b.md) for contract decisions and exact tests.
+
+Thirteen deterministic supervisor tests use process substitutes only. The real
+cancellation test uses barriers at controls, READY and confirmed learner entry (a
+fixture stderr marker), replacing the fixed sleep. Five consecutive real-phase runs
+passed all 15 real cases; runs 2–5 also passed the 13 deterministic cases each.
+The complete PostgreSQL/real-isolation suite passed **376 tests, no skips**, 88.22 s.
+Locked sync/lock check, Alembic upgrade/current/check at 0008, Ruff/format (161 files),
+strict mypy (98 source files), source/wheel build and installed-wheel fresh runtime
+probe passed. No operational worker was provisioned or enabled. The supervisor change
+naturally changes the existing isolation-profile hash; immutable old policy pins remain
+unchanged. Future operator provisioning must use the reviewed new profile.
+
+Exact-pushed-commit CI is pending and will be recorded separately; local JUnit/logs are
+ignored in `.local-runner/s010b-evidence/`. Existing dirty AUTO001 files remain unchanged.
+The S010b cancellation blocker is locally resolved, but S010a stays **Blocked** for
+real acknowledgement-loss and wall-clock lease recovery. Neither was implemented or
+verified here. Remote isolation certification, cold-start/deployed checks and production
+readiness remain unverified. Next scope is remaining S011 recovery evidence, not begun.

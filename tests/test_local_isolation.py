@@ -161,25 +161,57 @@ s.execute('def solve():\\n while True: pass', 'solve', [])
         process.wait(timeout=2)
 
 
-def test_real_cancellation_stops_complete_unit(sandbox):
+@pytest.mark.parametrize("phase", ["controls", "ready", "running"])
+def test_real_cancellation_stops_complete_unit(sandbox, phase):
+    import selectors
     from concurrent.futures import ThreadPoolExecutor
     from threading import Event
 
-    ready = Event()
-    original = sandbox.verify_controls
+    reached, release = Event(), Event()
+    sent = []
+    original_controls = sandbox.verify_controls
+    original_ready = sandbox.wait_for_ready
+    original_send = sandbox.send_payload
+
+    def barrier():
+        reached.set()
+        assert release.wait(3), "Cancellation phase was not released"
 
     def controls(unit, process):
-        original(unit, process)
-        ready.set()
+        original_controls(unit, process)
+        if phase == "controls":
+            barrier()
+
+    def ready(process):
+        original_ready(process)
+        if phase == "ready":
+            barrier()
+
+    def send(process, payload):
+        original_send(process, payload)
+        sent.append(True)
+        if phase == "running":
+            # Confirm learner entry, rather than treating cgroup readiness as code execution.
+            with selectors.DefaultSelector() as selector:
+                selector.register(process.stderr, selectors.EVENT_READ)
+                assert selector.select(2), "Learner did not reach the running marker"
+                assert os.read(process.stderr.fileno(), 64) == b"RUNNING\n"
+            barrier()
 
     sandbox.verify_controls = controls
+    sandbox.wait_for_ready = ready
+    sandbox.send_payload = send
+    source = "def solve():\n import os\n os.write(2, b'RUNNING\\n')\n while True: pass"
     with ThreadPoolExecutor(max_workers=1) as pool:
-        result = pool.submit(sandbox.execute, "def solve():\n while True: pass", "solve", [])
-        assert ready.wait(3)
-        time.sleep(0.1)
-        sandbox.cancel()
+        result = pool.submit(sandbox.execute, source, "solve", [])
+        try:
+            assert reached.wait(3), "Execution did not reach the requested cancellation phase"
+            sandbox.cancel()
+        finally:
+            release.set()
         with pytest.raises(RuntimeError, match="cancelled"):
             result.result(timeout=5)
+    assert bool(sent) == (phase == "running")
     assert sandbox.active_unit is None
 
 
