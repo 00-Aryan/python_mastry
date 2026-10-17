@@ -36,7 +36,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Publication verification artifacts | `955b082`; local isolated reference CLI, immutable private snapshot/report pins | [S012](sprints/S012.md): 394 local passed/no skips; exact-commit remote CI passed | S013 consumes approved reports, strengthened by S014 quality-v2; no deployed attestation |
 | Safe local publication | `e2ca64e`, strengthened by `edcb3c2`; approved immutable quality evidence and final revision/hash/freshness recheck | [S013](sprints/S013.md), [S014](sprints/S014.md); exact implementation CI passed | Missing usable approved quality-v2 evidence retains 503; no deployment certification |
 | Question-quality verification | `edcb3c2`; private misconception programs, isolated checks and immutable quality-v2 reports | [S014](sprints/S014.md): 466 local passed/no skips; 408 hosted passed/58 isolation skips | Bounded declared misconceptions/root types; human semantic review and remote/deployed certification remain |
-| First executable dictionary question | S015 implemented; authored safe lookup and bounded real learner flow | [S015](sprints/S015.md): 473 local passed/no skips; exact CI pending | Assisted bundle pass is not lifecycle completion/mastery; no operational population |
+| First executable dictionary question | `055c692`; authored safe lookup, bounded real learner flow and readiness/reload repair | [S015](sprints/S015.md): 473 local passed/no skips; 412 hosted passed/61 isolation skips; exact CI passed | Assisted bundle pass is not lifecycle completion/mastery; no operational population |
 | Pilot pack, browser drafts/workspace | Planned S016–S036 | No accepted completion evidence | No complete usable branch or hosted release |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
@@ -56,7 +56,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S012 | **Verified locally** at `955b082`; [record](sprints/S012.md); CI 38945673491 passed | 394 local passed/no skips; 348 remote passed/46 isolation skips; publication integration remains S013 |
 | S013 | **Verified locally** at `e2ca64e`; [record](sprints/S013.md); CI 38949458995 passed | 429 local passed/no skips; 381 remote passed/48 isolation skips; explicit report/policy gates |
 | S014 | **Verified locally** at `edcb3c2`; [record](sprints/S014.md); CI 38958524412 passed | 466 local passed/no skips; 408 hosted passed/58 isolation skips; explicit quality-v2 approval required |
-| S015 | **Awaiting exact-commit CI**; [record](sprints/S015.md) | 473 local passed/no failures or skips; all local quality/package checks passed |
+| S015 | **Verified locally** at `055c692`; [record](sprints/S015.md); CI 39012725405 passed | 473 local passed/no failures or skips; 412 hosted passed/61 isolation skips; no deployed certification |
 | S016–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
@@ -175,12 +175,12 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S015 — First executable question** passed local acceptance and awaits exact-commit
-CI; see its [record](sprints/S015.md). Full PostgreSQL/real-isolation: 473 passed,
-zero failures/skips; required quality/package checks passed.
-Publication retains approved fresh quality-v2 and final-lock exact-snapshot gates.
+**S016 — Pilot branch specification** is next ready, not started. S015 is Verified
+for local scope at `055c692`; [its record](sprints/S015.md) includes exact-commit CI
+39012725405 and 473 local real-isolation passes with no skips. Publication retains
+approved fresh quality-v2 and final-lock exact-snapshot gates. No local S015 blocker.
 No .env, operational worker, AUTO001, scheduling, merge or deployment change.
-S016 follows verified closeout, not started.
+This closeout does not begin S016.
 
 
 ## S012 local acceptance — 16 October 2026
@@ -273,8 +273,15 @@ status/history or durable retry; new admission still fails closed. See
 Final local full suite: **473 passed, zero failures/errors/skips**, 242.91 s. Locked
 dependencies, Ruff/format (191 files), strict mypy (107 files), real migration CLI/no
 drift, builds, package/source/content parity and installed mandatory isolation probe
-passed. AUTO001 and .env are unchanged/excluded. Exact-commit CI remains the closeout
-gate. No local acceptance blocker. S016 is next after closeout, not started. Local
-assisted bundle success is not lifecycle completion, independent credit/mastery,
-human browser usability, universal correctness or deployed certification. Authoring
-answers are visible in this public repository; runtime API privacy is separately tested.
+passed. AUTO001 and .env are unchanged/excluded. Exact implementation
+`055c692bedefae660b00d558633ef89b12f02d15` passed
+[CI 39012725405](https://github.com/00-Aryan/python_mastry/actions/runs/39012725405):
+**412 passed / 61 isolation skips**, zero failures, 106.17 s, plus all configured
+locked-sync/quality/migration/build checks. The separate isolation job skipped;
+hosted skips do not certify real execution. S015 is **Verified for local scope**;
+this later documentation-only closeout and its commit/CI handoff remain separate
+from implementation verification. No local acceptance blocker. S016 is next ready,
+not started. Local assisted bundle success is not lifecycle completion, independent
+credit/mastery, human browser usability, universal correctness or deployed certification.
+Authoring answers are visible in this public repository; runtime API privacy is
+separately tested. No operator database population or operational worker was enabled.
