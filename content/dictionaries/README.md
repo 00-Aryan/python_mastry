@@ -1,6 +1,8 @@
 # First executable dictionary question (S015)
 
 This directory supplies one authoring input, not a pilot catalog or an import tool.
+[S016's branch specification](../../docs/curriculum/dictionary_pilot_branch.md) maps
+the later ten-slot plan and its coverage gaps; it preserves these S015 identities.
 `DICT-LOOKUP-001` asks for an integer dictionary lookup with a caller-selected fallback.
 A present zero must remain zero; only an absent key uses the fallback. The primary
 skill and rubric assess that distinction. No iteration/counting/transfer skill is

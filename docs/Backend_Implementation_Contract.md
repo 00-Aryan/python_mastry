@@ -537,3 +537,13 @@ stored reads and durable request replay when worker readiness is absent, while n
 admission still fails closed. See [the walkthrough](../content/dictionaries/README.md)
 and [S015 evidence](roadmap/sprints/S015.md). Source-controlled answers in this public
 repository are not secret; runtime API private-asset exclusion remains enforced.
+
+
+### S016 specification refinement: pilot branch coverage
+
+[The dictionary pilot specification](curriculum/dictionary_pilot_branch.md) defines
+D1–D4 observable areas, primary role coverage, conservative family/novelty boundaries
+and optional function/loop repair guidance from the roadmap. It preserves actual
+S015 identities and exposes unallocated roles, two-holdout capacity and unreleased
+transfer/review controls. It is an authoring plan: no runtime modes, access gates,
+scoring, new questions, seed facts or operational settings are enabled by S016.
