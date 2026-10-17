@@ -37,7 +37,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Safe local publication | `e2ca64e`, strengthened by `edcb3c2`; approved immutable quality evidence and final revision/hash/freshness recheck | [S013](sprints/S013.md), [S014](sprints/S014.md); exact implementation CI passed | Missing usable approved quality-v2 evidence retains 503; no deployment certification |
 | Question-quality verification | `edcb3c2`; private misconception programs, isolated checks and immutable quality-v2 reports | [S014](sprints/S014.md): 466 local passed/no skips; 408 hosted passed/58 isolation skips | Bounded declared misconceptions/root types; human semantic review and remote/deployed certification remain |
 | First executable dictionary question | `055c692`; authored safe lookup, bounded real learner flow and readiness/reload repair | [S015](sprints/S015.md): 473 local passed/no skips; 412 hosted passed/61 isolation skips; exact CI passed | Assisted bundle pass is not lifecycle completion/mastery; no operational population |
-| Pilot branch specification | S016 specified; four observable areas, ten-slot coverage, family/rubric and repair guidance | [S016](sprints/S016.md): structural acceptance and 473 local regressions passed/no skips; exact CI pending | Specification only; role/holdout capacity and unreleased transfer/review controls remain explicit |
+| Pilot branch specification | `0873bba`; four observable areas, ten-slot coverage, family/rubric and repair guidance | [S016](sprints/S016.md): specification audit passed; 473 local regressions/no skips; CI 39014253922 passed (412 passed/61 isolation skips) | Specification only; role/holdout capacity and unreleased transfer/review controls remain explicit |
 | Pilot pack, browser drafts/workspace | Planned S017–S036 | No accepted completion evidence | No complete usable branch or hosted release |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
@@ -58,7 +58,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S013 | **Verified locally** at `e2ca64e`; [record](sprints/S013.md); CI 38949458995 passed | 429 local passed/no skips; 381 remote passed/48 isolation skips; explicit report/policy gates |
 | S014 | **Verified locally** at `edcb3c2`; [record](sprints/S014.md); CI 38958524412 passed | 466 local passed/no skips; 408 hosted passed/58 isolation skips; explicit quality-v2 approval required |
 | S015 | **Verified locally** at `055c692`; [record](sprints/S015.md); CI 39012725405 passed | 473 local passed/no failures or skips; 412 hosted passed/61 isolation skips; no deployed certification |
-| S016 | **Awaiting exact-commit CI**; [record](sprints/S016.md) | Specification audit and 473 local regressions passed/no failures or skips; quality/package checks passed |
+| S016 | **Verified for specification/local scope** at `0873bba`; [record](sprints/S016.md); CI 39014253922 passed | No runtime feature or new content inferred; role/holdout/mode gaps remain explicit |
 | S017–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
@@ -177,13 +177,13 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S016 — Pilot branch specification** passed local acceptance and awaits exact-commit
-CI; see its [record](sprints/S016.md) and
-[coverage specification](../curriculum/dictionary_pilot_branch.md). The specification
-audit and 473 PostgreSQL/real-isolation regressions passed with no failures/skips;
-quality/package checks passed. No runtime or operator change.
-S017 follows verified closeout, not started. Preserve .env/AUTO001/scheduling;
-no merge, deployment, operational worker or additional card is authorized.
+**S017 — Safe-lookup question pair** is next ready, not started. S016 is Verified
+for specification/local scope at `0873bba`; see its [record](sprints/S016.md),
+[coverage/family/rubric specification](../curriculum/dictionary_pilot_branch.md) and
+exact-commit CI 39014253922. No local S016 blocker. Existing publication, retry/readiness,
+receipt and isolation behavior is unchanged. No runtime or operator change.
+Preserve .env/AUTO001/scheduling; this closeout starts no additional card and performs
+no merge, deployment or operational-worker setup.
 
 
 ## S012 local acceptance — 16 October 2026
@@ -303,7 +303,12 @@ feature were added. S017–S024 retain their own authoring/runtime acceptance ga
 Document scope/slot/identity/link checks passed. Existing PostgreSQL/real-isolation
 regressions: **473 passed / zero failures/errors/skips**, 230.23 s. Locked dependencies,
 Ruff/format, strict mypy, real migration/no drift and source/wheel/package checks passed.
-All AUTO001 files and .env are preserved/excluded. Exact-commit CI remains the
-closeout gate. No local S016 blocker; S017 follows verified closeout, not started.
-This verifies a specification and unchanged local behavior, not future content,
-complete role coverage, pedagogical outcomes, mastery or deployed isolation.
+All AUTO001 files and .env are preserved/excluded. Exact specification delivery
+`0873bba0d82fd2f89bb58e71e139ed7be412d616` passed
+[CI 39014253922](https://github.com/00-Aryan/python_mastry/actions/runs/39014253922):
+**412 passed / 61 isolation skips**, zero failures, 141.30 s, plus all configured
+locked-sync/quality/migration/build checks. The separate isolation job skipped;
+local real-isolation evidence remains distinct. S016 is **Verified for its local specification scope**; the later documentation closeout commit/CI handoff is reported separately.
+No local S016 blocker; S017 is next ready, not started. This verifies a specification
+and unchanged local behavior, not future content, complete role coverage, pedagogical
+outcomes, broader correctness, mastery or deployed isolation.
