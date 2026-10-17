@@ -866,3 +866,23 @@ new publication. No automatic operator policy approval. Migration 0010 retains o
 bytes and protects new candidate assets and quality evidence against mutation.
 See [decision 0012](decisions/0012_question_quality.md) for exact checks, supported
 signature/type semantics, limits, policy upgrade and certification boundaries.
+
+## S015 — First real dictionary question and reload recovery
+
+[The authored question and bounded walkthrough](../content/dictionaries/README.md)
+use the existing APIs without adding routes. Publication still requires a fresh
+approved quality-v2 report and final locked exact-snapshot/revision/hash recheck.
+A passing public_run means only its selected public bundle passed; an assessment
+uses the complete pinned test bundle. Neither result awards mastery or changes
+attempt lifecycle. The S015 demonstration is assisted practice with a passing
+full-bundle evaluation, not independent credit or a browser/deployed release.
+
+Worker readiness gates **new evaluation admission**. With LOCAL_RUNNER_ENABLED=true,
+missing, expired or revoked readiness is treated as an absent admission descriptor;
+owned status/history reads and exact durable request replay still work. Ownership,
+stored role and request-payload checks precede replay as before. A new request still
+returns 503 EVALUATION_UNAVAILABLE with no admission mutation, and an incompatible
+payload at an existing key returns 409 IDEMPOTENCY_CONFLICT. Database/unexpected
+faults are not swallowed as readiness absence. This repairs the HTTP dependency
+ordering exposed when a real one-shot worker withdrew readiness before status reload;
+worker authentication, isolation, leases and result protection are unchanged.

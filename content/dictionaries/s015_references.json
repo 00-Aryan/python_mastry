@@ -1,0 +1,6 @@
+{
+  "curricula": [{"id":"15000000-0000-0000-0000-000000000010","code":"PYTHON-S015","title":"First dictionary question"}],
+  "skills": [{"id":"15000000-0000-0000-0000-000000000011","curriculum_id":"15000000-0000-0000-0000-000000000010","code":"DICT-SAFE-LOOKUP","title":"Look up a value with a fallback","competency":"Distinguish a missing dictionary key from a present key whose integer value is zero."}],
+  "patterns": [{"id":"15000000-0000-0000-0000-000000000021","code":"LOOKUP-DEFAULT","title":"Dictionary lookup with a caller-selected default"}],
+  "question_families": [{"id":"15000000-0000-0000-0000-000000000031","code":"DICT-LOOKUP-S015","novelty_definition":"Return an existing integer value, including zero, or the supplied fallback only when the key is absent. No iteration or aggregation is assessed."}]
+}

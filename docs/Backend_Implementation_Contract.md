@@ -524,3 +524,16 @@ misconception coverage, not proof against every incorrect program or validation 
 free-text/nested constraints. Migration 0010 preserves historical reports/publications;
 new publication requires quality-v2 evidence in addition to unchanged S013 gates.
 No source runs in the API and no learner scoring/worker/deployment capability is enabled.
+
+### S015 implementation refinement: one executable dictionary question
+
+One version-controlled dictionary lookup authoring input now demonstrates quality-v2
+publication, owned server-timed attempts/help/immutable submissions and real isolated
+evaluation through the existing CLI/HTTP boundaries. No migration/importer/catalog or
+new completion/scoring transition is added. Separate test-only process wiring supplies
+a disposable schema and local development configuration; it never fakes authentication,
+clock, reference verification or runner results. The API dependency now preserves
+stored reads and durable request replay when worker readiness is absent, while new
+admission still fails closed. See [the walkthrough](../content/dictionaries/README.md)
+and [S015 evidence](roadmap/sprints/S015.md). Source-controlled answers in this public
+repository are not secret; runtime API private-asset exclusion remains enforced.

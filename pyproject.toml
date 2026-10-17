@@ -33,7 +33,7 @@ dev = [
 
 [tool.uv.build-backend]
 module-name = "mastery_backend"
-source-include = ["alembic.ini", "migrations/**", "docs/**", "tests/**", "AGENTS.md", ".python-version", "uv.lock", ".env.example"]
+source-include = ["alembic.ini", "migrations/**", "content/**", "docs/**", "tests/**", "AGENTS.md", ".python-version", "uv.lock", ".env.example"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

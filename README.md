@@ -1,8 +1,8 @@
 # Python Mastery Backend
 
-This is the local **B6a evaluation-lifecycle increment**, building on the tested B0 API. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
+This is the local **S015 first-executable-question checkpoint**, building on the B0–B6b backend and S012–S014 publication gates. It runs locally on Linux or WSL with Python 3.12 and uv. It includes validated settings, an app factory, structured request logs, safe JSON errors, CORS and host checks, bounded request bodies, health endpoints and generated API documentation.
 
-Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers, progressive assistance, immutable source receipts, evaluation orchestration and the documented CLI-seeded local development identity are implemented. Deployed authentication, code evaluation and learning evidence belong to later increments. No endpoint simulates those features. Production startup is deliberately rejected until deployed authentication is implemented.
+Question storage, skill CRUD/prerequisite DAG storage, owned attempts/server timers, progressive assistance, immutable source receipts, real local isolated evaluation and CLI-seeded development identity are implemented. S015 demonstrates one dictionary question through these boundaries. Deployed authentication and learning evidence remain future work; production startup is rejected. Older B-increment sections below describe their historical boundaries; the refined contracts, current roadmap status and linked S015 walkthrough define current local behavior.
 
 S012 adds a separate local `mastery-content verify-reference` command and immutable
 reference-verification artifacts. See [its setup, limits and publication boundary](docs/decisions/0010_publication_artifacts.md).
@@ -12,6 +12,10 @@ explain the gate; missing configuration/evidence remains 503. S014 adds private
 misconception programs and [bounded question-quality checks](docs/decisions/0012_question_quality.md).
 New publication requires quality-v2 evidence; old reports/publications remain intact.
 Remote/deployed certification remains unverified.
+
+S015 supplies [one executable dictionary question and a repeatable local walkthrough](content/dictionaries/README.md).
+It uses the existing quality-gated publication and real isolated worker; no operational
+worker is enabled. Passing a bundle remains distinct from lifecycle completion or mastery.
 
 ## Quick start in WSL and VS Code
 
@@ -163,12 +167,12 @@ Use the returned version ID for admin preview and PATCH. Edits supply the curren
 an `expected_revision` body and requires Idempotency-Key. All state-changing POSTs
 require this key; successful identical replay returns its original result.
 
-Publication requires complete validated assets and a trusted executable reference
-verification receipt. Complete drafts currently receive `503 VERIFICATION_UNAVAILABLE`
-and stay drafts. Incomplete drafts receive a validation conflict. **There is no
-production/test-verifier switch or publication bypass in the CLI.** Public catalog
-reads remain empty until verified published content exists. The test-only verifier
-validates the publication transition; it does not validate any future verifier.
+Publication requires complete validated assets and fresh approved quality-v2 evidence
+from the isolated authoring command. Missing usable evidence returns
+`503 VERIFICATION_UNAVAILABLE` and leaves the draft unchanged; incomplete content
+receives a validation conflict. **There is no publication bypass in the CLI.**
+The S015 walkthrough publishes its authored question only in a disposable test schema
+through the real gates. It does not populate or configure the operator database.
 
 Read the [question storage decision](docs/decisions/0003_question_storage.md) for
 content types, enum/position choices and the exact acceptance checks. The generated

@@ -967,3 +967,51 @@ def test_detail_projection_and_history_share_job_lock(
     assert response.json()["status"] == response.json()["transitions"][-1]["state"] == "pending"
     monkeypatch.setattr(EvaluationRepository, "transitions", original)
     assert worker(seeded_storage, attempt_clock, adapter).claim() is not None
+
+
+@pytest.mark.parametrize("readiness", ["missing", "expired", "revoked"])
+def test_worker_unavailable_preserves_owned_reads_and_durable_replay(
+    attempt_client, receipt, adapter, seeded_storage, attempt_clock, tmp_path, readiness
+):
+    from mastery_backend.application.worker_authority import provision_worker
+    from mastery_backend.infrastructure.database.worker_models import ExecutionWorkerIdentity
+
+    accepted = request_job(attempt_client, receipt, key="recover-after-exit")
+    assert accepted.status_code == 202
+    assert worker(seeded_storage, attempt_clock, adapter).dispatch_once()
+    identifier = accepted.json()["id"]
+    terminal = attempt_client.get(f"/api/v1/evaluations/{identifier}").json()
+    before = current(attempt_client, {"id": receipt["attempt_id"]})
+    if readiness != "missing":
+        # Discovery-only identity fixture, never an execution/security certification.
+        authority = provision_worker(
+            seeded_storage, attempt_clock, tmp_path / "discovery-only.json", "1" * 64, "2" * 64
+        )
+        authority.heartbeat(True)
+        if readiness == "expired":
+            attempt_clock.advance(15000)
+        else:
+            with seeded_storage.begin() as session:
+                session.get(ExecutionWorkerIdentity, authority.worker_id).revoked = True
+    attempt_client.app.dependency_overrides.pop(runner_adapter)
+    attempt_client.app.state.settings.local_runner_enabled = True
+    result = attempt_client.get(f"/api/v1/evaluations/{identifier}")
+    assert result.status_code == 200 and result.json() == terminal
+    history = attempt_client.get(f"/api/v1/attempts/{receipt['attempt_id']}/evaluations")
+    assert history.status_code == 200 and history.json()["items"][0]["id"] == identifier
+    replay = request_job(attempt_client, receipt, key="recover-after-exit")
+    assert replay.status_code == 202 and replay.json() == accepted.json()
+    assert replay.headers["Idempotency-Replayed"] == "true"
+    conflict = request_job(attempt_client, receipt, key="recover-after-exit", revision=99)
+    assert conflict.status_code == 409
+    assert conflict.json()["error"]["code"] == "IDEMPOTENCY_CONFLICT"
+    # Even with no readiness, authorization remains enforced rather than revealing jobs.
+    assert attempt_client.get(f"/api/v1/evaluations/{uuid4()}").status_code == 404
+    unavailable = request_job(attempt_client, receipt, key="new-admission")
+    assert unavailable.status_code == 503
+    assert unavailable.json()["error"]["code"] == "EVALUATION_UNAVAILABLE"
+    with seeded_storage() as session:
+        assert session.scalar(select(func.count()).select_from(EvaluationJob)) == 1
+        assert session.get(Attempt, UUID(receipt["attempt_id"])).revision == before["revision"]
+    assert_private_absent(result)
+    assert_private_absent(history)

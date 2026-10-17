@@ -137,7 +137,14 @@ def runner_adapter(
         return None
     from mastery_backend.application.worker_authority import LocalRunnerAdmission
 
-    return LocalRunnerAdmission(factory, clock)
+    try:
+        return LocalRunnerAdmission(factory, clock)
+    except ContentError as error:
+        if error.code != "EVALUATION_UNAVAILABLE":
+            raise
+        # Absence denies new admission inside the service, after owned durable replay.
+        # Stored status/history reads do not depend on a worker remaining ready.
+        return None
 
 
 def evaluation_service(
