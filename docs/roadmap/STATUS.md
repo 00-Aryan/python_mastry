@@ -33,9 +33,10 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Source receipts | `eb015cd`; immutable source and evidence snapshots | [B5](../B5_Verification.md), remote regressions | Receipt alone is not correctness |
 | Evaluation lifecycle | `ad75f15`; dispatch intent, leases, retries and protected terminal results | [B6a](../B6a_Verification.md), remote regressions | Synthetic B6a results prove orchestration only |
 | B6b runner | `895b8e5`; separate CLI, Bubblewrap/systemd/seccomp, curated runtime, outside-sandbox grading, worker authority and signed provenance | [ADR 0009](../decisions/0009_local_isolated_runner.md), [setup](../Local_Runner_Setup.md), source/tests inspected; remote static/build checks | [B6b reconciliation](../B6b_Verification.md): real host checks executed locally; local verification closure **Verified** at `9ca97d2` after explicit S010a/S011 audit; remote/deployed isolation certification remains unverified |
-| Publication verification artifacts | `955b082`; local isolated reference CLI, immutable private snapshot/report pins | [S012](sprints/S012.md): 394 local passed/no skips; exact-commit remote CI passed | S013 consumes approved reports; stronger quality validation is S014; no deployed attestation |
-| Safe local publication | `e2ca64e`; approved immutable evidence and final revision/hash/freshness recheck | [S013](sprints/S013.md): 429 local passed/no skips; exact implementation CI passed | Missing usable evidence retains 503; no S014 quality or deployment certification |
-| Pilot pack, browser drafts/workspace | Planned S014–S036 | No accepted completion evidence | No complete usable branch or hosted release |
+| Publication verification artifacts | `955b082`; local isolated reference CLI, immutable private snapshot/report pins | [S012](sprints/S012.md): 394 local passed/no skips; exact-commit remote CI passed | S013 consumes approved reports, strengthened by S014 quality-v2; no deployed attestation |
+| Safe local publication | `e2ca64e`, strengthened by `edcb3c2`; approved immutable quality evidence and final revision/hash/freshness recheck | [S013](sprints/S013.md), [S014](sprints/S014.md); exact implementation CI passed | Missing usable approved quality-v2 evidence retains 503; no deployment certification |
+| Question-quality verification | `edcb3c2`; private misconception programs, isolated checks and immutable quality-v2 reports | [S014](sprints/S014.md): 466 local passed/no skips; 408 hosted passed/58 isolation skips | Bounded declared misconceptions/root types; human semantic review and remote/deployed certification remain |
+| Pilot pack, browser drafts/workspace | Planned S015–S036 | No accepted completion evidence | No complete usable branch or hosted release |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
 ## Roadmap reconciliation
@@ -53,7 +54,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S011 | **Verified** at `9ca97d2`; [record](sprints/S011.md); CI 38938550175 passed | Actual wire acknowledgement-loss and elapsed-time recovery; no production readiness claim |
 | S012 | **Verified locally** at `955b082`; [record](sprints/S012.md); CI 38945673491 passed | 394 local passed/no skips; 348 remote passed/46 isolation skips; publication integration remains S013 |
 | S013 | **Verified locally** at `e2ca64e`; [record](sprints/S013.md); CI 38949458995 passed | 429 local passed/no skips; 381 remote passed/48 isolation skips; explicit report/policy gates |
-| S014 | **Awaiting exact-commit CI**; [record](sprints/S014.md) | 466 local passed/no skips; explicit quality-v2 approval required; remote CI pending |
+| S014 | **Verified locally** at `edcb3c2`; [record](sprints/S014.md); CI 38958524412 passed | 466 local passed/no skips; 408 hosted passed/58 isolation skips; explicit quality-v2 approval required |
 | S015–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
@@ -172,11 +173,12 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S014 — Question-quality verifier** passed local acceptance and awaits exact-commit
-CI; see its [record](sprints/S014.md). New publication requires fresh approved quality-v2
-evidence plus S013 final locks/revision/hash checks; absent usable evidence remains 503.
-S015 follows closeout and has not started. No actual .env, operational worker, AUTO001,
-scheduling, merge or deployment change occurred.
+**S015 — First executable question** is next ready, not started. S014 is Verified
+for local scope at `edcb3c2` with exact-commit CI passed; see its
+[record](sprints/S014.md). New publication requires fresh approved quality-v2 evidence
+plus S013 final locks/revision/hash checks; absent usable evidence remains 503.
+No local S014 blocker remains. No actual .env, operational worker, AUTO001, scheduling,
+merge or deployment change occurred. This closeout does not begin S015.
 
 
 ## S012 local acceptance — 16 October 2026
@@ -241,6 +243,14 @@ without retroactive quality certification. See [decision 0012](../decisions/0012
 Final local PostgreSQL/real-isolation: **466 passed, zero failures/skips**, 199.78 s.
 Locked dependencies, Ruff/format (187 files), strict mypy (107 files), migration CLI/no
 drift, source/wheel/source parity and installed fresh mandatory isolation probe passed.
-All AUTO001 changes and .env are preserved unchanged and excluded. Exact-commit CI
-is pending. S015 is next after closeout, not started. Broader semantic/test completeness,
-remote/deployed isolation and cross-host certification are not claimed.
+All AUTO001 changes and .env are preserved unchanged and excluded. Exact implementation
+`edcb3c2177ede229a9b939ee6dd76783a19e3366` passed
+[CI 38958524412](https://github.com/00-Aryan/python_mastry/actions/runs/38958524412):
+**408 passed / 58 isolation skips**, zero failures, 113.25 s, plus all configured
+locked-sync/quality/migration/build checks. The separate isolation job skipped; local
+real-isolation evidence remains distinct. S014 is **Verified for local scope** with no
+local blocker. This documentation-only closeout follows its implementation evidence;
+its commit/CI handoff is reported separately. S015 is next ready, not started. Operator
+migration/new quality report/policy approval and API restart remain deliberate setup,
+not applied here. Broader semantic/test completeness, remote/deployed isolation and
+cross-host certification are not claimed.
