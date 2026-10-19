@@ -184,7 +184,8 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 Local technical acceptance passed: 481 tests, no failures/skips, plus required quality,
 migration and package checks. Delivery d9aea5e passed exact CI 39302177782 (415 passed /
 66 skipped; separate isolation job skipped). The user explicitly retained human review
-as pending, so the card is not Verified and S018 is not ready. Preserve
+as pending, so the card is not Verified and S018 is not ready. The 20 October agent
+review flags overlap with P01 teaching; named human disposition remains required. Preserve
 .env/AUTO001/scheduling; no operator setup, merge, deployment or next card is started.
 
 
@@ -344,3 +345,18 @@ on 19 October the user chose to keep that item pending. Technical reports do not
 satisfy it. S018 remains planned, not ready. Coverage/holdout/mode limitations, finite
 semantic evidence and remote/deployed isolation certification remain open. No mastery
 or completed pilot claim is made.
+
+
+### S017 review supplement — 20 October 2026 (Asia/Kolkata)
+
+[The pinned review record](sprints/S017.md#review-supplement--20-october-2026-asiakolkata)
+records Codex as an **AI reviewer**, six source-file SHA-256 pins, source/version
+references and findings on solution demands, families, exposure and observable
+rubrics. A01 adds a presence observable allowed by S016, but P01/S015 membership
+hints teach the same underlying branch; unseen reasoning after that exposure is
+not established by different outputs alone. This needs a named human decision,
+not another technical pass or agent self-approval. Human reviewer/date/decision
+remain unsupplied. **Awaiting human review; S018 blocked.** No content revision,
+family reassignment or acceptance waiver. Retain d9aea5e technical delivery and
+0e07d33 documentation closeout; this is a separate review supplement. Historical
+481 local passes/no skips and 415 hosted passes/66 skips remain separate evidence.
