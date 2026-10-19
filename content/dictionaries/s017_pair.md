@@ -6,10 +6,11 @@ Private question inputs and the family/rubric review live beside this note:
 
 - `dict_p01.private.json`: existing admin-create request shape; value-with-fallback
   practice, using the existing D1 skill and S015 family.
-- `dict_a01.private.json`: assessment-candidate request; separate presence and value
-  outputs, using the same D1 and the presence-reporting family proposed by the private
-  audit. S016's required human novelty review is a separate recorded acceptance item.
-- `s017_references.json`: only the new presence-reporting family. Seed the existing
+- `dict_a01.private.json`: source authoring revision 2, assessment-candidate request;
+  fixed alias→name→score lookup using two flat maps and the same D1 skill. Separate
+  AI novelty review replaces manual review by explicit user authorization.
+- `s017_references.json`: retains the rejected presence proposal's identity and adds a
+  distinct alias-chain family; it never repurposes the historical UUID. Seed the existing
   `s015_references.json` first; never seed a second D1 skill.
 - `s017_authoring_review.private.md`: private contract/rubric/novelty rationale and
   counterexamples. These source-controlled inputs are not frontend/static assets;
@@ -47,6 +48,12 @@ with these request files, isolated `verify-reference`, then deliberate policy re
 approval and ordinary publish. Follow [the quality rules](../../docs/decisions/0012_question_quality.md)
 and [publication setup](../../docs/decisions/0011_safe_publication.md). No import,
 automatic operator approval or release setup is performed here.
+
+These are fresh-catalog inputs: the revised A01 uses a new family. If a prior A01
+was already imported, its question-level family cannot be changed by creating a
+version. Do not apply this request to rewrite that identity/history; no operator
+migration or import is performed here. Git retains d9aea5e's rejected presence
+candidate; source revision 2 is not a database version-number claim.
 
 A real passing result means the pinned bundle matched, not arbitrary correctness,
 unaided credit, lifecycle completion or mastery. Existing coverage/holdout/mode gaps

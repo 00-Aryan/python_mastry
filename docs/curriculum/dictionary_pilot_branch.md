@@ -1,6 +1,7 @@
 # Dictionary pilot branch specification — S016
 
-Specification version 1; 17 October 2026 (Asia/Kolkata). This is an authoring plan.
+Specification version 1; 17 October 2026 (Asia/Kolkata), with the S017 acceptance
+addendum of 20 October 2026 below. This is an authoring plan.
 It creates no database facts, published questions, learner restrictions, scoring or
 mastery claims. The first branch is **safe dictionary lookup and frequency counting**,
 with optional function/loop repair, then ordered selection and applied aggregation.
@@ -33,14 +34,15 @@ has an authored, executed question; D2–D4 are specified, not implemented cover
 
 | Label / area | Observable primary criterion | Required contrasting cases for later authoring | Limits of the claim |
 |---|---|---|---|
-| D1 — Safe lookup | Return a present value, including zero, and distinguish an absent key under an explicit fallback/presence policy. | Present versus absent; zero versus missing; caller-selected fallback; empty mapping and exact key identity. | Existing S015 covers integer values only. No blanket claim about nulls, nested lookup, mutation, exceptions or all dictionary use. |
+| D1 — Safe lookup | Return a present value, including zero, and distinguish an absent key under an explicit fallback/presence policy. | Present versus absent; zero versus missing; caller-selected fallback; empty mapping and exact key identity. | S015 covers integer values only. Revised S017 A01 adds exactly two dependent lookups across flat maps; no blanket null, arbitrary nested/recursive lookup, mutation, exception or general dictionary claim. |
 | D2 — Initialization and count updates | Maintain the correct per-key count as items or declared adjustments are processed. | First occurrence versus repeat; duplicates; empty input; independent keys; stated initialization/update rules. | Count identity and normalization are part of the question contract. Passing this does not establish arbitrary aggregation or iteration mastery. |
 | D3 — Ordered selection from counts | Select the qualifying result according to the declared original order and tie/no-result rule, using the required count evidence. | Multiple qualifying candidates; first versus last; no qualifying candidate; ties; explicit character, token or event identity. | Dictionary iteration order alone is not evidence of the required input-order semantics. D2 is supporting knowledge, not an automatic second observation. |
 | D4 — Validated record aggregation | Apply declared record validation and grouping/aggregation rules and produce the specified summary. | Valid versus malformed records; skip/reject policy; empty and repeated groups; field/type boundaries; stable tie/output rules where relevant. | A failure cannot automatically diagnose intent, syntax fluency or application skill. Nested/prose semantics, mutation and complexity need separate review. |
 
 Each question version has exactly one primary assessed skill with a private rubric.
 For that criterion, authors record the expected observable behavior, contrasting
-cases, representative wrong programs and human-reviewed limits. Secondary concepts
+cases, representative wrong programs and reviewed limits (S017 uses the authorized
+AI process below; this is not human approval). Secondary concepts
 and prerequisite tags do not automatically receive evidence. Use the existing
 normalized mappings/rubric field, not a second scoring schema. A real bundle pass is
 finite executable evidence; prose, explanation quality and complexity claims remain
@@ -99,7 +101,7 @@ owning card; versioned published facts cannot be retroactively merged or reassig
 | Planned slot | Owner / primary | Family boundary and acceptance requirement |
 |---|---|---|
 | DICT-P01 | S017 / D1 | A plain value-with-fallback lookup shares S015's family. Reuse its assets as appropriate while preserving S015's question identity. Renaming keys, function or story does not create novelty. |
-| DICT-A01 | S017 / D1 | Must change the essential lookup decision/output demands, such as explicitly distinguishing presence from an equal fallback value, beyond P01's value-only return. Audit actual solution differences and contrasting tests; a cosmetic wrapper still belongs to P01's family and cannot satisfy unseen-assessment acceptance. |
+| DICT-A01 | S017 / D1 | Must change the essential lookup decisions or data flow beyond all learner-visible P01/S015 material, including every hint and solution. Adding a presence flag alone is insufficient when that prior help teaches membership/branching. Audit actual solution differences and contrasts; cosmetic wrappers retain the familiar family and cannot satisfy unseen-assessment acceptance. |
 | DICT-P02 | S018 / D2 | Plain per-item frequency accumulation defines a counting family, separate from single-key lookup. Reworded tokens/characters sharing this essential algorithm stay in that family. |
 | DICT-A02 | S018 / D2 | Must require a substantively different count-update decision/state contract, not the same frequency loop over renamed inputs or a different return wrapper. The authoring card must document that change and distinguishing cases; if it cannot, keep it familiar and block the card's unseen-assessment claim. |
 | DICT-P03 | S019 / D3 | Establish the declared count-and-original-order selection demands. Specify what constitutes a character/event, tie behavior and absence. Merely reversing or renaming an example is not a new family. |
@@ -164,7 +166,7 @@ and repositories as documented; no second curriculum service/schema is introduce
 | Requirement or gap | Resolution / owning card |
 |---|---|
 | D1–D4 labels lacked explicit definitions. | Defined here from the four roadmap areas; no invented installed skills. D1 reuses its actual S015 identity. |
-| Exact A01/A02/T01/T02 contracts and novelty judgments do not exist yet. | Boundary rules above constrain S017–S020. Actual statements, tests, reference/incorrect programs and human novelty review are required there; no invented successful audit here. |
+| Exact A01/A02/T01/T02 contracts and novelty judgments do not exist yet. | Boundary rules above constrain S017–S020. Actual statements, tests, reference/incorrect programs and documented novelty review are required there. S017 uses the user-authorized separate AI review below; later cards retain their own review requirements and no successful audit is inferred. |
 | Two holdouts are assigned to a pool of three skills with no exact targets/codes. | Keep two unassigned slots, require explicit primary targets in S021 and retain capacity gaps; do not invent a third review question. |
 | The ten-slot plan leaves some primary roles unallocated. | Matrix preserves those gaps. S022/S024 cannot claim all-role/all-skill competence or retention from this pack alone. |
 | Runtime transfer/review modes and guarded review release are unavailable. | Preserve allowlists; S021 must record a blocker if its access criterion remains unsupported rather than expose holdouts or fake review completion. |
@@ -174,3 +176,27 @@ These do not prevent documenting the S016 branch specification. They do prevent
 claims of later content/runtime completion. No missing or contradictory S016 card
 criterion requires a new feature or an expanded pilot count. S017 is the next unit
 only after this specification's acceptance/CI closes; it has not started.
+
+
+## S017 acceptance addendum — 20 October 2026 (Asia/Kolkata)
+
+The user explicitly authorized: “replacing the project's manual human-review
+requirement with documented AI review” for this S017 closeout. This supersedes the
+manual-review blocker recorded at ebe3b50 for S017; it is **not human approval** and
+does not lower novelty, quality, privacy or publication standards. Other cards are
+not reviewed or completed by this authorization.
+
+A separate AI reviewer must inspect actual learner-visible P01/S015 statements,
+examples, all hints and solutions against A01, the primary D1 rubric and these family
+criteria. The current presence-only candidate is not accepted merely because its
+output has another field. A changed decision or data-flow dependency must survive
+comparison with the fully taught P01 solution. Record the reviewer identity, date,
+exact final hashes/source revisions, decision, counterexamples, overlap and limits.
+The author cannot replace that separate assessment with their own self-approval.
+
+Revised assets require fresh real isolated quality/publication checks and relevant
+regressions. Preserve historical question/family/report facts and exact-snapshot,
+approval/freshness and isolation gates. If all criteria pass, S017 may be Verified
+for its explicit **local content scope under AI review**; otherwise record a specific
+content blocker, without requesting manual review. AI assessment does not prove any
+learner's independence, mastery, arbitrary correctness or deployed isolation.

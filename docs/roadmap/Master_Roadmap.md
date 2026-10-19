@@ -322,7 +322,7 @@ Acceptance: A coverage matrix maps skills to practice, independent, transfer and
 
 Deliverable: Author DICT-P01 and DICT-A01 with statements, examples, edge cases, hints, reference code and distinct assessment-family rules.
 
-Acceptance: Both publish through the verifier and their rubrics identify safe lookup evidence.
+Acceptance: Both publish through the verifier and their rubrics identify safe lookup evidence. For S017, the user-authorized 20 October 2026 AI-review addendum in the pilot specification replaces manual human review. A separate AI reviewer assesses final hash-pinned assets against all learner-visible P01/S015 help; presence alone does not establish novelty. Preserve the substantive family standard and limit closure to local content verification under AI review.
 
 ### S018 — Counting question pair
 

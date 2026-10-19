@@ -61,27 +61,35 @@ def test_lookup_authoring_contract_and_role(code, role):
     assert content.contract.invalid_input_policy == "not_tested"
 
 
-def test_lookup_family_audit_has_presence_counterexample_and_identity_continuity():
+def test_lookup_family_audit_has_dependent_key_contrasts_and_identity_continuity():
     practice, assessment = payload("DICT-P01"), payload("DICT-A01")
     previous = json.loads((DIRECTORY / "s015_lookup.private.json").read_text())
     family = ReferenceCatalogSeed.model_validate_json(PAIR_REFERENCES.read_bytes())
     assert practice["family_id"] == previous["family_id"] != assessment["family_id"]
-    assert str(family.question_families[0].id) == assessment["family_id"]
+    assert any(str(item.id) == assessment["family_id"] for item in family.question_families)
+    # Retain the rejected presence proposal's identity; do not repurpose historical facts.
+    assert assessment["family_id"] == "17000000-0000-0000-0000-000000000032"
+    assert any(
+        str(item.id) == "17000000-0000-0000-0000-000000000031" for item in family.question_families
+    )
     assert not family.skills and not family.curricula  # D1 is reused, not duplicated.
     cases = assessment["draft"]["test_cases"]
-    # Value-only output cannot distinguish these authored private cases; presence must.
-    present = next(
-        case for case in cases if case["input"] == [{"equal-score": 5}, "equal-score", 5]
-    )
-    absent = next(case for case in cases if case["input"] == [{}, "equal-score", 5])
-    assert present["visibility"] == absent["visibility"] == "private"
-    assert present["expected_output"]["value"] == absent["expected_output"]["value"] == 5
-    assert present["expected_output"]["found"] is True
-    assert absent["expected_output"]["found"] is False
+    # A mapped value becomes the second key; the original key must not short-circuit it.
+    contrasts = [
+        ([{"short": "Ada"}, {"short": 99, "Ada": 8}, "short", -1], 8),
+        ([{}, {"short": 99}, "short", -1], -1),
+        ([{"short": "Ada"}, {"short": 99}, "short", -1], -1),
+        ([{"short": ""}, {"": 0, "short": 99}, "short", 7], 0),
+        ([{"start": "middle", "middle": "end"}, {"middle": 4, "end": 9}, "start", -1], 4),
+        ([{"same": "same"}, {"same": 5}, "same", -3], 5),
+    ]
+    for arguments, result in contrasts:
+        case = next(case for case in cases if case["input"] == arguments)
+        assert case["visibility"] == "private" and case["expected_output"] == result
+    assert assessment["draft"]["contract"]["function_name"] == "lookup_alias_score"
+    assert assessment["draft"]["contract"]["output"]["type"] == "integer"
     for case in cases:
-        assert set(case["expected_output"]) == {"found", "value"}
-        assert type(case["expected_output"]["found"]) is bool
-        assert type(case["expected_output"]["value"]) is int
+        assert type(case["expected_output"]) is int
 
 
 @pytest.fixture
@@ -127,10 +135,11 @@ def test_lookup_rejects_broken_reference_and_weak_tests(
     draft = DraftContent.model_validate(body["draft"])
     if damage == "reference":
         name = draft.contract.function_name
+        arguments = ", ".join(argument.name for argument in draft.contract.arguments)
         draft = draft.model_copy(
             update={
                 "solution": draft.solution.model_copy(
-                    update={"reference_code": f"def {name}(scores, name, fallback): return None"}
+                    update={"reference_code": f"def {name}({arguments}): return None"}
                 )
             }
         )
@@ -283,9 +292,8 @@ def test_real_lookup_pair_publication_privacy_family_history_and_results(
                 sources.insert(
                     1,
                     (
-                        "def lookup_entry(scores, name, fallback):\n"
-                        '    return {"found": int(name in scores),\n'
-                        '            "value": scores.get(name, fallback)}\n',
+                        "def lookup_alias_score(aliases, scores, alias, fallback):\n"
+                        "    return scores.get(alias, fallback)\n",
                         "incorrect",
                     ),
                 )

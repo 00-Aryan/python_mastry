@@ -1,102 +1,115 @@
-# S017 private authoring review — D1 safe lookup
+# S017 private authoring review — D1 safe lookup, revision 2
 
-19 October 2026 (Asia/Kolkata). This is an admin authoring record, not an API or
-frontend asset. It intentionally discusses private test witnesses and incorrect
-programs. The repository is public: source readers can inspect these inputs; runtime
-privacy means they do not enter ordinary learner DTOs, errors, logs or wheel assets.
-This rationale is agent-authored; S016's required human novelty review is recorded
-separately in S017. No human acceptance, external study or independent pedagogical
-validation is inferred from execution checks.
+20 October 2026 (Asia/Kolkata). Private admin authoring material, not a frontend or
+API asset. Exact private witnesses, misconception programs and answers remain in
+these authoring inputs. The repository is public, so source readers can inspect
+them; runtime API privacy is distinct from repository secrecy.
 
-## Assigned roles, identities and source provenance
+The user authorized documented **AI review** in place of S017's manual human-review
+requirement. This rationale is authored by the implementation assistant; a separate
+AI reviewer assesses the final hashes in S017's record. Neither is human approval.
 
-| Input / role | Primary skill and family | Source and version relationship |
+## Source identities and superseded candidate
+
+- Original delivery d9aea5e, documentation 0e07d33 and initial AI assessment ebe3b50
+  remain historical references. Git retains their exact old inputs and audit.
+- P01 is unchanged, practice-only, primary D1 skill UUID
+  `15000000-0000-0000-0000-000000000011`, existing curriculum/pattern and family
+  `DICT-LOOKUP-S015` / `15000000-0000-0000-0000-000000000031`. It retains S015's
+  value-with-fallback demands, not a new independent family.
+- The original A01 presence/value wrapper is **rejected for novelty after P01 help**.
+  P01/S015 hint stages 2–4 already teach its membership/branch solution. An extra
+  output bit and equal-fallback witness cannot establish the required changed
+  solution demand. Preserve the original proposed presence-family UUID
+  `17000000-0000-0000-0000-000000000031` and metadata; do not reuse it for the revision.
+- A01 source authoring **revision 2** uses the same D1 primary skill and supported
+  assessment mode, with the new `DICT-LOOKUP-ALIAS-CHAIN` family UUID
+  `17000000-0000-0000-0000-000000000032`. It requires fixed two-hop lookup in two
+  flat maps, not counting, ordering, aggregation or arbitrary nested lookup.
+
+`source authoring revision 2` is a repository revision label, not an invented
+persisted question version. Acceptance creates fresh disposable questions and real
+version-1 reports/publications; actual generated IDs/hashes are recorded separately.
+Existing immutable question versions/reports/family exposure are never rewritten.
+Question.family_id belongs to the question identity: an operator who already imported
+the rejected A01 must not apply this request as a family-changing version of that
+identity. This unit supplies fresh-catalog inputs only, not an importer, reassignment
+or operator migration. Reusing an existing code fails normally; a future authorized
+identity transition would need its own plan. No operator content is populated here.
+
+## Review of all prior learner-visible teaching
+
+P01 and S015 statements/examples teach choosing a stored score or caller fallback.
+Their full help ladder additionally teaches key membership, branching and direct
+indexing; the reference uses dict.get. Those are shared supporting lookup concepts.
+Review assumes the learner could have seen **every** P01 hint and solution, rather
+than treating the short canonical reference as the only exposure.
+
+A01 requires `lookup_alias_score(aliases, scores, alias, fallback)` to use the
+retrieved alias value as the next map's key. P01's stored value terminates the
+lookup; A01's first value is an intermediate name needed before the score can be
+selected. Renaming the original key or wrapping the P01 result cannot create that
+data dependency. The new rubric observes correct key flow and both missing-link
+boundaries, not the addition of an output field. Output remains an integer.
+
+Concrete private contrasts (retained in the JSON test bundle):
+
+| Decision | Witness and expected result | Why P01-only adaptation fails |
 |---|---|---|
-| `dict_p01.private.json`, DICT-P01 / practice only | Existing D1 `DICT-SAFE-LOOKUP`, skill UUID 15000000-0000-0000-0000-000000000011; existing family DICT-LOOKUP-S015, UUID 15000000-0000-0000-0000-000000000031. | Reuses S015's `lookup_score(scores, name, fallback)` teaching assets, with a practice-specific rubric and an extra present-equals-fallback witness. It is a new question identity/code, never a new novelty family. |
-| `dict_a01.private.json`, DICT-A01 / assessment only | Same existing D1; new family DICT-LOOKUP-PRESENCE, UUID 17000000-0000-0000-0000-000000000031. | `lookup_entry(scores, name, fallback)` reports membership separately from value. It is the independent-assessment **candidate** allocated by S016, not already eligible independent learner evidence. |
+| Resolved key wins over original | aliases short→Ada; scores short→99 and Ada→8; query short, fallback −1 → 8 | Reading the caller alias directly in scores selects 99. |
+| Missing alias stops | empty aliases; scores short→99; query short, fallback −1 → −1 | Treating an unresolved alias as its own name selects 99. |
+| Missing target stops | aliases short→Ada; scores short→99 only; query short, fallback −1 → −1 | Alias presence alone does not establish score presence, nor permit retrying the old key. |
+| Empty target remains valid | aliases short→empty string; scores empty string→0 and short→99; fallback 7 → 0 | Truthiness checks erase a valid intermediate key or score. |
+| Exactly one alias mapping | aliases start→middle and middle→end; scores middle→4 and end→9; query start, fallback −1 → 4 | Following another alias produces 9; the wrong program terminates normally, so its kill is semantic. |
+| Same name is valid | aliases same→same; scores same→5; fallback −3 → 5 | Returning fallback cannot accidentally satisfy the expected result. |
 
-The base curriculum/pattern/skill and original family are defined once in
-`s015_references.json`; `s017_references.json` adds only the new family. No duplicate
-skill, new curriculum, prerequisite restriction or speculative coverage is added.
-Existing S015 source question DICT-LOOKUP-001 and its JSON are unchanged from starting
-HEAD fb096ad (S015 delivery 055c692; S016 specification 0873bba). This review and the
-new authored inputs are pinned together by the S017 content commit. Actual database
-question-version IDs/version 1/report IDs are generated and checked during disposable
-acceptance, recorded in JUnit and the sprint record; no operator version IDs are
-invented or repinned. Published database content remains the runtime authority.
+Additional cases cover zero/negative scores, empty maps/query keys, exact alias and
+resolved-name case, Unicode identity, a caller-selected negative fallback and a
+score equal to fallback. Inputs are valid flat maps; invalid input policy remains
+not_tested. No unsupported nested-schema validator, null policy, loop/recursion
+competence or multi-skill evidence is implied.
 
-## Observable rubrics and family audit
+## Examples, help and misconceptions
 
-P01 asks only for an integer value: use the stored value when the key exists,
-otherwise the caller's fallback. It preserves zero and negative scores, exact key
-identity and empty input behavior. Its same essential value-with-default algorithm
-shares S015's family even though the code/title differs. This is familiar practice
-if that family has already been attempted; no new independent observation follows.
+Public example 1 demonstrates an actual renamed alias ace→Ada with score 8. Example
+2 demonstrates an absent alias returning fallback 0. They describe the contract
+honestly without source code, private expected values or future-stage help. Each
+private misconception below must first match both public examples.
 
-A01 must return exactly `{found: boolean, value: integer}`. `found` means key
-membership. The private pair `({"equal-score": 5}, "equal-score", 5)` and
-`({}, "equal-score", 5)` returns the **same value 5**, but respectively requires
-found true and false. A result derived only from P01's value and fallback cannot
-recover this missing bit of information. A01 therefore requires an independently
-observable membership decision, not a renamed story or a constant wrapper. The
-reference uses explicit membership and branches to choose the paired flag/value.
+| Incorrect program label | Mistake | Private semantic distinction |
+|---|---|---|
+| UNRESOLVED_ALIAS_IS_KEY | Uses the original alias as a name when no mapping exists. | Missing alias with an original-key score. |
+| EMPTY_TARGET_IS_MISSING | Treats an empty resolved string as absence. | A valid empty-string target has score zero and nonzero fallback. |
+| SCORE_TRUTHINESS | Treats a stored zero score as absence. | Stored zero with fallback 7. |
+| ORIGINAL_KEY_PRIORITY | Reads scores under the original alias before resolving it. | Both original and resolved score keys exist and disagree. |
+| EXTRA_ALIAS_HOP | Follows one additional alias mapping. | Terminating start→middle→end contrast above. |
 
-The tasks still share D1 concepts, dictionary access and default selection. A learner
-who already understands membership may adapt a prior solution quickly. The family
-distinction is the documented change in required decisions and observables, not a
-claim of disjoint knowledge, psychometric independence or a guarantee that any actual
-learner is unfamiliar. Exposure/history, help, mode, timing, outcome and future
-checkpoint policy must still decide eligibility. Assistance-free test fixtures that
-submit a reference are controlled grading checks, not unaided human performance.
+All five stages retain ordered owned disclosure and 60-second wait budgets.
+A01's later help intentionally explains the dependency and full reference; those
+are assisted/exposed attempts. P01 help does not supply the two-map dependency,
+but prior experience elsewhere with alias chains may. No actual learner history
+or unseen eligibility is inferred from a new family UUID. Private tests/rubrics/
+incorrect programs remain excluded from public DTOs, errors and even full-solution
+escape. Only the owned pinned reference may be revealed by that escape.
 
-## Private case and incorrect-program review
+## Verification and limits
 
-| Question | Reference and representative mistake coverage |
-|---|---|
-| P01 | Two public examples (present positive, missing with fallback zero), then private zero with nonzero fallback, empty mapping/caller fallback, negative score, exact case, Unicode/empty keys and present-equals-fallback. The truthiness-default and ignored-caller-default programs both match examples but fail private distinctions. |
-| A01 | Two public examples, then private present/absent collision at equal fallback, zero, negatives, empty mapping, exact case, Unicode and empty keys. Presence inferred from value equality fails the equal-fallback witness; presence inferred from truthiness fails stored zero; truthy value selection fails zero with a nonzero fallback. All three programs must match every public example before being killed privately. |
+Use actual admin draft creation, quality-v2 isolated verification, explicit test-local
+policy approval and ordinary publish with all existing final-lock freshness/hash/
+revision checks. Both questions need fresh reports for this revision's acceptance;
+old presence reports cannot certify the changed content. Broken references and weak
+suites must reject and remain drafts. Reuse real learner/worker tests for incorrect
+and correct results, immutable receipts/pins, ownership/privacy and durable replay
+once bounded workers exit. No fake verifier, test result callback or API execution.
 
-Expected A01 `found` fields are actual JSON booleans, never 0/1; `value` fields are
-integers. The real learner-evaluation check separately rejects an integer presence
-flag using the existing type-aware JSON comparison. Exact object comparison rejects
-missing/extra keys on exercised cases. No executable expressions or pickle are used.
-Both contracts accept valid integer-valued mappings and choose `not_tested` for invalid
-inputs; no unsupported nested-schema validator is implied. Statement, examples,
-private expected values, hints and references agree on zero, missing and equal-value
-semantics. Submitted source is never executed in the API.
+The separate AI reviewer rejected the first candidate and requested stronger final
+contrasts in its interim two-hop review. The final assessment, exact hashes and real
+run results are recorded in S017. This audit is not a human endorsement, empirical
+study or proof of psychometric independence. Both tasks retain D1 overlap. Future
+eligibility still depends on actual familiarity/help, policy, mode, timing and outcome.
 
-All five hint stages are present, ordered and use the pinned 60-second waiting budget:
-direction → pattern → pseudocode → partial code → explicit full-solution escape.
-Direction does not reveal later stages. Full solution is available only through an
-owned confirmed grant; incorrect programs/private tests remain excluded even then.
-No links to S018, transfer, delayed review or held-out assets are created.
-
-## Verification and bounds
-
-Use existing admin create/preview, isolated `mastery-content verify-reference` and
-normal publish routes; no importer or seed creates a published question. Both real
-reports must pass quality-v2 with every candidate killed; missing policy approval
-stays 503. Publication rechecks fresh approved immutable evidence, revision and exact
-snapshot under final locks. Negative real runs replace the reference with a wrong
-return or weaken private cases to duplicate a public example; both must stay drafts
-with VERIFICATION_FAILED. Mutants are not credited for syntax/resource/infra errors.
-
-The API/CLI acceptance driver uses production auth, clocks, services, sandbox and
-signed worker results, with test-only disposable-schema/settings wiring from S015.
-Worker calls are bounded `provision`/`once`, never an operational serve loop. Approval
-and readiness are test-local, not .env/operator changes. The real pair walkthrough
-checks role allowlists, canonical immutable report pins, ownership, future-stage/
-private-asset exclusions, distinct/familiar family facts, submission snapshots and
-stored results/replays after readiness withdrawal and API restart.
-
-Finite cases do not prove arbitrary-input correctness, non-mutation, nested/prose
-constraints, explanation/complexity quality, mastery or deployed isolation. The
-references were reviewed for read-only dictionary operations; arbitrary learner
-non-mutation is not certified by returned-value tests. Quality-v2 still enforces its
-execution/resource/admission bounds and preserves infrastructure versus code failure.
-The audit is an authored design rationale plus actual checks, not an expert human
-study. Actual run results/commits are in [S017](../../docs/roadmap/sprints/S017.md).
-
-S016's unallocated D1 review/D1–D2 transfer/D3–D4 initial roles, two-holdout capacity
-and unavailable guarded transfer/review flows remain open. Two authored D1 questions
-do not close those gaps, complete the pilot, grant mastery or certify a deployment.
+Finite return-value checks do not prove all-input correctness, learner non-mutation,
+complexity, explanation quality, arbitrary nested lookup, human competence or mastery.
+References use read-only dictionary operations; general learner non-mutation remains
+uncertified. Unallocated pilot coverage, two-holdout capacity and unavailable guarded
+transfer/review flows remain open. No remote/deployed isolation certification follows.

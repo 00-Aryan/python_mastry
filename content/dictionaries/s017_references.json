@@ -4,6 +4,11 @@
       "id": "17000000-0000-0000-0000-000000000031",
       "code": "DICT-LOOKUP-PRESENCE",
       "novelty_definition": "Report exact boolean membership separately from integer value selection. Present and absent cases with equal returned values must have different presence flags; value-only fallback lookup cannot recover this fact. D1 overlaps practice; family metadata does not grant learner eligibility."
+    },
+    {
+      "id": "17000000-0000-0000-0000-000000000032",
+      "code": "DICT-LOOKUP-ALIAS-CHAIN",
+      "novelty_definition": "Resolve one alias string in a flat map, then use its retrieved name as the key of a separate integer-score lookup. Missing either required mapping returns caller fallback; an absent alias never implicitly names itself. This dependent two-hop data flow is not supplied by P01/S015 one-map teaching. AI-reviewed family classification never grants learner eligibility."
     }
   ]
 }

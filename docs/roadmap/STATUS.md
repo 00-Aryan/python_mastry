@@ -38,7 +38,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | Question-quality verification | `edcb3c2`; private misconception programs, isolated checks and immutable quality-v2 reports | [S014](sprints/S014.md): 466 local passed/no skips; 408 hosted passed/58 isolation skips | Bounded declared misconceptions/root types; human semantic review and remote/deployed certification remain |
 | First executable dictionary question | `055c692`; authored safe lookup, bounded real learner flow and readiness/reload repair | [S015](sprints/S015.md): 473 local passed/no skips; 412 hosted passed/61 isolation skips; exact CI passed | Assisted bundle pass is not lifecycle completion/mastery; no operational population |
 | Pilot branch specification | `0873bba`; four observable areas, ten-slot coverage, family/rubric and repair guidance | [S016](sprints/S016.md): specification audit passed; 473 local regressions/no skips; CI 39014253922 passed (412 passed/61 isolation skips) | Specification only; role/holdout capacity and unreleased transfer/review controls remain explicit |
-| Safe-lookup pair | S017 authored DICT-P01/DICT-A01; shared D1, explicit practice/presence families | [S017](sprints/S017.md): 481 local passed/no failures or skips; d9aea5e CI 39302177782 passed (415 passed/66 skips); required human novelty review open | No learner eligibility/mastery claim; other coverage/holdout/mode gaps unchanged |
+| Safe-lookup pair | Revised S017 A01 alias→name→score dependency; P01/S015 retained, old presence proposal rejected | [S017](sprints/S017.md): final separate AI ACCEPT, fresh 481 local passed/no skips; exact revision CI pending | Local content scope only; no learner independence/mastery/deployed claim; other coverage/holdout gaps unchanged |
 | Remaining pilot pack, browser drafts/workspace | Planned S018–S036 | No accepted completion evidence | No complete usable branch or hosted release |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
@@ -60,7 +60,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S014 | **Verified locally** at `edcb3c2`; [record](sprints/S014.md); CI 38958524412 passed | 466 local passed/no skips; 408 hosted passed/58 isolation skips; explicit quality-v2 approval required |
 | S015 | **Verified locally** at `055c692`; [record](sprints/S015.md); CI 39012725405 passed | 473 local passed/no failures or skips; 412 hosted passed/61 isolation skips; no deployed certification |
 | S016 | **Verified for specification/local scope** at `0873bba`; [record](sprints/S016.md); CI 39014253922 passed | No runtime feature or new content inferred; role/holdout/mode gaps remain explicit |
-| S017 | **Awaiting human review**; [record](sprints/S017.md) | Technical delivery d9aea5e: 481 local passed/no skips; CI 39302177782 passed (415 passed/66 skips); S016-required human novelty review remains open by user choice |
+| S017 | **Awaiting exact-commit CI**; [record](sprints/S017.md) | User-authorized separate AI review ACCEPT; revised local checks 481 passed/no skips, project/migration/packages passed; no content/manual-review blocker |
 | S018–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
@@ -179,14 +179,12 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S017 — Safe-lookup question pair** awaits required human novelty review; see
-[its record](sprints/S017.md) and [pair notes](../../content/dictionaries/s017_pair.md).
-Local technical acceptance passed: 481 tests, no failures/skips, plus required quality,
-migration and package checks. Delivery d9aea5e passed exact CI 39302177782 (415 passed /
-66 skipped; separate isolation job skipped). The user explicitly retained human review
-as pending, so the card is not Verified and S018 is not ready. The 20 October agent
-review flags overlap with P01 teaching; named human disposition remains required. Preserve
-.env/AUTO001/scheduling; no operator setup, merge, deployment or next card is started.
+**S017 — Safe-lookup question pair** has passed revised local content acceptance
+under the user-authorized separate AI review. Full PostgreSQL/real isolation: 481
+passed/no failures or skips; required project checks passed. Exact revised-commit CI
+is pending; S018 remains blocked until that checkpoint is verified. No manual review
+is requested. Preserve .env/AUTO001/operator configuration and scheduling; no merge,
+deployment, operational worker or next card is started.
 
 
 ## S012 local acceptance — 16 October 2026
@@ -360,3 +358,32 @@ remain unsupplied. **Awaiting human review; S018 blocked.** No content revision,
 family reassignment or acceptance waiver. Retain d9aea5e technical delivery and
 0e07d33 documentation closeout; this is a separate review supplement. Historical
 481 local passes/no skips and 415 hosted passes/66 skips remain separate evidence.
+
+
+### S017 AI-review authorization — 20 October 2026
+
+The user explicitly replaced S017 manual review with documented separate AI review.
+This supersedes earlier pending-human-review status; it grants no human approval and
+waives no novelty or execution gate. Original presence-only A01 is not accepted from
+an output-bit argument after P01 teaches its branch. Revision and fresh hash-pinned
+assessment/verification are in progress; S018 stays blocked pending those outcomes.
+
+
+### Revised S017 local acceptance — 20 October 2026
+
+Original presence-only A01 is rejected after comparison with all P01/S015 help.
+Source authoring revision 2 uses a fixed alias→name→score dependency, integer output
+and a new alias-chain family ...032; the old presence-family ...031 and all P01/S015
+bytes/history are preserved. The separate AI reviewer accepted the final seven
+hash-pinned inputs, with no remaining content changes. The record preserves the
+user's AI-review authorization, rationale, counterexamples and limits; this is never
+human approval or proof of learner independence.
+
+Focused acceptance: **8 passed/no skips**, 46.31 s. Fresh full PostgreSQL/real-isolation:
+**481 passed/no failures/errors/skips**, 274.41 s, including cancellation and real
+recovery regressions. Locked dependencies, Ruff/format, strict mypy, real Alembic
+upgrade/current/no drift, offline builds and package/source/privacy checks passed.
+No application implementation, dependency, schema, operator configuration or scheduling
+change. Exact revised-source CI is pending; S017 awaits that checkpoint, S018 stays
+blocked, and no next card starts. d9aea5e/0e07d33/ebe3b50 remain original history;
+revision and separate documentation-closeout evidence will be recorded independently.
