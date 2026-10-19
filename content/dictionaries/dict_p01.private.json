@@ -1,0 +1,243 @@
+{
+  "code": "DICT-P01",
+  "family_id": "15000000-0000-0000-0000-000000000031",
+  "draft": {
+    "title": "Practice safe score lookup",
+    "statement": "Implement lookup_score(scores, name, fallback). Return scores[name] when name is present; otherwise return fallback. A stored zero is a real score and must stay zero. Do not change scores. Inputs are valid JSON: scores is an object of integer values, name is a string, and fallback is an integer. Key matching is exact and case-sensitive. Return the integer result; do not print it.",
+    "track": "python",
+    "difficulty": "easy",
+    "assessment_role": "practice",
+    "supported_modes": [
+      "practice"
+    ],
+    "suggested_budget_seconds": 600,
+    "contract": {
+      "function_name": "lookup_score",
+      "arguments": [
+        {
+          "name": "scores",
+          "type": "object"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "fallback",
+          "type": "integer"
+        }
+      ],
+      "output": {
+        "type": "integer"
+      },
+      "constraints": [
+        "scores has at most 1000 string keys and integer values; booleans are excluded.",
+        "The name and fallback are supplied by the caller.",
+        "Do not mutate scores. This is a reviewed requirement; returned-value checks alone do not certify non-mutation."
+      ],
+      "invalid_input_policy": "not_tested"
+    },
+    "skill_mappings": [
+      {
+        "skill_id": "15000000-0000-0000-0000-000000000011",
+        "attribution_role": "primary",
+        "rubric": {
+          "criterion": "Return the stored integer for present keys, including zero and negatives; use the caller fallback only for absent keys.",
+          "limits": "Passing checks do not establish arbitrary-input correctness, non-mutation, complexity or unaided competence.",
+          "role": "practice",
+          "family_rule": "Same value-with-fallback demands as DICT-LOOKUP-001; retain DICT-LOOKUP-S015. Different question code is not unseen-family evidence."
+        }
+      }
+    ],
+    "pattern_ids": [
+      "15000000-0000-0000-0000-000000000021"
+    ],
+    "examples": [
+      {
+        "position": 1,
+        "input": [
+          {
+            "Ada": 8
+          },
+          "Ada",
+          0
+        ],
+        "expected_output": 8,
+        "explanation": "Ada is present, so return the stored score."
+      },
+      {
+        "position": 2,
+        "input": [
+          {
+            "Ada": 8
+          },
+          "Lin",
+          0
+        ],
+        "expected_output": 0,
+        "explanation": "Lin is absent, so return the supplied fallback."
+      }
+    ],
+    "test_cases": [
+      {
+        "position": 1,
+        "visibility": "public",
+        "input": [
+          {
+            "Ada": 8
+          },
+          "Ada",
+          0
+        ],
+        "expected_output": 8
+      },
+      {
+        "position": 2,
+        "visibility": "public",
+        "input": [
+          {
+            "Ada": 8
+          },
+          "Lin",
+          0
+        ],
+        "expected_output": 0
+      },
+      {
+        "position": 3,
+        "visibility": "private",
+        "input": [
+          {
+            "zero-score": 0
+          },
+          "zero-score",
+          7
+        ],
+        "expected_output": 0,
+        "critical": true
+      },
+      {
+        "position": 4,
+        "visibility": "private",
+        "input": [
+          {},
+          "missing-score",
+          19
+        ],
+        "expected_output": 19,
+        "critical": true
+      },
+      {
+        "position": 5,
+        "visibility": "private",
+        "input": [
+          {
+            "penalty": -4
+          },
+          "penalty",
+          9
+        ],
+        "expected_output": -4
+      },
+      {
+        "position": 6,
+        "visibility": "private",
+        "input": [
+          {
+            "Ada": 8
+          },
+          "ada",
+          -3
+        ],
+        "expected_output": -3
+      },
+      {
+        "position": 7,
+        "visibility": "private",
+        "input": [
+          {
+            "λ": 12
+          },
+          "λ",
+          0
+        ],
+        "expected_output": 12
+      },
+      {
+        "position": 8,
+        "visibility": "private",
+        "input": [
+          {
+            "": 0
+          },
+          "",
+          -2
+        ],
+        "expected_output": 0
+      },
+      {
+        "position": 9,
+        "visibility": "private",
+        "input": [
+          {
+            "equal-score": 5
+          },
+          "equal-score",
+          5
+        ],
+        "expected_output": 5,
+        "critical": true
+      }
+    ],
+    "assistance_steps": [
+      {
+        "position": 1,
+        "kind": "directional",
+        "content": "Ask whether the key exists. A value can be zero even when its key is present.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 2,
+        "kind": "pattern",
+        "content": "Use a dictionary lookup with an explicit caller-selected default, or a membership check followed by indexing. Avoid a truthiness fallback.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 3,
+        "kind": "pseudocode",
+        "content": "If the name is present, return its value. Otherwise, return the fallback parameter.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 4,
+        "kind": "partial_code",
+        "content": "Inside lookup_score(scores, name, fallback), test `if name in scores:` and return `scores[name]` in that branch; put the fallback return afterward.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 5,
+        "kind": "full_solution",
+        "content": "The complete implementation uses the caller's default argument with dict.get; a stored zero is returned unchanged.",
+        "next_budget_seconds": 60
+      }
+    ],
+    "solution": {
+      "reference_code": "def lookup_score(scores, name, fallback):\n    return scores.get(name, fallback)\n",
+      "explanation": "dict.get returns the stored value when the key exists, even when that value is zero. It returns the supplied fallback only for an absent key and does not modify the dictionary.",
+      "expected_complexity": "Expected O(1) lookup time and O(1) extra space; complexity is reviewed, not certified by these tests."
+    },
+    "incorrect_solutions": [
+      {
+        "position": 1,
+        "label": "TRUTHINESS_FALLBACK",
+        "source_code": "def lookup_score(scores, name, fallback):\n    return scores.get(name) or fallback\n"
+      },
+      {
+        "position": 2,
+        "label": "IGNORED_FALLBACK",
+        "source_code": "def lookup_score(scores, name, fallback):\n    return scores.get(name, 0)\n"
+      }
+    ],
+    "revision_links": []
+  }
+}

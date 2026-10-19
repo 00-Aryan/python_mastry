@@ -1,0 +1,302 @@
+{
+  "code": "DICT-A01",
+  "family_id": "17000000-0000-0000-0000-000000000031",
+  "draft": {
+    "title": "Report both score presence and value",
+    "statement": "Implement lookup_entry(scores, name, fallback). Return exactly an object with two keys: found is a JSON boolean that is true if and only if name is a key in scores; value is scores[name] when present and fallback otherwise. A present zero stays zero. A present value can equal fallback, so the value alone does not tell you whether the key exists. Inputs are valid JSON: scores is an object of integer values (not booleans), name is a string and fallback is an integer. Key matching is exact and case-sensitive. Do not mutate scores. Return the object; do not print it.",
+    "track": "python",
+    "difficulty": "easy",
+    "assessment_role": "assessment",
+    "supported_modes": [
+      "assessment"
+    ],
+    "suggested_budget_seconds": 600,
+    "contract": {
+      "function_name": "lookup_entry",
+      "arguments": [
+        {
+          "name": "scores",
+          "type": "object"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "fallback",
+          "type": "integer"
+        }
+      ],
+      "output": {
+        "type": "object"
+      },
+      "constraints": [
+        "scores has at most 1000 string keys and integer values; booleans are excluded.",
+        "Return exactly found (boolean) and value (integer), with no extra keys.",
+        "found represents key membership, not value truthiness or comparison with fallback.",
+        "Do not mutate scores. Return-value checks do not certify non-mutation."
+      ],
+      "invalid_input_policy": "not_tested"
+    },
+    "skill_mappings": [
+      {
+        "skill_id": "15000000-0000-0000-0000-000000000011",
+        "attribution_role": "primary",
+        "rubric": {
+          "criterion": "Distinguish presence independently from the returned value; preserve stored zeroes and caller fallback semantics. Return an exact boolean found flag and integer value.",
+          "role": "independent_assessment_candidate",
+          "family_rule": "Presence reporting adds an observable decision absent from value-only lookup. Equal returned values for present and absent keys require different found flags; see the private S017 family audit. New family metadata alone grants no eligibility.",
+          "limits": "Finite cases and root object checks do not establish arbitrary nested semantic correctness, non-mutation, complexity or unaided mastery. Actual assistance/familiarity and future evidence policy still apply."
+        }
+      }
+    ],
+    "pattern_ids": [
+      "15000000-0000-0000-0000-000000000021"
+    ],
+    "examples": [
+      {
+        "position": 1,
+        "input": [
+          {
+            "Ada": 8
+          },
+          "Ada",
+          0
+        ],
+        "expected_output": {
+          "found": true,
+          "value": 8
+        },
+        "explanation": "The key exists; report true and its stored value."
+      },
+      {
+        "position": 2,
+        "input": [
+          {
+            "Ada": 8
+          },
+          "Lin",
+          0
+        ],
+        "expected_output": {
+          "found": false,
+          "value": 0
+        },
+        "explanation": "The key is absent; report false and the caller fallback."
+      }
+    ],
+    "test_cases": [
+      {
+        "position": 1,
+        "visibility": "public",
+        "input": [
+          {
+            "Ada": 8
+          },
+          "Ada",
+          0
+        ],
+        "expected_output": {
+          "found": true,
+          "value": 8
+        },
+        "critical": false
+      },
+      {
+        "position": 2,
+        "visibility": "public",
+        "input": [
+          {
+            "Ada": 8
+          },
+          "Lin",
+          0
+        ],
+        "expected_output": {
+          "found": false,
+          "value": 0
+        },
+        "critical": false
+      },
+      {
+        "position": 3,
+        "visibility": "private",
+        "input": [
+          {
+            "equal-score": 5
+          },
+          "equal-score",
+          5
+        ],
+        "expected_output": {
+          "found": true,
+          "value": 5
+        },
+        "critical": true
+      },
+      {
+        "position": 4,
+        "visibility": "private",
+        "input": [
+          {},
+          "equal-score",
+          5
+        ],
+        "expected_output": {
+          "found": false,
+          "value": 5
+        },
+        "critical": true
+      },
+      {
+        "position": 5,
+        "visibility": "private",
+        "input": [
+          {
+            "zero-score": 0
+          },
+          "zero-score",
+          7
+        ],
+        "expected_output": {
+          "found": true,
+          "value": 0
+        },
+        "critical": true
+      },
+      {
+        "position": 6,
+        "visibility": "private",
+        "input": [
+          {
+            "penalty": -4
+          },
+          "penalty",
+          9
+        ],
+        "expected_output": {
+          "found": true,
+          "value": -4
+        },
+        "critical": true
+      },
+      {
+        "position": 7,
+        "visibility": "private",
+        "input": [
+          {},
+          "missing-score",
+          -3
+        ],
+        "expected_output": {
+          "found": false,
+          "value": -3
+        },
+        "critical": true
+      },
+      {
+        "position": 8,
+        "visibility": "private",
+        "input": [
+          {
+            "Ada": 8
+          },
+          "ada",
+          -3
+        ],
+        "expected_output": {
+          "found": false,
+          "value": -3
+        },
+        "critical": true
+      },
+      {
+        "position": 9,
+        "visibility": "private",
+        "input": [
+          {
+            "λ": 12
+          },
+          "λ",
+          0
+        ],
+        "expected_output": {
+          "found": true,
+          "value": 12
+        },
+        "critical": true
+      },
+      {
+        "position": 10,
+        "visibility": "private",
+        "input": [
+          {
+            "": 0
+          },
+          "",
+          -2
+        ],
+        "expected_output": {
+          "found": true,
+          "value": 0
+        },
+        "critical": true
+      }
+    ],
+    "assistance_steps": [
+      {
+        "position": 1,
+        "kind": "directional",
+        "content": "Treat existence and the chosen return value as two separate facts. Equal values can come from different presence states.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 2,
+        "kind": "pattern",
+        "content": "Use membership to obtain a boolean presence fact, then choose the stored value or caller fallback. Do not infer membership from truthiness or the chosen value.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 3,
+        "kind": "pseudocode",
+        "content": "If the name exists, return an object with found true and its stored score. Otherwise, return found false and the fallback.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 4,
+        "kind": "partial_code",
+        "content": "Inside lookup_entry, branch on `name in scores`. In the present branch use `scores[name]` with found true; in the missing branch use fallback with found false.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 5,
+        "kind": "full_solution",
+        "content": "The complete implementation reports key membership and selects the value in the same branch. Neither zero nor equality with fallback changes membership.",
+        "next_budget_seconds": 60
+      }
+    ],
+    "solution": {
+      "reference_code": "def lookup_entry(scores, name, fallback):\n    if name in scores:\n        return {\"found\": True, \"value\": scores[name]}\n    return {\"found\": False, \"value\": fallback}\n",
+      "explanation": "Membership is independent from the stored value. A present zero and a present value equal to fallback both require found true; an absent key requires found false. Each branch selects the corresponding value without modifying scores.",
+      "expected_complexity": "Expected O(1) lookup time and O(1) extra space; reviewed, not certified by finite execution tests."
+    },
+    "incorrect_solutions": [
+      {
+        "position": 1,
+        "label": "PRESENCE_FROM_VALUE",
+        "source_code": "def lookup_entry(scores, name, fallback):\n    value = scores.get(name, fallback)\n    return {\"found\": value != fallback, \"value\": value}\n"
+      },
+      {
+        "position": 2,
+        "label": "PRESENCE_FROM_TRUTHINESS",
+        "source_code": "def lookup_entry(scores, name, fallback):\n    return {\"found\": bool(scores.get(name)), \"value\": scores.get(name, fallback)}\n"
+      },
+      {
+        "position": 3,
+        "label": "FALSEY_VALUE_FALLBACK",
+        "source_code": "def lookup_entry(scores, name, fallback):\n    return {\"found\": name in scores, \"value\": scores.get(name) or fallback}\n"
+      }
+    ],
+    "revision_links": []
+  }
+}

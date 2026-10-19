@@ -1,6 +1,8 @@
 # First executable dictionary question (S015)
 
-This directory supplies one authoring input, not a pilot catalog or an import tool.
+The S015 inputs below provide the original executable witness.
+[S017 adds the two D1 pair inputs](s017_pair.md); this is still an incomplete pilot
+authoring directory, not an import tool or a complete ten-question catalog.
 [S016's branch specification](../../docs/curriculum/dictionary_pilot_branch.md) maps
 the later ten-slot plan and its coverage gaps; it preserves these S015 identities.
 `DICT-LOOKUP-001` asks for an integer dictionary lookup with a caller-selected fallback.

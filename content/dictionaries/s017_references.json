@@ -1,0 +1,9 @@
+{
+  "question_families": [
+    {
+      "id": "17000000-0000-0000-0000-000000000031",
+      "code": "DICT-LOOKUP-PRESENCE",
+      "novelty_definition": "Report exact boolean membership separately from integer value selection. Present and absent cases with equal returned values must have different presence flags; value-only fallback lookup cannot recover this fact. D1 overlaps practice; family metadata does not grant learner eligibility."
+    }
+  ]
+}
