@@ -1,0 +1,313 @@
+{
+  "code": "DICT-P02",
+  "family_id": "18000000-0000-0000-0000-000000000031",
+  "draft": {
+    "title": "Count exact token occurrences",
+    "statement": "Implement count_tokens(tokens). Return an object mapping each token to how many times it occurs in the supplied array. Start from no counts. Count every occurrence, including duplicates. An empty array returns an empty object. Tokens are valid strings, including the empty string, whitespace and Unicode; matching is exact and case-sensitive, without trimming or normalization. Return positive integer counts. Output key order is irrelevant. Do not mutate tokens. Return the object; do not print it.",
+    "track": "python",
+    "difficulty": "easy",
+    "assessment_role": "practice",
+    "supported_modes": [
+      "practice"
+    ],
+    "suggested_budget_seconds": 600,
+    "contract": {
+      "function_name": "count_tokens",
+      "arguments": [
+        {
+          "name": "tokens",
+          "type": "array"
+        }
+      ],
+      "output": {
+        "type": "object"
+      },
+      "constraints": [
+        "tokens has at most 1000 string elements; each string has at most 200 characters.",
+        "Treat exact strings as keys; no case folding, trimming, tokenization or Unicode normalization.",
+        "Return only observed keys with positive integer counts. Object key order is irrelevant.",
+        "Do not mutate tokens. Returned-value checks alone do not certify non-mutation."
+      ],
+      "invalid_input_policy": "not_tested"
+    },
+    "skill_mappings": [
+      {
+        "skill_id": "18000000-0000-0000-0000-000000000011",
+        "attribution_role": "primary",
+        "rubric": {
+          "criterion": "Initialize a key on its first occurrence and increment it for every repeated occurrence. Keep independent exact-token counts, including empty/whitespace/Unicode tokens; empty input yields an empty mapping.",
+          "role": "practice",
+          "family_rule": "Ordinary frequency accumulation is monotone and independent of event order. Renaming words, characters or story retains this frequency family; D1 lookup is supporting knowledge, not another primary observation.",
+          "limits": "Finite return-value checks and AI content review do not prove learner independence, arbitrary nested semantics, non-mutation, complexity, explanation quality or mastery."
+        }
+      }
+    ],
+    "pattern_ids": [
+      "18000000-0000-0000-0000-000000000021"
+    ],
+    "examples": [
+      {
+        "position": 1,
+        "input": [
+          [
+            "red",
+            "blue"
+          ]
+        ],
+        "expected_output": {
+          "red": 1,
+          "blue": 1
+        },
+        "explanation": "Each distinct token occurs once."
+      },
+      {
+        "position": 2,
+        "input": [
+          []
+        ],
+        "expected_output": {},
+        "explanation": "No token occurs in an empty input."
+      }
+    ],
+    "test_cases": [
+      {
+        "position": 1,
+        "visibility": "public",
+        "input": [
+          [
+            "red",
+            "blue"
+          ]
+        ],
+        "expected_output": {
+          "red": 1,
+          "blue": 1
+        }
+      },
+      {
+        "position": 2,
+        "visibility": "public",
+        "input": [
+          []
+        ],
+        "expected_output": {}
+      },
+      {
+        "position": 3,
+        "visibility": "private",
+        "input": [
+          [
+            "red",
+            "red",
+            "red"
+          ]
+        ],
+        "expected_output": {
+          "red": 3
+        },
+        "critical": true
+      },
+      {
+        "position": 4,
+        "visibility": "private",
+        "input": [
+          [
+            "x",
+            "y",
+            "x",
+            "y",
+            "x"
+          ]
+        ],
+        "expected_output": {
+          "x": 3,
+          "y": 2
+        },
+        "critical": true
+      },
+      {
+        "position": 5,
+        "visibility": "private",
+        "input": [
+          [
+            "",
+            "x",
+            ""
+          ]
+        ],
+        "expected_output": {
+          "": 2,
+          "x": 1
+        },
+        "critical": true
+      },
+      {
+        "position": 6,
+        "visibility": "private",
+        "input": [
+          [
+            "A",
+            "a",
+            "A"
+          ]
+        ],
+        "expected_output": {
+          "A": 2,
+          "a": 1
+        },
+        "critical": true
+      },
+      {
+        "position": 7,
+        "visibility": "private",
+        "input": [
+          [
+            " x",
+            "x",
+            "x "
+          ]
+        ],
+        "expected_output": {
+          " x": 1,
+          "x": 1,
+          "x ": 1
+        },
+        "critical": true
+      },
+      {
+        "position": 8,
+        "visibility": "private",
+        "input": [
+          [
+            "λ",
+            "λ",
+            "Δ"
+          ]
+        ],
+        "expected_output": {
+          "λ": 2,
+          "Δ": 1
+        },
+        "critical": true
+      },
+      {
+        "position": 9,
+        "visibility": "private",
+        "input": [
+          [
+            "é",
+            "é",
+            "é"
+          ]
+        ],
+        "expected_output": {
+          "é": 2,
+          "é": 1
+        },
+        "critical": true
+      },
+      {
+        "position": 10,
+        "visibility": "private",
+        "input": [
+          [
+            "0",
+            "0",
+            "-1"
+          ]
+        ],
+        "expected_output": {
+          "0": 2,
+          "-1": 1
+        },
+        "critical": true
+      },
+      {
+        "position": 11,
+        "visibility": "private",
+        "input": [
+          [
+            " "
+          ]
+        ],
+        "expected_output": {
+          " ": 1
+        },
+        "critical": true
+      },
+      {
+        "position": 12,
+        "visibility": "private",
+        "input": [
+          [
+            "alone"
+          ]
+        ],
+        "expected_output": {
+          "alone": 1
+        },
+        "critical": true
+      }
+    ],
+    "assistance_steps": [
+      {
+        "position": 1,
+        "kind": "directional",
+        "content": "A token can occur more than once. Keep one count for each exact string rather than one result for the whole array.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 2,
+        "kind": "pattern",
+        "content": "Use a dictionary accumulator. Read the current count with default zero, then add one for each occurrence.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 3,
+        "kind": "pseudocode",
+        "content": "Start with an empty mapping. For each token, replace its count with its old count or zero, plus one. Return the mapping.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 4,
+        "kind": "partial_code",
+        "content": "Inside the loop, assign `counts[token] = counts.get(token, 0) + 1`; initialize counts before the loop and return it afterward.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 5,
+        "kind": "full_solution",
+        "content": "The complete implementation keeps one dictionary and increments the matching counter once per token. Empty input leaves it empty.",
+        "next_budget_seconds": 60
+      }
+    ],
+    "solution": {
+      "reference_code": "def count_tokens(tokens):\n    counts = {}\n    for token in tokens:\n        counts[token] = counts.get(token, 0) + 1\n    return counts\n",
+      "explanation": "Each token occurrence adds one to its own counter. A new key starts from zero; existing keys retain their accumulated count. Strings are used unchanged and input is only read.",
+      "expected_complexity": "Expected O(n) time and O(k) extra space for n events and k distinct tokens; reviewed, not certified by finite tests."
+    },
+    "incorrect_solutions": [
+      {
+        "position": 1,
+        "label": "OVERWRITE_REPEATS",
+        "source_code": "def count_tokens(tokens):\n    counts = {}\n    for token in tokens:\n        counts[token] = 1\n    return counts\n"
+      },
+      {
+        "position": 2,
+        "label": "SKIP_EMPTY_TOKEN",
+        "source_code": "def count_tokens(tokens):\n    counts = {}\n    for token in tokens:\n        if token:\n            counts[token] = counts.get(token, 0) + 1\n    return counts\n"
+      },
+      {
+        "position": 3,
+        "label": "LOWERCASE_KEYS",
+        "source_code": "def count_tokens(tokens):\n    counts = {}\n    for token in tokens:\n        key = token.lower()\n        counts[key] = counts.get(key, 0) + 1\n    return counts\n"
+      },
+      {
+        "position": 4,
+        "label": "STRIP_WHITESPACE",
+        "source_code": "def count_tokens(tokens):\n    counts = {}\n    for token in tokens:\n        key = token.strip()\n        counts[key] = counts.get(key, 0) + 1\n    return counts\n"
+      }
+    ],
+    "revision_links": []
+  }
+}

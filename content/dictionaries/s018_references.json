@@ -1,0 +1,30 @@
+{
+  "skills": [
+    {
+      "id": "18000000-0000-0000-0000-000000000011",
+      "curriculum_id": "15000000-0000-0000-0000-000000000010",
+      "code": "DICT-COUNT-UPDATES",
+      "title": "Initialize and update counts by key",
+      "competency": "Maintain per-key counts under explicit initialization and update rules; distinguish first and repeated events, empty input and independent keys."
+    }
+  ],
+  "patterns": [
+    {
+      "id": "18000000-0000-0000-0000-000000000021",
+      "code": "PER-KEY-COUNTS",
+      "title": "Per-key dictionary count state"
+    }
+  ],
+  "question_families": [
+    {
+      "id": "18000000-0000-0000-0000-000000000031",
+      "code": "DICT-TOKEN-FREQUENCY",
+      "novelty_definition": "Count each exact string token occurrence once. Empty input yields an empty mapping; repeated occurrences increment the same counter. Renamed tokens with the same frequency algorithm retain this family."
+    },
+    {
+      "id": "18000000-0000-0000-0000-000000000032",
+      "code": "DICT-SATURATING-CHANGES",
+      "novelty_definition": "Process signed per-key adjustments chronologically, flooring count at zero after every event and discarding negative deficits immediately. Reordering events can change results; final-total clamping is insufficient. New family classification is AI-reviewed content evidence, not learner eligibility."
+    }
+  ]
+}

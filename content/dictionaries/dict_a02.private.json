@@ -1,0 +1,511 @@
+{
+  "code": "DICT-A02",
+  "family_id": "18000000-0000-0000-0000-000000000032",
+  "draft": {
+    "title": "Apply changes without carrying negative counts",
+    "statement": "Implement apply_count_changes(adjustments). Each adjustment is a valid two-item array [token, change], where token is a string and change an integer, excluding booleans. Start every token count at zero. Process adjustments in the given sequence. After each adjustment, add change to that token's current count and floor the result at zero immediately; a negative deficit is discarded and cannot reduce a later positive update. Return an object containing only tokens whose final count is positive. Empty input returns an empty object. A zero change leaves the current count unchanged. Tokens match exactly, including empty strings, whitespace, case and Unicode. Output key order is irrelevant. Do not mutate adjustments or its pairs. Return the object; do not print it.",
+    "track": "python",
+    "difficulty": "easy",
+    "assessment_role": "assessment",
+    "supported_modes": [
+      "assessment"
+    ],
+    "suggested_budget_seconds": 600,
+    "contract": {
+      "function_name": "apply_count_changes",
+      "arguments": [
+        {
+          "name": "adjustments",
+          "type": "array"
+        }
+      ],
+      "output": {
+        "type": "object"
+      },
+      "constraints": [
+        "At most 1000 valid two-item adjustments; token strings have at most 200 characters and changes are integers from -1000 through 1000, excluding booleans.",
+        "For every event, the new count is max(0, previous count + change); previous count is zero when no positive count is present.",
+        "Discard deficits after each event, not only after computing a final signed sum. No cross-token reset.",
+        "Return only positive integer counts. Internal representation of zero is not assessed; object key order is irrelevant.",
+        "Do not mutate adjustments or its pairs. Returned-value tests alone do not certify non-mutation."
+      ],
+      "invalid_input_policy": "not_tested"
+    },
+    "skill_mappings": [
+      {
+        "skill_id": "18000000-0000-0000-0000-000000000011",
+        "attribution_role": "primary",
+        "rubric": {
+          "criterion": "Apply each signed adjustment to its token state, immediately floor negative results at zero, and discard deficits before later events. Preserve independent token states, valid zero adjustments and exact key identity; return only final positive counts.",
+          "role": "independent_assessment_candidate",
+          "family_rule": "The chronological per-token recurrence and discarded deficits can make opposite event orders produce different answers. P02 teaches commutative positive occurrence counting, not this state rule. Weighted inputs or omitting zero outputs alone do not establish novelty. Actual exposure to this policy or its help still matters.",
+          "limits": "Finite return-value checks and AI content review do not prove learner independence, arbitrary nested semantics, non-mutation, complexity, explanation quality or mastery."
+        }
+      }
+    ],
+    "pattern_ids": [
+      "18000000-0000-0000-0000-000000000021"
+    ],
+    "examples": [
+      {
+        "position": 1,
+        "input": [
+          [
+            [
+              "red",
+              3
+            ],
+            [
+              "red",
+              -1
+            ],
+            [
+              "blue",
+              2
+            ]
+          ]
+        ],
+        "expected_output": {
+          "red": 2,
+          "blue": 2
+        },
+        "explanation": "The red count rises to three then decreases to two; blue has its own count."
+      },
+      {
+        "position": 2,
+        "input": [
+          []
+        ],
+        "expected_output": {},
+        "explanation": "No adjustments leave no positive counts."
+      }
+    ],
+    "test_cases": [
+      {
+        "position": 1,
+        "visibility": "public",
+        "input": [
+          [
+            [
+              "red",
+              3
+            ],
+            [
+              "red",
+              -1
+            ],
+            [
+              "blue",
+              2
+            ]
+          ]
+        ],
+        "expected_output": {
+          "red": 2,
+          "blue": 2
+        }
+      },
+      {
+        "position": 2,
+        "visibility": "public",
+        "input": [
+          []
+        ],
+        "expected_output": {}
+      },
+      {
+        "position": 3,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              -3
+            ],
+            [
+              "x",
+              2
+            ]
+          ]
+        ],
+        "expected_output": {
+          "x": 2
+        },
+        "critical": true
+      },
+      {
+        "position": 4,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              2
+            ],
+            [
+              "x",
+              -3
+            ]
+          ]
+        ],
+        "expected_output": {},
+        "critical": true
+      },
+      {
+        "position": 5,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              3
+            ],
+            [
+              "x",
+              -5
+            ],
+            [
+              "x",
+              4
+            ]
+          ]
+        ],
+        "expected_output": {
+          "x": 4
+        },
+        "critical": true
+      },
+      {
+        "position": 6,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              5
+            ],
+            [
+              "x",
+              -2
+            ]
+          ]
+        ],
+        "expected_output": {
+          "x": 3
+        },
+        "critical": true
+      },
+      {
+        "position": 7,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              2
+            ],
+            [
+              "x",
+              -2
+            ]
+          ]
+        ],
+        "expected_output": {},
+        "critical": true
+      },
+      {
+        "position": 8,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "y",
+              5
+            ],
+            [
+              "x",
+              -3
+            ],
+            [
+              "x",
+              2
+            ],
+            [
+              "y",
+              -1
+            ]
+          ]
+        ],
+        "expected_output": {
+          "y": 4,
+          "x": 2
+        },
+        "critical": true
+      },
+      {
+        "position": 9,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              0
+            ]
+          ]
+        ],
+        "expected_output": {},
+        "critical": true
+      },
+      {
+        "position": 10,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              3
+            ],
+            [
+              "x",
+              0
+            ]
+          ]
+        ],
+        "expected_output": {
+          "x": 3
+        },
+        "critical": true
+      },
+      {
+        "position": 11,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              2
+            ],
+            [
+              "x",
+              3
+            ],
+            [
+              "x",
+              1
+            ]
+          ]
+        ],
+        "expected_output": {
+          "x": 6
+        },
+        "critical": true
+      },
+      {
+        "position": 12,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "",
+              2
+            ],
+            [
+              "x",
+              -3
+            ],
+            [
+              "",
+              -1
+            ]
+          ]
+        ],
+        "expected_output": {
+          "": 1
+        },
+        "critical": true
+      },
+      {
+        "position": 13,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "A",
+              3
+            ],
+            [
+              "a",
+              2
+            ],
+            [
+              "A",
+              -1
+            ]
+          ]
+        ],
+        "expected_output": {
+          "A": 2,
+          "a": 2
+        },
+        "critical": true
+      },
+      {
+        "position": 14,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              " x",
+              2
+            ],
+            [
+              "x",
+              1
+            ],
+            [
+              "x ",
+              3
+            ]
+          ]
+        ],
+        "expected_output": {
+          " x": 2,
+          "x": 1,
+          "x ": 3
+        },
+        "critical": true
+      },
+      {
+        "position": 15,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "λ",
+              2
+            ],
+            [
+              "Δ",
+              3
+            ],
+            [
+              "λ",
+              -4
+            ],
+            [
+              "λ",
+              1
+            ]
+          ]
+        ],
+        "expected_output": {
+          "Δ": 3,
+          "λ": 1
+        },
+        "critical": true
+      },
+      {
+        "position": 16,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              -2
+            ],
+            [
+              "y",
+              -1
+            ]
+          ]
+        ],
+        "expected_output": {},
+        "critical": true
+      },
+      {
+        "position": 17,
+        "visibility": "private",
+        "input": [
+          [
+            [
+              "x",
+              1000
+            ],
+            [
+              "x",
+              -1000
+            ],
+            [
+              "x",
+              1
+            ]
+          ]
+        ],
+        "expected_output": {
+          "x": 1
+        },
+        "critical": true
+      }
+    ],
+    "assistance_steps": [
+      {
+        "position": 1,
+        "kind": "directional",
+        "content": "Track what each token can retain after an individual event, not merely the total signed change at the end.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 2,
+        "kind": "pattern",
+        "content": "Maintain independent per-token state. Apply one change, floor that result at zero immediately, then use that updated state for the next event.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 3,
+        "kind": "pseudocode",
+        "content": "Start empty. For each token/change pair, add the change to that token's current count. Keep the positive result; otherwise treat its count as zero. Finally return only positive counts.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 4,
+        "kind": "partial_code",
+        "content": "Compute `updated = counts.get(token, 0) + change` inside the event loop. Store updated when positive; otherwise remove that token or store zero and filter the final mapping.",
+        "next_budget_seconds": 60
+      },
+      {
+        "position": 5,
+        "kind": "full_solution",
+        "content": "The complete implementation updates one token at a time and removes nonpositive results, so an overshoot never becomes debt and never resets another token.",
+        "next_budget_seconds": 60
+      }
+    ],
+    "solution": {
+      "reference_code": "def apply_count_changes(adjustments):\n    counts = {}\n    for token, change in adjustments:\n        updated = counts.get(token, 0) + change\n        if updated > 0:\n            counts[token] = updated\n        else:\n            counts.pop(token, None)\n    return counts\n",
+      "explanation": "A count is never negative after an event. A later positive change therefore starts from zero after an overshoot. Only the affected token is changed; the mapping contains exactly the remaining positive counts. Inputs are read without modification.",
+      "expected_complexity": "Expected O(n) time and O(k) extra space for n events and k distinct tokens; reviewed, not certified by finite tests."
+    },
+    "incorrect_solutions": [
+      {
+        "position": 1,
+        "label": "FINAL_TOTAL_CLAMP",
+        "source_code": "def apply_count_changes(adjustments):\n    counts = {}\n    for token, change in adjustments:\n        counts[token] = counts.get(token, 0) + change\n    return {token: count for token, count in counts.items() if count > 0}\n"
+      },
+      {
+        "position": 2,
+        "label": "ABSOLUTE_UNDERFLOW",
+        "source_code": "def apply_count_changes(adjustments):\n    counts = {}\n    for token, change in adjustments:\n        updated = abs(counts.get(token, 0) + change)\n        if updated > 0:\n            counts[token] = updated\n        else:\n            counts.pop(token, None)\n    return counts\n"
+      },
+      {
+        "position": 3,
+        "label": "KEEP_ZERO_OUTPUT",
+        "source_code": "def apply_count_changes(adjustments):\n    counts = {}\n    for token, change in adjustments:\n        counts[token] = max(0, counts.get(token, 0) + change)\n    return counts\n"
+      },
+      {
+        "position": 4,
+        "label": "GLOBAL_UNDERFLOW_RESET",
+        "source_code": "def apply_count_changes(adjustments):\n    counts = {}\n    for token, change in adjustments:\n        updated = counts.get(token, 0) + change\n        if updated < 0:\n            counts.clear()\n        elif updated == 0:\n            counts.pop(token, None)\n        else:\n            counts[token] = updated\n    return counts\n"
+      }
+    ],
+    "revision_links": []
+  }
+}

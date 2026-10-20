@@ -200,3 +200,21 @@ approval/freshness and isolation gates. If all criteria pass, S017 may be Verifi
 for its explicit **local content scope under AI review**; otherwise record a specific
 content blocker, without requesting manual review. AI assessment does not prove any
 learner's independence, mastery, arbitrary correctness or deployed isolation.
+
+
+## S018 acceptance addendum — 20 October 2026 (Asia/Kolkata)
+
+For S018, the user explicitly requests the documented AI-review process and separate
+assessment of final hash-pinned assets, without an invented manual-review gate.
+Apply the S017 process above to the counting pair: a separate AI reviewer inspects
+all learner-visible prior material, including every P02 example/hint/solution,
+against A02's actual changed update/state contract. Record reviewer/date, hashes,
+decision, counterexamples, substantive findings and limits. This is AI review, never
+human approval; no novelty standard, publication or isolation control is waived.
+
+P02 is exact-string frequency accumulation. The proposed A02 distinction is signed
+per-event count adjustment with immediate zero floor and discarded deficits, rather
+than final-total clamping. This is still D2 state updating, not D3 result selection
+or D4 malformed-record validation. Final review and real quality/publication checks
+must accept actual authored assets before counting this as delivered coverage.
+Other pilot coverage/holdout/mode gaps remain unchanged.

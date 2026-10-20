@@ -18,6 +18,7 @@ It uses the existing quality-gated publication and real isolated worker; no oper
 worker is enabled. Passing a bundle remains distinct from lifecycle completion or mastery.
 S016 defines the [pilot branch coverage, family boundaries, rubrics and repair guidance](docs/curriculum/dictionary_pilot_branch.md); the ten-question pack remains incomplete.
 S017 supplies [the D1 safe-lookup practice/assessment-candidate pair](content/dictionaries/s017_pair.md), with private authoring assets and real quality-gated acceptance checks.
+S018 adds [the D2 frequency/chronological-adjustment pair](content/dictionaries/s018_pair.md), with separate AI novelty review and the same publication gates.
 
 ## Quick start in WSL and VS Code
 

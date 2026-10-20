@@ -328,7 +328,7 @@ Acceptance: Both publish through the verifier and their rubrics identify safe lo
 
 Deliverable: Author DICT-P02 and DICT-A02, covering initialization, updates, duplicates and empty input.
 
-Acceptance: Real reference/mutant checks pass; unseen assessment does not simply copy the practice solution contract.
+Acceptance: Real reference/mutant checks pass; unseen assessment does not simply copy the practice solution contract. S018 uses the user-requested separate AI review of final hash-pinned assets under the pilot acceptance addendum, including all prior examples and help; no human approval or proven learner independence is inferred.
 
 ### S019 — Ordered-selection question pair
 

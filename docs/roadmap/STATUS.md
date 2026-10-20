@@ -39,7 +39,8 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | First executable dictionary question | `055c692`; authored safe lookup, bounded real learner flow and readiness/reload repair | [S015](sprints/S015.md): 473 local passed/no skips; 412 hosted passed/61 isolation skips; exact CI passed | Assisted bundle pass is not lifecycle completion/mastery; no operational population |
 | Pilot branch specification | `0873bba`; four observable areas, ten-slot coverage, family/rubric and repair guidance | [S016](sprints/S016.md): specification audit passed; 473 local regressions/no skips; CI 39014253922 passed (412 passed/61 isolation skips) | Specification only; role/holdout capacity and unreleased transfer/review controls remain explicit |
 | Safe-lookup pair | Revised S017 A01 alias→name→score dependency; P01/S015 retained, old presence proposal rejected | [S017](sprints/S017.md): Verified locally under separate AI review at 8b497e6; fresh 481 local passed/no skips; CI 39306784956 passed (415 passed/66 skips) | Local content scope only; no learner independence/mastery/deployed claim; other coverage/holdout gaps unchanged |
-| Remaining pilot pack, browser drafts/workspace | Planned S018–S036 | No accepted completion evidence | No complete usable branch or hosted release |
+| Counting pair | S018 authored; exact-string frequency practice and per-event saturating assessment | [S018](sprints/S018.md): final separate AI ACCEPT; 489 local passed/no skips; exact-commit CI pending | Local content scope; no mastery/independence/deployed claim |
+| Remaining pilot pack, browser drafts/workspace | Planned S019–S036 | No accepted completion evidence | No complete usable branch or hosted release |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
 ## Roadmap reconciliation
@@ -61,7 +62,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S015 | **Verified locally** at `055c692`; [record](sprints/S015.md); CI 39012725405 passed | 473 local passed/no failures or skips; 412 hosted passed/61 isolation skips; no deployed certification |
 | S016 | **Verified for specification/local scope** at `0873bba`; [record](sprints/S016.md); CI 39014253922 passed | No runtime feature or new content inferred; role/holdout/mode gaps remain explicit |
 | S017 | **Verified for local content scope under AI review** at 8b497e6; [record](sprints/S017.md) | Final separate AI ACCEPT at seven hashes; 481 local passed/no skips; exact CI 39306784956 passed (415 passed/66 skips); no S017 blocker |
-| S018 | **Ready, not started** | S016/S017 prerequisites satisfied; author D2 identities/pair and its substantive family contrasts within its own card |
+| S018 | **Awaiting exact-commit CI**; [record](sprints/S018.md) | Final separate AI ACCEPT; 16 focused/489 full local passed, no skips; no content blocker; source delivery CI pending |
 | S019–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
@@ -180,15 +181,12 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S018 — Counting question pair** is next ready, not started. S017 is Verified for
-explicit local content scope under the user-authorized separate AI review at 8b497e6;
-[its record](sprints/S017.md) reconciles final hashes, AI decision, actual verification
-and S018 prerequisites. Local revised suite: 481 passed/no skips; exact source
-[CI 39306784956](https://github.com/00-Aryan/python_mastry/actions/runs/39306784956)
-passed (415 passed/66 skips; separate isolation job skipped). No S017 blocker.
-This handoff starts no next card. Preserve AUTO001/.env/operator configuration and
-scheduling; no operational worker, merge or deployment. AI review establishes no
-human approval, proven learner independence, mastery or deployed isolation.
+**S018 — Counting question pair** awaits exact-commit CI after final separate AI
+ACCEPT and 489 local PostgreSQL/real-isolation passes with no skips. Commit/push
+only its scoped assets/tests/records, inspect exact delivery CI, then record closure
+and reassess S019 authoring prerequisites. Preserve S015/S017 assets and all
+AUTO001/.env/operator configuration. No other card, scheduling, operational worker,
+merge or deployment is started.
 
 
 ## S012 local acceptance — 16 October 2026
