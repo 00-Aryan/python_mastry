@@ -39,7 +39,7 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | First executable dictionary question | `055c692`; authored safe lookup, bounded real learner flow and readiness/reload repair | [S015](sprints/S015.md): 473 local passed/no skips; 412 hosted passed/61 isolation skips; exact CI passed | Assisted bundle pass is not lifecycle completion/mastery; no operational population |
 | Pilot branch specification | `0873bba`; four observable areas, ten-slot coverage, family/rubric and repair guidance | [S016](sprints/S016.md): specification audit passed; 473 local regressions/no skips; CI 39014253922 passed (412 passed/61 isolation skips) | Specification only; role/holdout capacity and unreleased transfer/review controls remain explicit |
 | Safe-lookup pair | Revised S017 A01 alias→name→score dependency; P01/S015 retained, old presence proposal rejected | [S017](sprints/S017.md): Verified locally under separate AI review at 8b497e6; fresh 481 local passed/no skips; CI 39306784956 passed (415 passed/66 skips) | Local content scope only; no learner independence/mastery/deployed claim; other coverage/holdout gaps unchanged |
-| Counting pair | S018 authored; exact-string frequency practice and per-event saturating assessment | [S018](sprints/S018.md): final separate AI ACCEPT; 489 local passed/no skips; exact-commit CI pending | Local content scope; no mastery/independence/deployed claim |
+| Counting pair | `564e5e1`; exact-string frequency practice and per-event saturating assessment | [S018](sprints/S018.md): final separate AI ACCEPT; 489 local passed/no skips; CI 39376725034 passed (418 passed/71 skipped) | Local content scope; no mastery/independence/deployed claim |
 | Remaining pilot pack, browser drafts/workspace | Planned S019–S036 | No accepted completion evidence | No complete usable branch or hosted release |
 | Evidence, reviews, recommendations, statistics, hosted authentication/deployment | Planned S037 onward | No accepted implementation evidence | No mastery or release-readiness claims |
 
@@ -62,8 +62,9 @@ The actual remote run below verifies baseline behavior with PostgreSQL, but skip
 | S015 | **Verified locally** at `055c692`; [record](sprints/S015.md); CI 39012725405 passed | 473 local passed/no failures or skips; 412 hosted passed/61 isolation skips; no deployed certification |
 | S016 | **Verified for specification/local scope** at `0873bba`; [record](sprints/S016.md); CI 39014253922 passed | No runtime feature or new content inferred; role/holdout/mode gaps remain explicit |
 | S017 | **Verified for local content scope under AI review** at 8b497e6; [record](sprints/S017.md) | Final separate AI ACCEPT at seven hashes; 481 local passed/no skips; exact CI 39306784956 passed (415 passed/66 skips); no S017 blocker |
-| S018 | **Awaiting exact-commit CI**; [record](sprints/S018.md) | Final separate AI ACCEPT; 16 focused/489 full local passed, no skips; no content blocker; source delivery CI pending |
-| S019–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
+| S018 | **Verified for local content scope under separate AI review** at `564e5e1`; [record](sprints/S018.md) | Final 17-file pinned AI ACCEPT; 16 focused/489 full local passed, no skips; CI 39376725034 passed (418 passed/71 skipped); no S018 blocker |
+| S019 | **Ready for bounded content authoring, not started** | P03/T01 D3 rubric and D1/D2 foundations available; require own novelty audit; transfer/review runtime controls remain unavailable |
+| S020–S114 | Planned; no completion inferred | Follow prerequisites and refined contracts |
 
 **S010a — B6b verification closure** is a verification unit, not new runner
 features: run current-HEAD real isolation + PostgreSQL regressions, CLI migration/data
@@ -181,12 +182,18 @@ All four dirty AUTO001 files and scheduling/local state were preserved unchanged
 
 ## Next action
 
-**S018 — Counting question pair** awaits exact-commit CI after final separate AI
-ACCEPT and 489 local PostgreSQL/real-isolation passes with no skips. Commit/push
-only its scoped assets/tests/records, inspect exact delivery CI, then record closure
-and reassess S019 authoring prerequisites. Preserve S015/S017 assets and all
-AUTO001/.env/operator configuration. No other card, scheduling, operational worker,
-merge or deployment is started.
+**S019 — Ordered-selection question pair** is next ready for bounded content
+authoring, not started. S018 is Verified for explicit local content scope under
+separate AI review at `564e5e1`; [its record](sprints/S018.md) pins final assets,
+review rationale, actual reports and prerequisite reconciliation. Local: 489 passed,
+zero failures/skips; [exact source CI 39376725034](https://github.com/00-Aryan/python_mastry/actions/runs/39376725034)
+passed with 418 passed/71 skipped and the separate isolation job skipped.
+S019 must justify P03/T01's actual order/tie/identity and transfer-family demands.
+Existing runtime transfer/review modes and guarded release remain unavailable;
+authoring readiness grants no transfer credit or access bypass. This handoff starts
+no next card. Preserve AUTO001/.env/operator configuration and scheduling; no
+operational worker, merge or deployment. AI review establishes no human approval,
+proven learner independence, mastery or deployed isolation.
 
 
 ## S012 local acceptance — 16 October 2026
@@ -397,3 +404,31 @@ quality/publication/runner capability suffice; D2 identity/pair authoring belong
 S018 itself. S018 is **Ready, not started**. No S017 blocker or next-card implementation.
 Original d9aea5e/0e07d33/ebe3b50 are retained; this later documentation-only closeout
 and its commit/CI handoff remain separate from revised technical delivery 8b497e6.
+
+
+## S018 closeout — 21 October 2026 (Asia/Kolkata)
+
+Counting pair technical delivery **564e5e19bc643f671a3683dcffa00b53e9b81b2c** is
+Verified for local content scope under separate AI review. P02 teaches ordinary
+frequency counts; A02 changes the chronological effective-state rule with immediate
+zero flooring and discarded deficits, rather than merely renaming P02 or weighting
+its data. The separate reviewer accepted all final 17 hash-pinned inputs after
+comparison with prior full learner-visible teaching; finite checks and AI review
+make no learner-independence or mastery guarantee.
+
+Real quality-v2 references/candidates, rejection/publication/privacy and signed
+learner flows passed: 16 focused tests, no skips. Full local PostgreSQL/mandatory
+isolation regressions: **489 passed / zero failures/errors/skips**, 323.79 s. Locked
+dependencies, Ruff/format, strict mypy, migration/no drift and package checks passed.
+An absent cached build backend required authorized network builds, with no dependency
+change. [Exact delivery CI 39376725034](https://github.com/00-Aryan/python_mastry/actions/runs/39376725034)
+passed: **418 passed / 71 skipped / zero failures**, 140.74 s, plus all configured
+locked-sync/quality/migration/build checks. Five S018 real cases and the separate
+isolation job skipped remotely; local evidence is distinct from deployed certification.
+
+All four pre-existing AUTO001 modifications, .env, S015/S017 assets and operator
+configuration remain preserved and excluded. This subsequent STATUS/S018-only
+documentation closeout and its commit/CI handoff remain separate from technical
+delivery 564e5e1. No S018 blocker. S019's prerequisites were reconciled as authoring
+readiness only; its content is not started, runtime transfer/review controls and
+pilot coverage/holdout gaps remain open. No operational worker, merge or deployment.
